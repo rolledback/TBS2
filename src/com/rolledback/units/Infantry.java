@@ -1,4 +1,5 @@
 package com.rolledback.units;
+
 import com.rolledback.framework.Team;
 import com.rolledback.terrain.Tile;
 
@@ -13,5 +14,5 @@ public class Infantry extends Unit {
       moveRange = 2;
       type = UNIT_TYPE.INFANTRY;
    }
-
+   
 }
