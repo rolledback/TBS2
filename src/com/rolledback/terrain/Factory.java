@@ -39,6 +39,8 @@ public class Factory extends Tile {
          return false;
       owner.setResources(owner.getResources() - productionList.get(type));
       owner.createUnit(world.getTiles()[y][x], type);
+      owner.getUnits().get(owner.getUnits().size()).setAttacked(true);
+      owner.getUnits().get(owner.getUnits().size()).setMoved(true);
       return true;
    }
    

@@ -77,7 +77,7 @@ public class Unit {
    }
    
    public String toString() {
-      return "Type: " + classification + ", " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName() + " Moved: "
+      return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName() + " Moved: "
             + moved + " Attacked: " + attacked;
    }
    

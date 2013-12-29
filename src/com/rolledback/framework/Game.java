@@ -17,7 +17,7 @@ public class Game {
    static Unit selectedUnit;
    static Unit targetUnit;
    
-   // smaller number = more units per column at start, also slower game setup
+   //smaller number = more units per column at start
    static int UNIT_DENSITY = 5;
    
    public static void main(String args[]) {
@@ -119,33 +119,6 @@ public class Game {
             world.getTiles()[row][col] = new Plain(world, col, row);
          }
       }
-      teamOne.createUnit(world.getTiles()[10][7], UNIT_TYPE.TANK);
-      teamOne.createUnit(world.getTiles()[4][5], UNIT_TYPE.TANK);
-      teamTwo.createUnit(world.getTiles()[9][9], UNIT_TYPE.TANK);
-      world.printUnits();
-      System.out.println("---TESTING MOVING THEN ATTACKING AND DESTROYING---");
-      gameLoop(7, 10);
-      gameLoop(8, 9);
-      world.printUnits();
-      System.out.println(teamOne.getUnits().toString());
-      System.out.println(teamTwo.getUnits().toString());
-      gameLoop(9, 9);
-      world.printUnits();
-      
-      while(teamTwo.getUnits().size() > 0) {
-         teamOne.getUnits().get(0).setAttacked(false);
-         gameLoop(8, 9);
-         gameLoop(9, 9);      
-      }
-      
-      world.printUnits();
-            
-      if(selectedUnit != null) 
-         System.out.println(selectedUnit.toString());
-      else
-         System.out.println("NO UNIT SELECTED");
-      System.out.println(teamOne.getUnits().toString());
-      System.out.println(teamTwo.getUnits().toString());
       
       System.out.println("DONE");
    }

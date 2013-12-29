@@ -1,0 +1,26 @@
+System.out.println("\n\nTESTING BEGINS HERE");
+
+teamOne.getUnits().clear();
+teamTwo.getUnits().clear();
+for(int row = 0; row < gameHeight; row++) {
+   for(int col = 0; col < gameWidth; col++) {
+      world.getTiles()[row][col] = new Plain(world, col, row);
+   }
+}
+world.getTiles()[0][0] = new Factory(world, 0, 0, currentTeam);
+world.printMap();
+System.out.println("---TESTING FACTORIES---");           
+gameLoop(0, 0);
+world.printUnits();
+System.out.println();
+System.out.println(((Factory)world.getTiles()[0][0]).produceUnit(UNIT_TYPE.TANK));
+world.destroyUnit(teamOne.getUnits().get(0));
+System.out.println(((Factory)world.getTiles()[0][0]).produceUnit(UNIT_TYPE.TANK));
+world.destroyUnit(teamOne.getUnits().get(0));
+System.out.println(((Factory)world.getTiles()[0][0]).produceUnit(UNIT_TYPE.TANK));
+if(selectedUnit != null) 
+   System.out.println(selectedUnit.toString());
+else
+   System.out.println("NO UNIT SELECTED");
+System.out.println(teamOne.toString());      
+System.out.println("DONE");
