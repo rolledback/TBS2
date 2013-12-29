@@ -1,0 +1,20 @@
+System.out.println("\n\nTESTING BEGINS HERE");
+      
+teamOne.getUnits().clear();
+teamTwo.getUnits().clear();
+for(int row = 0; row < gameHeight; row++) {
+   for(int col = 0; col < gameWidth; col++) {
+      world.getTiles()[row][col] = new Plain(world, col, row);
+   }
+}
+teamOne.createUnit(world.getTiles()[10][7], UNIT_TYPE.TANK);
+teamTwo.createUnit(world.getTiles()[9][9], UNIT_TYPE.TANK);
+world.printUnits();
+System.out.println("---TESTING ATTACKING FROM DISTANCE---");
+gameLoop(7, 10);
+gameLoop(9, 9);
+world.printUnits();
+System.out.println(teamOne.getUnits().toString());
+System.out.println(teamTwo.getUnits().toString());
+      
+System.out.println("DONE");

@@ -71,12 +71,12 @@ public class World {
          return;
       else if(range <= 0) {
          if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
-            valid[y][x] = 3;
+            valid[y][x] = 2;
          return;
       }
       else if(tiles[y][x].isOccupied()) {
          if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
-            valid[y][x] = 3;
+            valid[y][x] = 2;
          else
             valid[y][x] = 0;
       }

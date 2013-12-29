@@ -8,7 +8,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class Team {
    
    private ArrayList<Unit> units;
-   String name;
+   private String name;
    int teamSize;
    private int resources;
    
@@ -48,6 +48,14 @@ public class Team {
    
    public void setResources(int resources) {
       this.resources = resources;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
    }
    
 }

@@ -22,7 +22,9 @@ public class Unit {
    protected int minAttack, maxAttack, defense, attackRange, moveRange;
    protected int x, y;
    int health, maxHealth;
-   boolean alive, moved;
+   private boolean alive;
+   private boolean moved;
+   private boolean attacked;
    protected Tile currentTile;
    protected UNIT_CLASS classification;
    protected UNIT_TYPE type;
@@ -48,31 +50,35 @@ public class Unit {
       owner = o;
    }
    
-   public void move(int x, int y, Tile tile) {
+   public void move(Tile tile) {
       currentTile.setOccupied(false);
-      this.x = x;
-      this.y = y;
+      currentTile.setOccupiedBy(null);
+      this.x = tile.getX();
+      this.y = tile.getY();
       currentTile = tile;
       tile.setOccupied(true);
+      tile.setOccupiedBy(this);
    }
    
    public int attack() {
       Random random = new Random();
       int adHocMaxAttack = maxAttack + currentTile.getEffect().attackBonus;
-      int adHocMinAttack = maxAttack + currentTile.getEffect().attackBonus;
+      int adHocMinAttack = minAttack + currentTile.getEffect().attackBonus;
       return random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
    }
    
    public void takeDamage(int amount) {
       Random random = new Random();
       int adHocDefense = defense + currentTile.getEffect().defenseBonus;
-      double percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
-      health -= (int) (amount - Math.ceil(amount * (percMinus / 100)));
+      int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
+      System.out.println("Actual damage taken: " + percMinus);
+      health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
       alive = health > 0;
    }
    
    public String toString() {
-      return "Type: " + classification + ", " + type + " x: " + x + " y: " + y;
+      return "Type: " + classification + ", " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName() + " Moved: "
+            + moved + " Attacked: " + attacked;
    }
    
    public int getMoveRange() {
@@ -125,6 +131,30 @@ public class Unit {
    
    public UNIT_TYPE getType() {
       return type;
+   }
+   
+   public boolean hasMoved() {
+      return moved;
+   }
+   
+   public void setMoved(boolean moved) {
+      this.moved = moved;
+   }
+   
+   public boolean hasAttacked() {
+      return attacked;
+   }
+   
+   public void setAttacked(boolean attacked) {
+      this.attacked = attacked;
+   }
+
+   public boolean isAlive() {
+      return alive;
+   }
+
+   public void setAlive(boolean alive) {
+      this.alive = alive;
    }
    
 }
