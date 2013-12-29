@@ -26,6 +26,7 @@ public class Unit {
    protected Tile currentTile;
    protected UNIT_CLASS classification;
    protected UNIT_TYPE type;
+   
    DIRECTION dir;
    private Team owner;
    
@@ -120,6 +121,10 @@ public class Unit {
    
    public void setOwner(Team owner) {
       this.owner = owner;
+   }
+   
+   public UNIT_TYPE getType() {
+      return type;
    }
    
 }

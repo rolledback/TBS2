@@ -20,11 +20,11 @@ public class Team {
    }
    
    public void createUnit(Tile t, UNIT_TYPE uType) {
-      if (uType == UNIT_TYPE.TANK)
+      if(uType == UNIT_TYPE.TANK)
          units.add(new Tank(t.getX(), t.getY(), t, this));
-      if (uType == UNIT_TYPE.TANK_DEST)
+      if(uType == UNIT_TYPE.TANK_DEST)
          units.add(new TankDestroyer(t.getX(), t.getY(), t, this));
-      if (uType == UNIT_TYPE.INFANTRY)
+      if(uType == UNIT_TYPE.INFANTRY)
          units.add(new Infantry(t.getX(), t.getY(), t, this));
       t.setOccupied(true);
       t.setOccupiedBy(units.get(units.size() - 1));

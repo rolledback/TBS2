@@ -3,6 +3,7 @@ package com.rolledback.framework;
 import java.util.Arrays;
 
 import com.rolledback.terrain.*;
+import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.*;
 
@@ -23,9 +24,28 @@ public class World {
    }
    
    public void printMap() {
-      for (int row = 0; row < height; row++) {
-         for (int col = 0; col < width; col++) {
+      for(int row = 0; row < height; row++) {
+         for(int col = 0; col < width; col++) {
             System.out.print(tiles[row][col].getMapChar() + " ");
+         }
+         System.out.println();
+      }
+   }
+   
+   public void printUnits() {
+      for(int row = 0; row < height; row++) {
+         for(int col = 0; col < width; col++) {
+            char uChar = '_';
+            if(tiles[row][col].isOccupied()) {
+               UNIT_TYPE u = tiles[row][col].getOccupiedBy().getType();
+               if(u == UNIT_TYPE.INFANTRY)
+                  uChar = 'I';
+               if(u == UNIT_TYPE.TANK)
+                  uChar = 'T';
+               if(u == UNIT_TYPE.TANK_DEST)
+                  uChar = 'D';
+            }
+            System.out.print(uChar + " ");
          }
          System.out.println();
       }
@@ -33,10 +53,10 @@ public class World {
    
    public int[][] calcMoveSpots(Unit unit) {
       int[][] valid = new int[height][width];
-      for (int x = 0; x < valid.length; x++)
+      for(int x = 0; x < valid.length; x++)
          Arrays.fill(valid[x], -1);
       int adHocRange = unit.getMoveRange() + unit.getCurrentTile().getEffect().moveBonus;
-      if (adHocRange <= 0)
+      if(adHocRange <= 0)
          adHocRange = 1;
       unit.getCurrentTile().setOccupied(false);
       calcMoveSpotsHelper(unit, valid, unit.getX(), unit.getY(), adHocRange + 1);
@@ -45,57 +65,75 @@ public class World {
    }
    
    public void calcMoveSpotsHelper(Unit unit, int valid[][], int x, int y, int range) {
-      if (x < 0 || x >= width || y < 0 || y >= height)
+      if(x < 0 || x >= width || y < 0 || y >= height)
          return;
-      else if (valid[y][x] == 0)
+      else if(valid[y][x] == 0)
          return;
-      else if (range <= 0) {
-         if (tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+      else if(range <= 0) {
+         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
             valid[y][x] = 3;
          return;
-      } else if (tiles[y][x].isOccupied()) {
-         if (!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+      }
+      else if(tiles[y][x].isOccupied()) {
+         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
             valid[y][x] = 3;
          else
             valid[y][x] = 0;
-      } else if (!tiles[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
+      }
+      else if(!tiles[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
          valid[y][x] = 0;
-      else if (!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
+      else if(!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
          valid[y][x] = 0;
       else
          valid[y][x] = 1;
       range--;
-      if (valid[y][x] == 1) {
+      if(valid[y][x] == 1) {
          calcMoveSpotsHelper(unit, valid, x + 1, y, range);
          calcMoveSpotsHelper(unit, valid, x - 1, y, range);
          calcMoveSpotsHelper(unit, valid, x, y + 1, range);
          calcMoveSpotsHelper(unit, valid, x, y - 1, range);
-      } else
+      }
+      else
          return;
    }
    
    public void buildMap() {
-      for (int row = 0; row < tiles.length; row++) {
-         for (int col = 0; col < tiles[row].length; col++) {
+      for(int row = 0; row < tiles.length; row++) {
+         for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
-            if (type <= .70)
+            if(type <= .70)
                tiles[row][col] = new Plain(this, col, row);
-            else if (type > .70 && type <= .95)
+            else if(type > .70 && type <= .95)
                tiles[row][col] = new Forest(this, col, row);
             else
                tiles[row][col] = new Mountain(this, col, row);
          }
+      }
+      placeFactories(teamOne, 0, width / 5);
+      placeFactories(teamTwo, width - (width / 5), width);
+      
+   }
+   
+   public void placeFactories(Team team, int min, int max) {
+      for(int col = min; col < max; col++) {
+         int row = (int) (Math.random() * height);
+         Tile spot = tiles[row][col];
+         while(spot.isOccupied() || spot.getType() == TILE_TYPE.MOUNTAIN) {
+            row = (int) (Math.random() * height);
+            spot = tiles[row][col];
+         }
+         tiles[row][col] = new Factory(this, row, col, team);
       }
    }
    
    public String mapKey() {
       String key = height + "-" + width;
       String terrainKeys[] = new String[height];
-      for (int row = 0; row < tiles.length; row++) {
+      for(int row = 0; row < tiles.length; row++) {
          terrainKeys[row] = "";
-         for (int col = 0; col < tiles[row].length; col++) {
+         for(int col = 0; col < tiles[row].length; col++) {
             char currentTile = tiles[row][col].getMapChar();
-            switch (currentTile) {
+            switch(currentTile) {
             case ('p'):
                terrainKeys[row] += 0;
                break;
@@ -114,22 +152,22 @@ public class World {
             }
          }
       }
-      for (int row = 0; row < tiles.length; row++)
+      for(int row = 0; row < tiles.length; row++)
          key += '-' + terrainKeys[row];
       return key.toString();
    }
    
    public void buildArmy(Team team, int minCol, int maxCol) {
       int col = minCol;
-      for (int x = 0; x < team.teamSize; x++) {
+      for(int x = 0; x < team.teamSize; x++) {
          int row = (int) (Math.random() * height);
          Tile spot = tiles[row][col];
-         while (spot.isOccupied()) {
+         while(spot.isOccupied() || spot.getType() == TILE_TYPE.MOUNTAIN) {
             row = (int) (Math.random() * height);
             spot = tiles[row][col];
          }
          team.createUnit(spot, randUnitType());
-         if ((x + 1) % 3 == 0)
+         if((x + 1) % (team.teamSize / (width / 5)) == 0)
             col++;
       }
    }

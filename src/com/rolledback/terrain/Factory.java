@@ -33,9 +33,9 @@ public class Factory extends Tile {
    }
    
    public boolean produceUnit(UNIT_TYPE type) {
-      if (owner.getResources() < productionList.get(type))
+      if(owner.getResources() < productionList.get(type))
          return false;
-      if (world.getTiles()[y][x].isOccupied())
+      if(world.getTiles()[y][x].isOccupied())
          return false;
       owner.setResources(owner.getResources() - productionList.get(type));
       owner.createUnit(world.getTiles()[y][x], type);
