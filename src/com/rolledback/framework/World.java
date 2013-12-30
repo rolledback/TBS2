@@ -1,11 +1,17 @@
 package com.rolledback.framework;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
-import com.rolledback.terrain.*;
+import com.rolledback.terrain.Factory;
+import com.rolledback.terrain.Forest;
+import com.rolledback.terrain.Mountain;
+import com.rolledback.terrain.Plain;
+import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
-import com.rolledback.units.Unit.*;
+import com.rolledback.units.Unit.UNIT_CLASS;
+import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class World {
    private Team teamOne, teamTwo;
@@ -39,11 +45,20 @@ public class World {
             if(tiles[row][col].isOccupied()) {
                UNIT_TYPE u = tiles[row][col].getOccupiedBy().getType();
                if(u == UNIT_TYPE.INFANTRY)
-                  uChar = 'I';
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                        uChar = 'I';
+                  else
+                        uChar = 'i';
                if(u == UNIT_TYPE.TANK)
-                  uChar = 'T';
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                        uChar = 'T';
+                  else
+                        uChar = 't';
                if(u == UNIT_TYPE.TANK_DEST)
-                  uChar = 'D';
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                        uChar = 'D';
+                  else
+                        uChar = 'd';
             }
             System.out.print(uChar + " ");
          }
@@ -101,28 +116,27 @@ public class World {
       for(int row = 0; row < tiles.length; row++) {
          for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
-            if(type <= .70)
+            if(type < .65)
                tiles[row][col] = new Plain(this, col, row);
-            else if(type > .70 && type <= .95)
+            else if(type > .65 && type <= .90)
                tiles[row][col] = new Forest(this, col, row);
             else
                tiles[row][col] = new Mountain(this, col, row);
          }
       }
       placeFactories(teamOne, 0, width / 5);
-      placeFactories(teamTwo, width - (width / 5), width);
-      
+      placeFactories(teamTwo, width - (width / 5), width);     
    }
    
    public void placeFactories(Team team, int min, int max) {
       for(int col = min; col < max; col++) {
-         int row = (int) (Math.random() * height);
+         int row = (int)(Math.random() * height);
          Tile spot = tiles[row][col];
-         while(spot.isOccupied() || spot.getType() == TILE_TYPE.MOUNTAIN) {
-            row = (int) (Math.random() * height);
+         while(spot.getType() == TILE_TYPE.MOUNTAIN) {
+            row = (int)(Math.random() * height);
             spot = tiles[row][col];
          }
-         tiles[row][col] = new Factory(this, row, col, team);
+         tiles[row][col] = new Factory(this, col, row, team);
       }
    }
    
@@ -160,13 +174,11 @@ public class World {
    public void buildArmy(Team team, int minCol, int maxCol) {
       int col = minCol;
       for(int x = 0; x < team.teamSize; x++) {
-         int row = (int) (Math.random() * height);
-         Tile spot = tiles[row][col];
-         while(spot.isOccupied() || spot.getType() == TILE_TYPE.MOUNTAIN) {
-            row = (int) (Math.random() * height);
-            spot = tiles[row][col];
+         int row = (int)(Math.random() * height);
+         while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN) {
+            row = (int)(Math.random() * height);
          }
-         team.createUnit(spot, randUnitType());
+         team.createUnit(tiles[row][col], randUnitType());
          if((x + 1) % (team.teamSize / (width / 5)) == 0)
             col++;
       }
@@ -187,7 +199,8 @@ public class World {
    }
    
    public UNIT_TYPE randUnitType() {
-      return UNIT_TYPE.values()[(int) (Math.random() * UNIT_TYPE.values().length)];
+      return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
+      
    }
    
    public Tile[][] getTiles() {

@@ -10,7 +10,7 @@ public class Tank extends Unit {
       classification = UNIT_CLASS.VEHICLE;
       minAttack = 10;
       maxAttack = 15;
-      defense = 10;
+      defense = 12;
       moveRange = 4;
       type = UNIT_TYPE.TANK;
    }

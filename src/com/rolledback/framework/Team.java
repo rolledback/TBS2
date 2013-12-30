@@ -7,7 +7,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Team {
    
-   private ArrayList<Unit> units;
+   protected ArrayList<Unit> units;
    private String name;
    int teamSize;
    private int resources;

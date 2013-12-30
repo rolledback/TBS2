@@ -19,7 +19,11 @@ public class Unit {
       LEFT, RIGHT
    }
    
-   protected int minAttack, maxAttack, defense, attackRange, moveRange;
+   protected int minAttack;
+   protected int maxAttack;
+   protected int defense;
+   protected int attackRange;
+   protected int moveRange;
    protected int x, y;
    int health, maxHealth;
    private boolean alive;
@@ -51,6 +55,7 @@ public class Unit {
    }
    
    public void move(Tile tile) {
+      //System.out.println("Moving from " + currentTile.toString() + "\nto: " + tile.toString());
       currentTile.setOccupied(false);
       currentTile.setOccupiedBy(null);
       this.x = tile.getX();
@@ -71,14 +76,14 @@ public class Unit {
       Random random = new Random();
       int adHocDefense = defense + currentTile.getEffect().defenseBonus;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
-      System.out.println("Actual damage taken: " + percMinus);
+      //System.out.println("Actual damage taken: " + percMinus);
       health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
       alive = health > 0;
    }
    
    public String toString() {
-      return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName() + " Moved: "
-            + moved + " Attacked: " + attacked;
+      return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName()
+            + " Moved: " + moved + " Attacked: " + attacked;
    }
    
    public int getMoveRange() {
@@ -148,13 +153,29 @@ public class Unit {
    public void setAttacked(boolean attacked) {
       this.attacked = attacked;
    }
-
+   
    public boolean isAlive() {
       return alive;
    }
-
+   
    public void setAlive(boolean alive) {
       this.alive = alive;
+   }
+
+   public int getMaxAttack() {
+      return maxAttack;
+   }
+
+   public void setMaxAttack(int maxAttack) {
+      this.maxAttack = maxAttack;
+   }
+
+   public int getMinAttack() {
+      return minAttack;
+   }
+
+   public void setMinAttack(int minAttack) {
+      this.minAttack = minAttack;
    }
    
 }
