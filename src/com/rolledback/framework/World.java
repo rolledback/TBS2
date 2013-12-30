@@ -116,9 +116,9 @@ public class World {
       for(int row = 0; row < tiles.length; row++) {
          for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
-            if(type < .65)
+            if(type <= 70)
                tiles[row][col] = new Plain(this, col, row);
-            else if(type > .65 && type <= .90)
+            else if(type > .70 && type <= .95)
                tiles[row][col] = new Forest(this, col, row);
             else
                tiles[row][col] = new Mountain(this, col, row);

@@ -24,7 +24,7 @@ public class Game {
    
    public static void main(String args[]) {
       int[] winnerRecord = new int[3];
-      for(int z = 0; z < 5000; z++) {
+      for(int z = 0; z < 1; z++) {
          Game newGame = new Game();
          //newGame.world.printUnits();
          //System.out.println();
@@ -45,8 +45,8 @@ public class Game {
    }
    
    public Game() {
-      gameWidth = 25;
-      gameHeight = 15;
+      gameWidth = 10;
+      gameHeight = 10;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       teamOne = new ComputerTeam("CPU1", teamSize, 500, this);
       teamTwo = new ComputerTeam("CPU2", teamSize, 500, this);
@@ -139,27 +139,34 @@ public class Game {
    
    public void testCode() {
       //System.out.println("\n\nTESTING BEGINS HERE");
-      for(int y = 0; y < 1000; y++) {
+      for(int y = 0; y < 100; y++) {
          if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)            
-            break;
+            return;
          currentTeam = teamOne;
          ((ComputerTeam)teamOne).executeTurn();
          for(int x = 0; x < teamOne.getUnits().size(); x++) {
             teamOne.getUnits().get(x).setMoved(false);
             teamOne.getUnits().get(x).setAttacked(false);
          }
+         world.printUnits();
+         System.out.println();
+         System.out.println();
          currentTeam = teamTwo;
          if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)            
-            break;
+            return;
          ((ComputerTeam)teamTwo).executeTurn();
          for(int x = 0; x < teamTwo.getUnits().size(); x++) {
             teamTwo.getUnits().get(x).setMoved(false);
             teamTwo.getUnits().get(x).setAttacked(false);
          }
-         //world.printUnits();
-         //System.out.println();
-         //System.out.println();
+         world.printUnits();
+         System.out.println();
+         System.out.println();
       }
+       world.printUnits();
+       System.out.println();
+       world.printMap();
+       System.out.println("\n\n\n\n");
    }
    
    public void gameDebugFull() {

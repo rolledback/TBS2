@@ -2,16 +2,20 @@ package com.rolledback.framework;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 
+import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
+import com.rolledback.units.Unit.UNIT_CLASS;
 
 public class ComputerTeam extends Team {
    
    Game game;
    Team opponent;
-   
+   boolean deubg = true;
    public ComputerTeam(String name, int size, int r, Game g) {
       super(name, size, r);
       game = g;
@@ -19,12 +23,13 @@ public class ComputerTeam extends Team {
    
    public void executeTurn() {
       Coordinate target = chooseTarget();
-      //System.out.println("Target coordinates: " + target.toString());
+      if(deubg) System.out.println("Target coordinates: " + target.toString());
       int targetX = target.getX();
       int targetY = target.getY();
       for(int x = 0; x < units.size(); x++) {
          Unit currUnit = units.get(x);
          int[][] moveSpots = game.world.calcMoveSpots(currUnit);
+         if(deubg) System.out.println(currUnit.getX() + "," + currUnit.getY());
          Coordinate moveHere = null;
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
@@ -36,13 +41,14 @@ public class ComputerTeam extends Team {
                   break;
                }
                if(moveSpots[row][col] == 1) {
+                  System.out.println("BFS of " + col + "," + row + " to target is: " + bfsToBestSpot(game.world.getTiles().clone(), col, row, targetX, targetY, currUnit));
                   if(col == targetX)
                      currentDistance = Math.abs(row - targetY);
                   else if(row == targetY)
                      currentDistance = Math.abs(col - targetX);
-                  else 
-                     currentDistance = (Math.abs(col - targetX) / Math.abs(row - targetY));
-                  //System.out.println("Distance of " + col + "," + row + " to target is " + currentDistance);
+                  else
+                     currentDistance = (double)Math.abs(col - targetX) + (double)Math.abs(row - targetY);
+                  if(deubg) System.out.println("Distance of " + col + "," + row + " to target is " + currentDistance);
                   if(currentDistance < lowestDistance) {
                      moveHere = new Coordinate(col, row);
                      lowestDistance = currentDistance;
@@ -50,13 +56,70 @@ public class ComputerTeam extends Team {
                }                  
             }
          }
-         if(moveHere != null) {
-            //System.out.println("Move a unit to: " + moveHere.toString());
+         if(moveHere != null) {            
+            if(deubg) System.out.println("Move a unit to: " + moveHere.toString());
             game.gameLoop(currUnit.getX(), currUnit.getY());
             game.gameLoop(moveHere.getX(), moveHere.getY());
          }
       }
    }
+   public int bfsToBestSpot(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
+      int[][] moveSpots = new int[game.gameHeight][game.gameWidth];
+      for(int y = 0; y < game.gameHeight; y++) {
+         for(int x = 0; x < game.gameWidth; x++) {
+            if(world[y][x].isOccupied())
+               moveSpots[y][x] = 0;
+            else if(!world[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
+               moveSpots[y][x] = 0;
+            else if(!world[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
+               moveSpots[y][x] = 0;
+            else
+               moveSpots[y][x] = 1;
+         }
+      }
+      
+      for(int y = 0; y < game.gameHeight; y++) {
+         for(int x = 0; x < game.gameWidth; x++) {
+            if((y == targetY && x == targetX) || (y == row && x == col))
+               System.out.print("X ");
+            else
+               System.out.print(moveSpots[y][x] + " ");            
+         }
+         System.out.println();
+      }
+      
+      LinkedList<Tile> queue = new LinkedList<Tile>();
+      HashSet<Tile> set = new HashSet<Tile>();
+      queue.offer(world[row][col]);
+      queue.offer(null);
+      set.add(world[row][col]);
+      int distance = 1;
+      while(queue.size() > 1) {
+         Tile t = queue.poll();
+         distance++;
+         if(t == null) {
+            distance++;
+            queue.offer(null);            
+         }
+         else if(t.getX() == targetX && t.getY() == targetY)
+            return distance;
+         else {
+            int[] yDirs = {0, 0, 1, -1};
+            int[] xDirs = {1, -1, 0, 0};
+            distance--;
+            for(int i = 0; i < 4; i++)
+               try {
+                  if(moveSpots[t.getX() + xDirs[i]][t.getY() + yDirs[i]] == 1 && !set.contains(world[t.getX() + xDirs[i]][t.getY() + yDirs[i]])) {
+                     set.add(world[t.getX() + xDirs[i]][t.getY() + yDirs[i]]);
+                     queue.offer(world[t.getX() + xDirs[i]][t.getY() + yDirs[i]]);
+                  }
+               }
+               catch(Exception e) {}
+         }
+      }
+      return distance;
+   }
+   
    
    public Coordinate chooseTarget() {
       HashMap<Unit, Integer> numInRange = new HashMap<Unit, Integer>();      
@@ -93,9 +156,8 @@ public class ComputerTeam extends Team {
       }
 
       if(currentMax <= 0) {
-         possibleTargets.clear();
          numInRange.clear();
-         return findFutureTarget();   
+         return findFutureTarget(possibleTargets);   
       }
       else if(possibleTargets.size() > 1) {
          possibleTargets.clear();
@@ -105,26 +167,34 @@ public class ComputerTeam extends Team {
       return new Coordinate(possibleTargets.get(0).getX(), possibleTargets.get(0).getY());
    }
    
-   public Coordinate findFutureTarget() {
-      //System.out.println("By distance.");
+   public Coordinate findFutureTarget(ArrayList<Unit> possibleTargets) {
+      if(deubg) System.out.println("By distance.");
       HashMap<Unit, Double> distanceHash = new HashMap<Unit, Double>();
-      ListIterator<Unit> opponentI = opponent.getUnits().listIterator();
-      while(opponentI.hasNext()) {  
-         Unit currOpponent = opponentI.next();
+      ListIterator<Unit> targetI = possibleTargets.listIterator();
+      while(targetI.hasNext()) {  
+         Unit currOpponent = targetI.next();
+         if(deubg) System.out.println("Swarm distnace from " + currOpponent.toString());
          double distanceAvg = 0.0;
          ListIterator<Unit> unitI = units.listIterator();
          while(unitI.hasNext()) {
             Unit currFriendly = unitI.next();
+            double distance = 0.0;
+            if(deubg) System.out.println("Friendly = (" + currFriendly.getX() + "," + currFriendly.getY() + ")");
+            if(deubg) System.out.println("Enemy = (" + currOpponent.getX() + "," + currOpponent.getY() + ")");
             if(currFriendly.getX() == currOpponent.getX())
-               distanceAvg += Math.abs(currFriendly.getY() - currOpponent.getY());
+               distance = Math.abs(currFriendly.getY() - currOpponent.getY());
             else if(currFriendly.getY() == currOpponent.getY())
-               distanceAvg += Math.abs(currFriendly.getX() - currOpponent.getX());
+               distance = Math.abs(currFriendly.getX() - currOpponent.getX());
             else if(currFriendly.getY() == currOpponent.getY() && currFriendly.getX() == currOpponent.getX())
-               distanceAvg += 0;
+               distance = 0;
             else 
-               distanceAvg += (Math.abs(currFriendly.getX() - currOpponent.getX()) / Math.abs(currFriendly.getY() - currOpponent.getY()));
+               distance = ((double)Math.abs(currFriendly.getX() - currOpponent.getX()) + (double)Math.abs(currFriendly.getY() - currOpponent.getY()));
+            if(deubg) System.out.println("Distance: " + distance);
+            distanceAvg += distance;
          }
-         distanceAvg /= opponent.getUnits().size();
+         distanceAvg /= units.size();
+         if(deubg) System.out.println("Swarm average: " + distanceAvg);
+         if(deubg) System.out.println("------------");
          distanceHash.put(currOpponent, distanceAvg);
       }
 
@@ -134,11 +204,12 @@ public class ComputerTeam extends Team {
              minEntry = entry;
           }
       }
+      if(deubg) System.out.println("Go for: " + minEntry.getKey().toString() + "(dist " + minEntry.getValue() + ")");
       return new Coordinate(minEntry.getKey().getX(), minEntry.getKey().getY(), minEntry.getValue());
    }
    
    public Coordinate chooseBestTarget() {
-      //System.out.println("By potential damage");
+//      System.out.println("By potential damage");
       HashMap<Unit, Double> numInRange = new HashMap<Unit, Double>();      
       ListIterator<Unit> opponentI = opponent.getUnits().listIterator();
       while(opponentI.hasNext())
