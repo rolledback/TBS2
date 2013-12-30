@@ -96,7 +96,6 @@ public class ComputerTeam extends Team {
       int distance = 1;
       while(queue.size() > 1) {
          Tile t = queue.poll();
-         distance++;
          if(t == null) {
             distance++;
             queue.offer(null);            
@@ -106,7 +105,6 @@ public class ComputerTeam extends Team {
          else {
             int[] yDirs = {0, 0, 1, -1};
             int[] xDirs = {1, -1, 0, 0};
-            distance--;
             for(int i = 0; i < 4; i++)
                try {
                   if(moveSpots[t.getX() + xDirs[i]][t.getY() + yDirs[i]] == 1 && !set.contains(world[t.getX() + xDirs[i]][t.getY() + yDirs[i]])) {
