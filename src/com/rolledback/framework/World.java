@@ -46,19 +46,49 @@ public class World {
                UNIT_TYPE u = tiles[row][col].getOccupiedBy().getType();
                if(u == UNIT_TYPE.INFANTRY)
                   if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
-                        uChar = 'I';
+                     uChar = 'I';
                   else
-                        uChar = 'i';
+                     uChar = 'i';
                if(u == UNIT_TYPE.TANK)
                   if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
-                        uChar = 'T';
+                     uChar = 'T';
                   else
-                        uChar = 't';
+                     uChar = 't';
                if(u == UNIT_TYPE.TANK_DEST)
                   if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
-                        uChar = 'D';
+                     uChar = 'D';
                   else
-                        uChar = 'd';
+                     uChar = 'd';
+            }
+            System.out.print(uChar + " ");
+         }
+         System.out.println();
+      }
+   }
+   
+   public void printUnits(int x, int y) {
+      for(int row = 0; row < height; row++) {
+         for(int col = 0; col < width; col++) {
+            char uChar = '_';
+            if(row == y && col == x)
+               uChar = 'X';
+            else if(tiles[row][col].isOccupied()) {
+               UNIT_TYPE u = tiles[row][col].getOccupiedBy().getType();
+               if(u == UNIT_TYPE.INFANTRY)
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                     uChar = 'I';
+                  else
+                     uChar = 'i';
+               if(u == UNIT_TYPE.TANK)
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                     uChar = 'T';
+                  else
+                     uChar = 't';
+               if(u == UNIT_TYPE.TANK_DEST)
+                  if(tiles[row][col].getOccupiedBy().getOwner().equals(teamOne))
+                     uChar = 'D';
+                  else
+                     uChar = 'd';
             }
             System.out.print(uChar + " ");
          }
@@ -116,7 +146,7 @@ public class World {
       for(int row = 0; row < tiles.length; row++) {
          for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
-            if(type <= 70)
+            if(type <= .70)
                tiles[row][col] = new Plain(this, col, row);
             else if(type > .70 && type <= .95)
                tiles[row][col] = new Forest(this, col, row);
@@ -125,7 +155,7 @@ public class World {
          }
       }
       placeFactories(teamOne, 0, width / 5);
-      placeFactories(teamTwo, width - (width / 5), width);     
+      placeFactories(teamTwo, width - (width / 5), width);
    }
    
    public void placeFactories(Team team, int min, int max) {

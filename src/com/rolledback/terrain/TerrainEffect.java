@@ -13,7 +13,7 @@ public class TerrainEffect {
    }
    
    public String toString() {
-      return "Attack Bonus: " + attackBonus + "\nDefense Bonus: " + defenseBonus + "\nMove Bonus: " + moveBonus;
+      return "Attack Bonus: " + attackBonus + " Defense Bonus: " + defenseBonus + " Move Bonus: " + moveBonus;
    }
    
 }

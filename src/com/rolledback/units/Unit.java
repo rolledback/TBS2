@@ -21,7 +21,7 @@ public class Unit {
    
    protected int minAttack;
    protected int maxAttack;
-   protected int defense;
+   private int defense;
    protected int attackRange;
    protected int moveRange;
    protected int x, y;
@@ -55,7 +55,7 @@ public class Unit {
    }
    
    public void move(Tile tile) {
-      //System.out.println("Moving from " + currentTile.toString() + "\nto: " + tile.toString());
+      // System.out.println("Moving from " + currentTile.toString() + "\nto: " + tile.toString());
       currentTile.setOccupied(false);
       currentTile.setOccupiedBy(null);
       this.x = tile.getX();
@@ -76,14 +76,14 @@ public class Unit {
       Random random = new Random();
       int adHocDefense = defense + currentTile.getEffect().defenseBonus;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
-      //System.out.println("Actual damage taken: " + percMinus);
+      // System.out.println("Actual damage taken: " + percMinus);
       health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
       alive = health > 0;
    }
    
    public String toString() {
       return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName()
-            + " Moved: " + moved + " Attacked: " + attacked;
+            + " Moved: " + moved + " Attacked: " + attacked + " Defense: " + defense;
    }
    
    public int getMoveRange() {
@@ -161,21 +161,29 @@ public class Unit {
    public void setAlive(boolean alive) {
       this.alive = alive;
    }
-
+   
    public int getMaxAttack() {
       return maxAttack;
    }
-
+   
    public void setMaxAttack(int maxAttack) {
       this.maxAttack = maxAttack;
    }
-
+   
    public int getMinAttack() {
       return minAttack;
    }
-
+   
    public void setMinAttack(int minAttack) {
       this.minAttack = minAttack;
+   }
+   
+   public int getDefense() {
+      return defense;
+   }
+   
+   public void setDefense(int defense) {
+      this.defense = defense;
    }
    
 }

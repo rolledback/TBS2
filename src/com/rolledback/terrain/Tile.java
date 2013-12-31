@@ -39,10 +39,7 @@ public class Tile {
    }
    
    public String toString() {
-      if(!occupied)
-         return "Type: " + type + "\nx: " + x + "\ny: " + y + "\n" + getEffect().toString() + "\nOccupied: " + occupied;
-      else
-         return "Type: " + type + "\nx: " + x + "\ny: " + y + "\n" + getEffect().toString() + "\nOccupied: " + occupied + " By: " + occupiedBy;
+      return "Type: " + type + " x: " + x + " y: " + y + " " + getEffect().toString() + " Occupied: " + occupied;
    }
    
    public TerrainEffect getEffect() {

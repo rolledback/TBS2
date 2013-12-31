@@ -10,7 +10,7 @@ public class Infantry extends Unit {
       classification = UNIT_CLASS.INFANTRY;
       minAttack = 5;
       maxAttack = 8;
-      defense = 2;
+      setDefense(2);
       moveRange = 2;
       type = UNIT_TYPE.INFANTRY;
    }

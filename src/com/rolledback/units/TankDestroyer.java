@@ -10,7 +10,7 @@ public class TankDestroyer extends Unit {
       classification = UNIT_CLASS.VEHICLE;
       minAttack = 15;
       maxAttack = 20;
-      defense = 5;
+      setDefense(5);
       moveRange = 3;
       type = UNIT_TYPE.TANK_DEST;
    }

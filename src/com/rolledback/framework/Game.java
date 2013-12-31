@@ -19,18 +19,18 @@ public class Game {
    Unit selectedUnit;
    Unit targetUnit;
    
-   // smaller number = more units per column at start
    int UNIT_DENSITY = 5;
    
    public static void main(String args[]) {
+      int numGames = 1000;
       int[] winnerRecord = new int[3];
-      for(int z = 0; z < 1; z++) {
+      double turnAvg = 0.0;
+      long timeAvg = 0;
+      long start = System.currentTimeMillis() / 1000;
+      for(int z = 0; z < numGames; z++) {
+         System.out.println(z);
          Game newGame = new Game();
-         //newGame.world.printUnits();
-         //System.out.println();
-         //newGame.gameDebugFull();
-         newGame.testCode();
-         
+         turnAvg += (double)newGame.testCode();
          if(newGame.teamOne.getUnits().size() == 0 && newGame.teamTwo.getUnits().size() != 0)
             winnerRecord[1]++;
          else if(newGame.teamOne.getUnits().size() != 0 && newGame.teamTwo.getUnits().size() == 0)
@@ -38,15 +38,18 @@ public class Game {
          else
             winnerRecord[2]++;
       }
+      timeAvg = (System.currentTimeMillis() / 1000) - start;
       
       System.out.println("Team one wins: " + winnerRecord[0]);
       System.out.println("Team two wins: " + winnerRecord[1]);
       System.out.println("Ties?: " + winnerRecord[2]);
+      System.out.println("Avg turns: " + turnAvg / numGames);
+      System.out.println("Avg time: " + timeAvg / numGames);
    }
    
    public Game() {
-      gameWidth = 10;
-      gameHeight = 10;
+      gameWidth = 25;
+      gameHeight = 15;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       teamOne = new ComputerTeam("CPU1", teamSize, 500, this);
       teamTwo = new ComputerTeam("CPU2", teamSize, 500, this);
@@ -57,7 +60,6 @@ public class Game {
    }
    
    public void gameLoop(int xTile, int yTile) {
-      //System.out.println("Start of function");
       int x = xTile; // click data
       int y = yTile; // click data
       
@@ -68,7 +70,6 @@ public class Game {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
             attackMove(x, y);
             int attackNum = selectedUnit.attack();
-            //System.out.println("Attacking with: " + attackNum);
             targetUnit.takeDamage(attackNum);
             if(!targetUnit.isAlive())
                world.destroyUnit(targetUnit);
@@ -82,7 +83,6 @@ public class Game {
             selectedUnit.setAttacked(true);
          }
          if(!selectedUnit.hasMoved() && moveSpots[y][x] == 1) {
-            //System.out.println("Moving unit.");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
@@ -94,14 +94,12 @@ public class Game {
          unitSelected = true;
          if(selectedUnit.getOwner().equals(currentTeam)) {
             moveSpots = world.calcMoveSpots(selectedUnit);
-            //System.out.println("Selected unit.\n" + selectedUnit.toString() + "\n");
             // display move spots if haven't moved yet
             // display attack spots if haven't attacked yet
          }
       }
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
-         //System.out.println("Factory selected:\n" + ((Factory)selectedTile).getProductionList().toString() + "\n");
          // choose unit to produce
       }
       if(!unitSelected)
@@ -109,19 +107,16 @@ public class Game {
    }
    
    public void attackMove(int x, int y) {
-      //System.out.println("Attacking unit.");
-      //System.out.println(targetUnit.toString());
       if(Math.abs(selectedUnit.getX() - targetUnit.getX()) == 1 && targetUnit.getY() == selectedUnit.getY())
          return;
       if(Math.abs(selectedUnit.getY() - targetUnit.getY()) == 1 && targetUnit.getX() == selectedUnit.getX())
          return;
-      //System.out.println("Have to move to attack.");
       else if(x - 1 >= 0 && moveSpots[y][x - 1] == 1) {
          selectedUnit.move(world.getTiles()[y][x - 1]);
       }
       else if(x + 1 < gameWidth && moveSpots[y][x + 1] == 1) {
          selectedUnit.move(world.getTiles()[y][x + 1]);
-      }      
+      }
       else if(y - 1 >= 0 && moveSpots[y - 1][x] == 1) {
          selectedUnit.move(world.getTiles()[y - 1][x]);
       }
@@ -133,40 +128,24 @@ public class Game {
    
    public Tile selectTile(int x, int y) {
       Tile selectedTile = world.getTiles()[y][x];
-      //System.out.println("Tile selected:\n" + selectedTile.toString() + "\n");
       return selectedTile;
    }
    
-   public void testCode() {
-      //System.out.println("\n\nTESTING BEGINS HERE");
-      for(int y = 0; y < 100; y++) {
-         if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)            
-            return;
-         currentTeam = teamOne;
-         ((ComputerTeam)teamOne).executeTurn();
-         for(int x = 0; x < teamOne.getUnits().size(); x++) {
-            teamOne.getUnits().get(x).setMoved(false);
-            teamOne.getUnits().get(x).setAttacked(false);
+   public int testCode() {
+      for(int y = 0; y < 100000; y++) {
+         if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)
+            return y;
+         ((ComputerTeam)currentTeam).executeTurn();
+         for(int x = 0; x < currentTeam.getUnits().size(); x++) {
+            currentTeam.getUnits().get(x).setMoved(false);
+            currentTeam.getUnits().get(x).setAttacked(false);
          }
-         world.printUnits();
-         System.out.println();
-         System.out.println();
-         currentTeam = teamTwo;
-         if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)            
-            return;
-         ((ComputerTeam)teamTwo).executeTurn();
-         for(int x = 0; x < teamTwo.getUnits().size(); x++) {
-            teamTwo.getUnits().get(x).setMoved(false);
-            teamTwo.getUnits().get(x).setAttacked(false);
-         }
-         world.printUnits();
-         System.out.println();
-         System.out.println();
+         if(currentTeam.equals(teamOne))
+            currentTeam = teamTwo;
+         else
+            currentTeam = teamOne;
       }
-       world.printUnits();
-       System.out.println();
-       world.printMap();
-       System.out.println("\n\n\n\n");
+      return 9999;
    }
    
    public void gameDebugFull() {
