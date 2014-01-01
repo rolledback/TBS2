@@ -1,7 +1,9 @@
 package com.rolledback.units;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Team;
 import com.rolledback.terrain.Tile;
 
@@ -19,6 +21,7 @@ public class Unit {
       LEFT, RIGHT
    }
    
+   protected ArrayList<Coordinate> moveSet;
    protected int minAttack;
    protected int maxAttack;
    private int defense;
@@ -186,4 +189,11 @@ public class Unit {
       this.defense = defense;
    }
    
+   public ArrayList<Coordinate> getMoveSet() {
+      return moveSet;
+   }
+   
+   public void setMoveSet(ArrayList<Coordinate> moveSet) {
+      this.moveSet = moveSet;
+   }
 }

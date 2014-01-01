@@ -1,7 +1,7 @@
 package com.rolledback.framework;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Forest;
@@ -97,31 +97,42 @@ public class World {
    }
    
    public int[][] calcMoveSpots(Unit unit) {
-      int[][] valid = new int[height][width];
-      for(int x = 0; x < valid.length; x++)
-         Arrays.fill(valid[x], -1);
+      int[][] spots = new int[height][width];
+      for(int x = 0; x < spots.length; x++)
+         Arrays.fill(spots[x], -1);
       int adHocRange = unit.getMoveRange() + unit.getCurrentTile().getEffect().moveBonus;
       if(adHocRange <= 0)
          adHocRange = 1;
+      ArrayList<Coordinate> set = null;
+      set = new ArrayList<Coordinate>();
       unit.getCurrentTile().setOccupied(false);
-      calcMoveSpotsHelper(unit, valid, unit.getX(), unit.getY(), adHocRange + 1);
+      calcMoveSpotsHelper(unit, spots, unit.getX(), unit.getY(), adHocRange + 1, set);
       unit.getCurrentTile().setOccupied(true);
-      return valid;
+      unit.setMoveSet(set);
+      return spots;
    }
    
-   public void calcMoveSpotsHelper(Unit unit, int valid[][], int x, int y, int range) {
+   public void calcMoveSpotsHelper(Unit unit, int valid[][], int x, int y, int range, ArrayList<Coordinate> moveSet) {
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
       else if(valid[y][x] == 0)
          return;
       else if(range <= 0) {
-         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
             valid[y][x] = 2;
+            if(!moveSet.contains(new Coordinate(x, y))) {
+               moveSet.add(new Coordinate(x, y));
+            }
+         }
          return;
       }
       else if(tiles[y][x].isOccupied()) {
-         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
             valid[y][x] = 2;
+            if(!moveSet.contains(new Coordinate(x, y))) {
+               moveSet.add(new Coordinate(x, y));
+            }
+         }
          else
             valid[y][x] = 0;
       }
@@ -129,14 +140,18 @@ public class World {
          valid[y][x] = 0;
       else if(!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
          valid[y][x] = 0;
-      else
+      else {
          valid[y][x] = 1;
+         if(!moveSet.contains(new Coordinate(x, y))) {
+            moveSet.add(new Coordinate(x, y));
+         }
+      }
       range--;
       if(valid[y][x] == 1) {
-         calcMoveSpotsHelper(unit, valid, x + 1, y, range);
-         calcMoveSpotsHelper(unit, valid, x - 1, y, range);
-         calcMoveSpotsHelper(unit, valid, x, y + 1, range);
-         calcMoveSpotsHelper(unit, valid, x, y - 1, range);
+         calcMoveSpotsHelper(unit, valid, x + 1, y, range, moveSet);
+         calcMoveSpotsHelper(unit, valid, x - 1, y, range, moveSet);
+         calcMoveSpotsHelper(unit, valid, x, y + 1, range, moveSet);
+         calcMoveSpotsHelper(unit, valid, x, y - 1, range, moveSet);
       }
       else
          return;
@@ -156,6 +171,33 @@ public class World {
       }
       placeFactories(teamOne, 0, width / 5);
       placeFactories(teamTwo, width - (width / 5), width);
+      
+      lookForTraps();
+   }
+   
+   public void lookForTraps() {
+      boolean north, south, east, west;
+      for(int row = 0; row < tiles.length; row++) {
+         north = false;
+         south = false;
+         east = false;
+         west = false;
+         for(int col = 0; col < tiles[row].length; col++) {
+            north = row - 1 < 0 || tiles[row - 1][col].getType() == TILE_TYPE.MOUNTAIN;
+            south = row + 1 >= height || tiles[row + 1][col].getType() == TILE_TYPE.MOUNTAIN;
+            east = col + 1 >= width || tiles[row][col + 1].getType() == TILE_TYPE.MOUNTAIN;
+            west = col - 1 < 0 || tiles[row][col - 1].getType() == TILE_TYPE.MOUNTAIN;
+            if(north && south && east && west)
+               if(!(row - 1 < 0))
+                  tiles[row - 1][col] = new Plain(this, col, row - 1);
+               else if(!(row + 1 >= height))
+                  tiles[row + 1][col] = new Plain(this, col, row + 1);
+               else if(!(col + 1 >= width))
+                  tiles[row][col + 1] = new Plain(this, col + 1, row);
+               else
+                  tiles[row][col - 1] = new Plain(this, col - 1, row);
+         }
+      }
    }
    
    public void placeFactories(Team team, int min, int max) {

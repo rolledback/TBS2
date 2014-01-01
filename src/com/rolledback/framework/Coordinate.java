@@ -32,4 +32,12 @@ public class Coordinate {
    public String toString() {
       return "x: " + x + " y: " + y;
    }
+   
+   public boolean equals(Object compare) {
+      if(compare == null)
+         return false;
+      if(compare.getClass() != this.getClass())
+         return false;
+      return ((Coordinate)compare).getX() == this.x && ((Coordinate)compare).getY() == this.y;
+   }
 }

@@ -1,7 +1,5 @@
 package com.rolledback.framework;
 
-import java.util.Scanner;
-
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
@@ -22,7 +20,7 @@ public class Game {
    int UNIT_DENSITY = 5;
    
    public static void main(String args[]) {
-      int numGames = 1000;
+      int numGames = 500;
       int[] winnerRecord = new int[3];
       double turnAvg = 0.0;
       long timeAvg = 0;
@@ -44,15 +42,15 @@ public class Game {
       System.out.println("Team two wins: " + winnerRecord[1]);
       System.out.println("Ties?: " + winnerRecord[2]);
       System.out.println("Avg turns: " + turnAvg / numGames);
-      System.out.println("Avg time: " + timeAvg / numGames);
+      System.out.println("Avg time: " + (double)timeAvg / (double)numGames);
    }
    
    public Game() {
       gameWidth = 25;
       gameHeight = 15;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeam("CPU1", teamSize, 500, this);
-      teamTwo = new ComputerTeam("CPU2", teamSize, 500, this);
+      teamOne = new ComputerTeamB("CPU1", teamSize, 500, this);
+      teamTwo = new ComputerTeamB("CPU2", teamSize, 500, this);
       ((ComputerTeam)teamOne).opponent = teamTwo;
       ((ComputerTeam)teamTwo).opponent = teamOne;
       currentTeam = teamOne;
@@ -132,10 +130,17 @@ public class Game {
    }
    
    public int testCode() {
-      for(int y = 0; y < 100000; y++) {
+      for(int y = 0; y < 500000; y++) {
+         // System.out.println(y);
+         // System.out.println();
+         // world.printUnits();
+         // System.out.println();
          if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)
             return y;
-         ((ComputerTeam)currentTeam).executeTurn();
+         if(currentTeam.equals(teamOne))
+            ((ComputerTeam)currentTeam).executeTurn();
+         if(currentTeam.equals(teamTwo))
+            ((ComputerTeam)currentTeam).executeTurn();
          for(int x = 0; x < currentTeam.getUnits().size(); x++) {
             currentTeam.getUnits().get(x).setMoved(false);
             currentTeam.getUnits().get(x).setAttacked(false);
@@ -145,7 +150,12 @@ public class Game {
          else
             currentTeam = teamOne;
       }
+      world.printMap();
+      System.out.println();
+      world.printUnits();
+      System.out.println();
       return 9999;
+      
    }
    
    public void gameDebugFull() {
