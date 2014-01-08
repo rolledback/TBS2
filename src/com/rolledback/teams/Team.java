@@ -1,4 +1,4 @@
-package com.rolledback.framework;
+package com.rolledback.teams;
 
 import java.util.ArrayList;
 import com.rolledback.terrain.*;
@@ -9,7 +9,7 @@ public class Team {
    
    protected ArrayList<Unit> units;
    private String name;
-   int teamSize;
+   private int teamSize;
    private int resources;
    
    public Team(String name, int size, int r) {
@@ -56,6 +56,14 @@ public class Team {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public int getTeamSize() {
+      return teamSize;
+   }
+
+   public void setTeamSize(int teamSize) {
+      this.teamSize = teamSize;
    }
    
 }

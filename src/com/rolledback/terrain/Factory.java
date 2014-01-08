@@ -1,8 +1,8 @@
 package com.rolledback.terrain;
 
 import java.util.HashMap;
-import com.rolledback.framework.Team;
 import com.rolledback.framework.World;
+import com.rolledback.teams.Team;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Factory extends Tile {

@@ -1,6 +1,6 @@
 package com.rolledback.units;
 
-import com.rolledback.framework.Team;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 
 public class Tank extends Unit {
@@ -10,7 +10,7 @@ public class Tank extends Unit {
       classification = UNIT_CLASS.VEHICLE;
       minAttack = 10;
       maxAttack = 15;
-      setDefense(12);
+      defense = 12;
       moveRange = 4;
       type = UNIT_TYPE.TANK;
    }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
-import com.rolledback.framework.Team;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 
 public class Unit {
@@ -24,11 +24,12 @@ public class Unit {
    protected ArrayList<Coordinate> moveSet;
    protected int minAttack;
    protected int maxAttack;
-   private int defense;
+   protected int defense;
    protected int attackRange;
    protected int moveRange;
    protected int x, y;
-   int health, maxHealth;
+   private int health;
+   int maxHealth;
    private boolean alive;
    private boolean moved;
    private boolean attacked;
@@ -58,7 +59,7 @@ public class Unit {
    }
    
    public void move(Tile tile) {
-      // System.out.println("Moving from " + currentTile.toString() + "\nto: " + tile.toString());
+      System.out.println("Moving from " + currentTile.toString() + " to: " + tile.toString());
       currentTile.setOccupied(false);
       currentTile.setOccupiedBy(null);
       this.x = tile.getX();
@@ -195,5 +196,13 @@ public class Unit {
    
    public void setMoveSet(ArrayList<Coordinate> moveSet) {
       this.moveSet = moveSet;
+   }
+
+   public int getHealth() {
+      return health;
+   }
+
+   public void setHealth(int health) {
+      this.health = health;
    }
 }

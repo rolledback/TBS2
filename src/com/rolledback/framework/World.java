@@ -3,6 +3,7 @@ package com.rolledback.framework;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Forest;
 import com.rolledback.terrain.Mountain;
@@ -107,6 +108,8 @@ public class World {
       set = new ArrayList<Coordinate>();
       unit.getCurrentTile().setOccupied(false);
       calcMoveSpotsHelper(unit, spots, unit.getX(), unit.getY(), adHocRange + 1, set);
+      spots[unit.getY()][unit.getX()] = 0;
+      set.remove(new Coordinate(unit.getX(), unit.getY()));
       unit.getCurrentTile().setOccupied(true);
       unit.setMoveSet(set);
       return spots;
@@ -161,9 +164,9 @@ public class World {
       for(int row = 0; row < tiles.length; row++) {
          for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
-            if(type <= .70)
+            if(type <= .75)
                tiles[row][col] = new Plain(this, col, row);
-            else if(type > .70 && type <= .95)
+            else if(type > .75 && type <= .95)
                tiles[row][col] = new Forest(this, col, row);
             else
                tiles[row][col] = new Mountain(this, col, row);
@@ -201,7 +204,7 @@ public class World {
    }
    
    public void placeFactories(Team team, int min, int max) {
-      for(int col = min; col < max; col++) {
+      for(int col = min; col < max; col += 2) {
          int row = (int)(Math.random() * height);
          Tile spot = tiles[row][col];
          while(spot.getType() == TILE_TYPE.MOUNTAIN) {
@@ -245,14 +248,16 @@ public class World {
    
    public void buildArmy(Team team, int minCol, int maxCol) {
       int col = minCol;
-      for(int x = 0; x < team.teamSize; x++) {
-         int row = (int)(Math.random() * height);
+      for(int x = 0; x < team.getTeamSize(); x++) {
+         int row = (int)(Math.random() * height);         
          while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN) {
             row = (int)(Math.random() * height);
          }
          team.createUnit(tiles[row][col], randUnitType());
-         if((x + 1) % (team.teamSize / (width / 5)) == 0)
+         if((x + 1) % (double)(team.getTeamSize() / (width / 5)) == 0)
             col++;
+         if(col >= width)
+            col--;
       }
    }
    

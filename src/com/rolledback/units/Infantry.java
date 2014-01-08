@@ -1,6 +1,6 @@
 package com.rolledback.units;
 
-import com.rolledback.framework.Team;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 
 public class Infantry extends Unit {
@@ -10,7 +10,7 @@ public class Infantry extends Unit {
       classification = UNIT_CLASS.INFANTRY;
       minAttack = 5;
       maxAttack = 8;
-      setDefense(2);
+      defense = 2;
       moveRange = 2;
       type = UNIT_TYPE.INFANTRY;
    }

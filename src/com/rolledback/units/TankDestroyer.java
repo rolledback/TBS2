@@ -1,6 +1,6 @@
 package com.rolledback.units;
 
-import com.rolledback.framework.Team;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 
 public class TankDestroyer extends Unit {
@@ -10,7 +10,7 @@ public class TankDestroyer extends Unit {
       classification = UNIT_CLASS.VEHICLE;
       minAttack = 15;
       maxAttack = 20;
-      setDefense(5);
+      defense = 5;
       moveRange = 3;
       type = UNIT_TYPE.TANK_DEST;
    }

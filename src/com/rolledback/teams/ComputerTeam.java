@@ -1,11 +1,13 @@
-package com.rolledback.framework;
+package com.rolledback.teams;
 
+import com.rolledback.framework.Coordinate;
+import com.rolledback.framework.Game;
 import com.rolledback.units.Unit;
 
 public class ComputerTeam extends Team {
    
    Game game;
-   Team opponent;
+   private Team opponent;
    Coordinate target;
    Unit targetUnit;
    
@@ -17,7 +19,7 @@ public class ComputerTeam extends Team {
    public void executeTurn() {
       for(int x = 0; x < units.size(); x++) {
          Unit currUnit = units.get(x);
-         int[][] moveSpots = game.world.calcMoveSpots(currUnit);
+         int[][] moveSpots = game.getWorld().calcMoveSpots(currUnit);
          for(int row = 0; row < game.gameHeight; row++)
             for(int col = 0; col < game.gameWidth; col++)
                if(moveSpots[row][col] == 1) {
@@ -25,5 +27,13 @@ public class ComputerTeam extends Team {
                   game.gameLoop(col, row);
                }
       }
+   }
+
+   public Team getOpponent() {
+      return opponent;
+   }
+
+   public void setOpponent(Team opponent) {
+      this.opponent = opponent;
    }
 }
