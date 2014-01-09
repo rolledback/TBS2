@@ -52,14 +52,15 @@ public class ComputerTeamB extends ComputerTeam {
                Coordinate currentSpot = moveSetIterator.next();
                if(moveSpots[currentSpot.getY()][currentSpot.getX()] == 1) {
                   // calculate distance from spot to target using a breadth first search
-                  currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), currentSpot.getX(), currentSpot.getY(), targetX, targetY, currUnit);
+                  currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), currentSpot.getX(), currentSpot.getY(), targetX, targetY,
+                        currUnit);
                   if(currentDistance < lowestDistance) {
                      moveHere = new Coordinate(currentSpot.getX(), currentSpot.getY());
                      lowestDistance = currentDistance;
                   }
                }
             }
-            // if you found a spot to move to go there   
+            // if you found a spot to move to go there
             if(moveHere != null) {
                game.gameLoop(currUnit.getX(), currUnit.getY());
                delay(200);
@@ -71,12 +72,11 @@ public class ComputerTeamB extends ComputerTeam {
       }
    }
    
-   public void delay(int n)
-   {
+   public void delay(int n) {
       long startDelay = System.currentTimeMillis();
       long endDelay = 0;
-      while (endDelay - startDelay < n)
-         endDelay = System.currentTimeMillis(); 
+      while(endDelay - startDelay < n)
+         endDelay = System.currentTimeMillis();
    }
    
    // conduct a breadth first search to find shortest path between (row, col) and (targetY, targetX)

@@ -1,21 +1,19 @@
-package com.rolledback.gui;
+package com.rolledback.framework;
 
 import java.awt.BorderLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
-import com.rolledback.framework.Game;
-
 public class Launcher {
    
    static Game newGame;
    
-   public static void main(String args[]) {      
-      //init(104, 48); //1920x1080 @ 16x16 tiles
-      //init(52, 24); //1920x1080 @ 32x32 tiles
-      init(26, 12); //1920x1080 @ 64x64 tiles
-      //init(13, 6);  //1920x1080 @ 128x128 tiles
+   public static void main(String args[]) {
+      // init(104, 48); //1920x1080 @ 16x16 tiles
+      init(52, 24); // 1920x1080 @ 32x32 tiles
+      // init(26, 12); //1920x1080 @ 64x64 tiles
+      // init(13, 6); //1920x1080 @ 128x128 tiles
    }
    
    public static void init(int x, int y) {
@@ -26,7 +24,7 @@ public class Launcher {
       
       screenHeight -= (int)((double)screenHeight / 10);
       screenWidth -= (int)((double)screenWidth / 10);
-
+      
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
          screenWidth--;
       while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
@@ -51,7 +49,7 @@ public class Launcher {
             System.out.println("Make game less tall.");
          System.exit(-1);
       }
-      System.out.println(screenWidth);
+      
       int offsetHorizontal = screenWidth - (gameWidth * tileSize);
       int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
       newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight);
@@ -62,7 +60,7 @@ public class Launcher {
       frame.setResizable(false);
       frame.setVisible(true);
       frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
-      //newGame.switchTeams();
+      // newGame.switchTeams();
    }
    
 }

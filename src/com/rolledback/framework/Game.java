@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
@@ -31,7 +29,7 @@ public class Game extends JPanel implements MouseListener {
    
    public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, guiHeight, selectedX, selectedY;
    public Team teamOne, teamTwo;
-
+   
    Team currentTeam;
    private World world;
    
@@ -49,7 +47,7 @@ public class Game extends JPanel implements MouseListener {
       gameWidth = x;
       gameHeight = y;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("Player", teamSize, 500);
+      teamOne = new ComputerTeamB("Player", teamSize, 500, this);
       teamTwo = new ComputerTeamB("CPU2", teamSize, 500, this);
       currentTeam = teamTwo;
       
@@ -63,9 +61,9 @@ public class Game extends JPanel implements MouseListener {
       offsetHorizontal = oH;
       offsetVertical = oV;
       addMouseListener(this);
-      state = GAME_STATE.NORMAL;      
+      state = GAME_STATE.NORMAL;
       
-      grid = new Rectangle[y][x];      
+      grid = new Rectangle[y][x];
       for(int row = 0; row < gameHeight; row++)
          for(int col = 0; col < gameWidth; col++)
             grid[row][col] = new Rectangle((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
@@ -73,12 +71,12 @@ public class Game extends JPanel implements MouseListener {
       
       guiHeight = gH;
       
-      selectedX = 0;     
+      selectedX = 0;
       selectedY = 0;
    }
    
    public void paintComponent(Graphics g) {
-      System.out.println("Paint.");      
+      System.out.println("Paint.");
       drawTiles(g);
       drawUnits(g);
       drawHealthBars(g);
@@ -91,7 +89,7 @@ public class Game extends JPanel implements MouseListener {
       if(unitSelected && !selectedUnit.getOwner().equals(currentTeam)) {
          selectedUnit = null;
          unitSelected = false;
-      }      
+      }
       drawGui(g);
    }
    
@@ -105,7 +103,7 @@ public class Game extends JPanel implements MouseListener {
       g.fillRect(0, this.getHeight() - guiHeight, 16, guiHeight);
       g.fillRect(this.getWidth() - 16, this.getHeight() - guiHeight, 16, guiHeight);
       
-      currentTileGui(g);    
+      currentTileGui(g);
    }
    
    public void currentTileGui(Graphics g) {
@@ -145,8 +143,8 @@ public class Game extends JPanel implements MouseListener {
       }
       
       if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)
-         return; 
-       
+         return;
+      
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
@@ -161,7 +159,7 @@ public class Game extends JPanel implements MouseListener {
          update(this.getGraphics());
    }
    
-   public void drawTiles(Graphics g) {     
+   public void drawTiles(Graphics g) {
       for(int x = 0; x < gameWidth; x++) {
          for(int y = 0; y < gameHeight; y++) {
             Color tileColor;
@@ -171,6 +169,30 @@ public class Game extends JPanel implements MouseListener {
                tileColor = new Color(126, 208, 102);
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.MOUNTAIN)
                tileColor = Color.lightGray;
+            else if(world.getTiles()[y][x].getType() == TILE_TYPE.RIVER)
+               tileColor = Color.blue;
+            else if(world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
+               tileColor = new Color(128, 64, 0);
+            else
+               tileColor = Color.red;
+            g.setColor(tileColor);
+            g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
+            g.setColor(Color.black);
+            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
+         }
+      }
+   }
+   
+   public void drawHeightMap(Graphics g) {
+      for(int x = 0; x < gameWidth; x++) {
+         for(int y = 0; y < gameHeight; y++) {
+            Color tileColor;
+            if(world.getHeightMap()[y][x] == 0)
+               tileColor = Color.green;
+            else if(world.getHeightMap()[y][x] == 1)
+               tileColor = Color.yellow;
+            else if(world.getHeightMap()[y][x] == 2)
+               tileColor = Color.orange;
             else
                tileColor = Color.red;
             g.setColor(tileColor);
@@ -210,7 +232,8 @@ public class Game extends JPanel implements MouseListener {
             uString = "t";
          if(u == UNIT_TYPE.TANK_DEST)
             uString = "d";
-         g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + (tileSize / 2), (temp.getY() * tileSize) + offsetVertical + (tileSize / 2) + 10);
+         g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + (tileSize / 2), (temp.getY() * tileSize) + offsetVertical
+               + (tileSize / 2) + 10);
       }
    }
    
@@ -224,11 +247,12 @@ public class Game extends JPanel implements MouseListener {
                g.setColor(Color.red);
                g.fillRect(xCorner, yCorner, tileSize - (2 * buffer), buffer);
                g.setColor(Color.green);
-               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy().getHealth() / 100.0)), buffer);
+               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy()
+                     .getHealth() / 100.0)), buffer);
             }
          }
       }
-   }  
+   }
    
    public void gameLoop(int xTile, int yTile) {
       int x = xTile; // click data
@@ -278,7 +302,7 @@ public class Game extends JPanel implements MouseListener {
          selectedUnit = null;
       }
       System.out.println("State: " + state);
-      System.out.println("Selected unit: " + selectedUnit);      
+      System.out.println("Selected unit: " + selectedUnit);
       update(this.getGraphics());
    }
    
@@ -297,7 +321,7 @@ public class Game extends JPanel implements MouseListener {
                   g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
                }
             }
-         }    
+         }
    }
    
    public void attackMove(int x, int y) {
@@ -345,7 +369,14 @@ public class Game extends JPanel implements MouseListener {
       System.out.println("Team two: " + teamTwo.toString());
       System.out.println("Team two units: " + teamTwo.getUnits().toString());
    }
-
+   
+   public static void delay(int n) {
+      long startDelay = System.currentTimeMillis();
+      long endDelay = 0;
+      while(endDelay - startDelay < n)
+         endDelay = System.currentTimeMillis();
+   }
+   
    @Override
    public void mouseClicked(MouseEvent arg0) {
       System.out.println("Click.");
@@ -356,40 +387,40 @@ public class Game extends JPanel implements MouseListener {
             if(grid[row][col].contains(eventX, eventY)) {
                gameLoop(col, row);
                return;
-            }      
+            }
       switchTeams();
    }
-
+   
    @Override
    public void mouseEntered(MouseEvent arg0) {
       // TODO Auto-generated method stub
       
    }
-
+   
    @Override
    public void mouseExited(MouseEvent arg0) {
       // TODO Auto-generated method stub
       
    }
-
+   
    @Override
    public void mousePressed(MouseEvent arg0) {
       // TODO Auto-generated method stub
       
    }
-
+   
    @Override
    public void mouseReleased(MouseEvent arg0) {
       // TODO Auto-generated method stub
       
    }
-
+   
    public World getWorld() {
       return world;
    }
-
+   
    public void setWorld(World world) {
       this.world = world;
    }
-
+   
 }
