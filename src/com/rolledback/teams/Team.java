@@ -1,19 +1,29 @@
 package com.rolledback.teams;
 
 import java.util.ArrayList;
-import com.rolledback.terrain.*;
-import com.rolledback.units.*;
+
+import com.rolledback.terrain.City;
+import com.rolledback.terrain.Factory;
+import com.rolledback.terrain.Tile;
+import com.rolledback.units.Infantry;
+import com.rolledback.units.Tank;
+import com.rolledback.units.TankDestroyer;
+import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Team {
    
    protected ArrayList<Unit> units;
+   private ArrayList<City> cities;
+   private ArrayList<Factory> factories;
    private String name;
    private int teamSize;
    private int resources;
    
    public Team(String name, int size, int r) {
       units = new ArrayList<Unit>();
+      cities = new ArrayList<City>();
+      factories = new ArrayList<Factory>();
       teamSize = size;
       this.name = name;
       resources = r;
@@ -39,7 +49,7 @@ public class Team {
    }
    
    public String toString() {
-      return "Team: " + name + "\nResources: " + resources + "\nNum units: " + units.size();
+      return "Team: " + name + "\nResources: " + resources + "\nNum units: " + units.size() + "\nFactories: " + factories.toString() + "\nCities: " + cities.toString();
    }
    
    public int getResources() {
@@ -64,6 +74,22 @@ public class Team {
 
    public void setTeamSize(int teamSize) {
       this.teamSize = teamSize;
+   }
+
+   public ArrayList<City> getCities() {
+      return cities;
+   }
+
+   public void setCities(ArrayList<City> cities) {
+      this.cities = cities;
+   }
+
+   public ArrayList<Factory> getFactories() {
+      return factories;
+   }
+
+   public void setFactories(ArrayList<Factory> factories) {
+      this.factories = factories;
    }
    
 }

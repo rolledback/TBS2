@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
+import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Forest;
 import com.rolledback.terrain.Mountain;
@@ -145,6 +146,9 @@ public class World {
          else
             valid[y][x] = 0;
       }
+      else if(unit.getType() == UNIT_TYPE.INFANTRY && tiles[y][x].getType() == TILE_TYPE.CITY
+            && (((City)tiles[y][x]).getOwner() == null || !((City)tiles[y][x]).getOwner().equals(unit.getOwner())))
+         valid[y][x] = 3;
       else if(!tiles[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
          valid[y][x] = 0;
       else if(!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
@@ -182,19 +186,34 @@ public class World {
       int maxLengthLimit = (int)(Math.sqrt(Math.pow(height, 2) + Math.pow(width, 2))) / 2;
       for(int x = 0; x < (int)Math.sqrt(maxLengthLimit); x++) {
          ArrayList<Coordinate> riverPath = generateRiver(maxLengthLimit);
-         if(riverPath.size() > 5)
-            placeBridge(riverPath);
+         if(riverPath.size() >= 5)
+            for(int y = 0; y < riverPath.size() / 5; y++)
+               placeBridge(riverPath);
       }
       
       placeFactories(teamOne, 0, width / 5);
       placeFactories(teamTwo, width - (width / 5), width);
-      
+      placeCities((int)Math.sqrt(width), (int)(width / 5), (int)(width - (width / 5)));
       lookForTraps();
+   }
+   
+   public void placeCities(int numCities, int min, int max) {
+      for(int x = 0; x < numCities; x++) {
+         Random rand = new Random();
+         int col = rand.nextInt(max - min) + min;
+         int row = rand.nextInt(height - 1) + 1;
+         while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
+            col = rand.nextInt(max - min) + min;
+            row = rand.nextInt(height - 1) + 1;
+         }
+         tiles[row][col] = new City(this, col, row, null);
+      }
+      
    }
    
    public void placeBridge(ArrayList<Coordinate> riverPath) {
       Random rand = new Random();
-      int spot = rand.nextInt(riverPath.size() - 3) + 2;
+      int spot = rand.nextInt(riverPath.size() - 2) + 1;
       int prevX = riverPath.get(spot - 1).getX();
       int prevY = riverPath.get(spot - 1).getY();
       
@@ -202,10 +221,10 @@ public class World {
       int curY = riverPath.get(spot).getY();
       
       int nextX = riverPath.get(spot + 1).getX();
-      int nextY = riverPath.get(spot + 1).getX();
+      int nextY = riverPath.get(spot + 1).getY();
       int attempts = 0;
       while(!(prevX == curX && nextX == curX) && !(prevY == curY && nextY == curY) && attempts < 100) {
-         spot = rand.nextInt(riverPath.size() - 3) + 2;
+         spot = rand.nextInt(riverPath.size() - 2) + 1;
          prevX = riverPath.get(spot - 1).getX();
          prevY = riverPath.get(spot - 1).getY();
          
@@ -213,7 +232,7 @@ public class World {
          curY = riverPath.get(spot).getY();
          
          nextX = riverPath.get(spot + 1).getX();
-         nextY = riverPath.get(spot + 1).getX();
+         nextY = riverPath.get(spot + 1).getY();
          attempts++;
       }
       if(attempts < 100)
@@ -240,7 +259,7 @@ public class World {
       }
       riverPath.add(new Coordinate(col, row));
       tiles[row][col] = new River(this, col, row);
-      int maxLength = rand.nextInt(MLE - 3) + 3;
+      int maxLength = rand.nextInt(MLE - (MLE / 2)) + (MLE / 2);
       int length = 0;
       while(length < maxLength) {
          Coordinate next = nextRiverSpot(col, row);
@@ -370,6 +389,7 @@ public class World {
             spot = tiles[row][col];
          }
          tiles[row][col] = new Factory(this, col, row, team);
+         team.getFactories().add((Factory)tiles[row][col]);
       }
    }
    
@@ -408,7 +428,8 @@ public class World {
       int col = minCol;
       for(int x = 0; x < team.getTeamSize(); x++) {
          int row = (int)(Math.random() * height);
-         while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.RIVER) {
+         while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.RIVER
+               || tiles[row][col].getType() == TILE_TYPE.FACTORY || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
          }
          team.createUnit(tiles[row][col], randUnitType());

@@ -6,7 +6,7 @@ import com.rolledback.units.*;
 public class Tile {
    
    public enum TILE_TYPE {
-      PLAIN, FOREST, MOUNTAIN, FACTORY, RIVER, BRIDGE
+      PLAIN, FOREST, MOUNTAIN, FACTORY, RIVER, BRIDGE, CITY
    }
    
    protected boolean infantryPassable, vehiclePassable;

@@ -4,22 +4,26 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.ComputerTeamB;
 import com.rolledback.teams.Team;
+import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
-public class Game extends JPanel implements MouseListener {
+public class Game extends JPanel implements MouseListener, ActionListener {
    
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE
@@ -47,8 +51,8 @@ public class Game extends JPanel implements MouseListener {
       gameWidth = x;
       gameHeight = y;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamB("Player", teamSize, 500, this);
-      teamTwo = new ComputerTeamB("CPU2", teamSize, 500, this);
+      teamOne = new Team("Player", teamSize, 500);
+      teamTwo = new Team("CPU2", teamSize, 500);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamB.class))
@@ -73,11 +77,14 @@ public class Game extends JPanel implements MouseListener {
       
       selectedX = 0;
       selectedY = 0;
+      
+      gameDebugFull();
    }
    
    public void paintComponent(Graphics g) {
       System.out.println("Paint.");
       drawTiles(g);
+      // drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -149,6 +156,10 @@ public class Game extends JPanel implements MouseListener {
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
+      
+      for(City c: currentTeam.getCities())
+         c.produceResources();
+      
       state = GAME_STATE.NORMAL;
       
       if(currentTeam.getClass().equals(ComputerTeamB.class)) {
@@ -170,11 +181,18 @@ public class Game extends JPanel implements MouseListener {
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.MOUNTAIN)
                tileColor = Color.lightGray;
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.RIVER)
-               tileColor = Color.blue;
+               tileColor = new Color(41, 32, 132);
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
                tileColor = new Color(128, 64, 0);
-            else
-               tileColor = Color.red;
+            else if(world.getTiles()[y][x].getType() == TILE_TYPE.CITY)
+               tileColor = Color.MAGENTA;
+            else {
+               if(((Factory)world.getTiles()[y][x]).getOwner().equals(teamOne))
+                  tileColor = Color.red;
+               else
+                  tileColor = Color.blue;
+            }
+            
             g.setColor(tileColor);
             g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
             g.setColor(Color.black);
@@ -296,7 +314,18 @@ public class Game extends JPanel implements MouseListener {
       }
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
-         // choose unit to produce
+         Object[] possibilities = ((Factory)selectedTile).dialogBoxList();
+         Object s = JOptionPane.showInputDialog(this, "Choose unit to produce:\n" + "Current resource points: " + currentTeam.getResources(),
+               "Factory", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+         if(s != null) {
+            String unitType = ((String)s).split(",")[0];
+            if(unitType.equals("Tank"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK);
+            else if(unitType.equals("Tank Destroyer"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK_DEST);
+            else if(unitType.equals("Infantry"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
+         }
       }
       if(!unitSelected) {
          selectedUnit = null;
@@ -307,8 +336,10 @@ public class Game extends JPanel implements MouseListener {
    }
    
    public void drawMoveSpots(Graphics g) {
-      Color moveSet = new Color((float).0, (float).0, (float)1, (float).65);
-      Color attackSet = new Color((float)1, (float).0, (float).0, (float).65);
+      Color moveSet = new Color(0, 0, 255, 165);
+      Color attackSet = new Color(255, 0, 0, 165);
+      Color captureSet = new Color(255, 255, 0, 165);
+      
       for(int row = 0; row < gameHeight; row++)
          for(int col = 0; col < gameWidth; col++) {
             if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -316,8 +347,12 @@ public class Game extends JPanel implements MouseListener {
                   g.setColor(moveSet);
                   g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
                }
-               if(moveSpots[row][col] == 2) {
+               else if(moveSpots[row][col] == 2) {
                   g.setColor(attackSet);
+                  g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
+               }
+               else if(moveSpots[row][col] == 3) {
+                  g.setColor(captureSet);
                   g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
                }
             }
@@ -421,6 +456,13 @@ public class Game extends JPanel implements MouseListener {
    
    public void setWorld(World world) {
       this.world = world;
+   }
+   
+   @Override
+   public void actionPerformed(ActionEvent arg0) {
+      // TODO Auto-generated method stub
+      System.out.println(arg0.toString());
+      
    }
    
 }

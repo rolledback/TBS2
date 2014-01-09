@@ -1,6 +1,9 @@
 package com.rolledback.terrain;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.units.Unit.UNIT_TYPE;
@@ -32,6 +35,24 @@ public class Factory extends Tile {
       return this.productionList;
    }
    
+   public String[] dialogBoxList() {
+      String[] list = new String[productionList.size()];
+      int numEntry = 0;
+      for(Map.Entry<UNIT_TYPE, Integer> entry: productionList.entrySet()) {
+         String unitString = "";
+         if(entry.getKey() == UNIT_TYPE.INFANTRY)
+            unitString = "Infantry";
+         else if(entry.getKey() == UNIT_TYPE.TANK)
+            unitString = "Tank";
+         else if(entry.getKey() == UNIT_TYPE.TANK_DEST)
+            unitString = "Tank Destroyer";
+         list[numEntry] = unitString + ", cost: " + entry.getValue().toString();
+         numEntry++;
+      }
+      Arrays.sort(list);
+      return list;      
+   }
+   
    public boolean produceUnit(UNIT_TYPE type) {
       if(owner.getResources() < productionList.get(type))
          return false;
@@ -39,8 +60,8 @@ public class Factory extends Tile {
          return false;
       owner.setResources(owner.getResources() - productionList.get(type));
       owner.createUnit(world.getTiles()[y][x], type);
-      owner.getUnits().get(owner.getUnits().size()).setAttacked(true);
-      owner.getUnits().get(owner.getUnits().size()).setMoved(true);
+      owner.getUnits().get(owner.getUnits().size() - 1).setAttacked(true);
+      owner.getUnits().get(owner.getUnits().size() - 1).setMoved(true);
       return true;
    }
    
