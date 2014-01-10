@@ -11,8 +11,8 @@ public class Launcher {
    
    public static void main(String args[]) {
       //init(104, 48); //1920x1080 @ 16x16 tiles
-      init(52, 24); // 1920x1080 @ 32x32 tiles
-      //init(26, 12); //1920x1080 @ 64x64 tiles
+      //init(52, 24); // 1920x1080 @ 32x32 tiles
+      init(26, 12); //1920x1080 @ 64x64 tiles
       //init(13, 6); //1920x1080 @ 128x128 tiles
    }
    
@@ -60,7 +60,7 @@ public class Launcher {
       frame.setResizable(false);
       frame.setVisible(true);
       frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
-      // newGame.switchTeams();
+      //newGame.switchTeams();
    }
    
 }

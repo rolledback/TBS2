@@ -51,8 +51,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       gameWidth = x;
       gameHeight = y;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("Player", teamSize, 500);
-      teamTwo = new Team("CPU2", teamSize, 500);
+      teamOne = new ComputerTeamB("Player", teamSize, 500, this);
+      teamTwo = new ComputerTeamB("CPU2", teamSize, 500, this);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamB.class))
@@ -82,7 +82,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void paintComponent(Graphics g) {
-      System.out.println("Paint.");
       drawTiles(g);
       // drawHeightMap(g);
       drawUnits(g);
@@ -184,8 +183,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                tileColor = new Color(41, 32, 132);
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
                tileColor = new Color(128, 64, 0);
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.CITY)
-               tileColor = Color.MAGENTA;
+            else if(world.getTiles()[y][x].getType() == TILE_TYPE.CITY) {
+               if(((City)world.getTiles()[y][x]).getOwner() == null)
+                  tileColor = Color.MAGENTA;
+               else if(((City)world.getTiles()[y][x]).getOwner().equals(teamOne))
+                  tileColor = Color.orange;
+               else
+                  tileColor = Color.cyan;
+            }
             else {
                if(((Factory)world.getTiles()[y][x]).getOwner().equals(teamOne))
                   tileColor = Color.red;
@@ -295,6 +300,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
+         }
+         if(!selectedUnit.hasMoved() && moveSpots[y][x] == 3) {
+            selectedUnit.move(selectedTile);
+            selectedUnit.setMoved(true);
+            if(((City)selectedTile).getOwner() == null || !((City)selectedTile).getOwner().equals(currentTeam)) {
+               ((City)selectedTile).capture(selectedUnit);
+            }
          }
          if(!selectedUnit.hasMoved() && moveSpots[y][x] == 1) {
             selectedUnit.move(selectedTile);

@@ -147,8 +147,12 @@ public class World {
             valid[y][x] = 0;
       }
       else if(unit.getType() == UNIT_TYPE.INFANTRY && tiles[y][x].getType() == TILE_TYPE.CITY
-            && (((City)tiles[y][x]).getOwner() == null || !((City)tiles[y][x]).getOwner().equals(unit.getOwner())))
+            && (((City)tiles[y][x]).getOwner() == null || !((City)tiles[y][x]).getOwner().equals(unit.getOwner()))) {
          valid[y][x] = 3;
+         if(!moveSet.contains(new Coordinate(x, y))) {
+            moveSet.add(new Coordinate(x, y));
+         }
+      }
       else if(!tiles[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
          valid[y][x] = 0;
       else if(!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
@@ -193,7 +197,7 @@ public class World {
       
       placeFactories(teamOne, 0, width / 5);
       placeFactories(teamTwo, width - (width / 5), width);
-      placeCities((int)Math.sqrt(width), (int)(width / 5), (int)(width - (width / 5)));
+      placeCities((int)Math.sqrt(width + height), (int)(width / 5), (int)(width - (width / 5)));
       lookForTraps();
    }
    

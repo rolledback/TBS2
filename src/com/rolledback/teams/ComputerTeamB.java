@@ -7,14 +7,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
+import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_CLASS;
+import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamB extends ComputerTeam {
+   
+   final int animationDelay = 0;
    
    public ComputerTeamB(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -24,6 +29,8 @@ public class ComputerTeamB extends ComputerTeam {
       // go through all units and determine their target and where they should move
       for(int x = 0; x < units.size(); x++) {
          Unit currUnit = units.get(x);
+         if(currUnit.hasMoved())
+            continue;
          if(getOpponent().getUnits().size() <= 0)
             break;
          // find unit you want to attack
@@ -38,15 +45,30 @@ public class ComputerTeamB extends ComputerTeam {
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
          
+         // if the unit can capture a city, have it do that
+         if(currUnit.getType() == UNIT_TYPE.INFANTRY) {
+            Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
+            while(moveSetIterator.hasNext()) {
+               Coordinate currentSpot = moveSetIterator.next();
+               if(moveSpots[currentSpot.getY()][currentSpot.getX()] == 3) {
+                  game.gameLoop(currUnit.getX(), currUnit.getY());
+                  delay(animationDelay);
+                  game.gameLoop(currentSpot.getX(), currentSpot.getY());
+                  delay(animationDelay);
+                  break;
+               }
+            }
+         }
+         
          // if unit can attack target, do it
-         if(moveSpots[targetY][targetX] == 2) {
+         if(!currUnit.hasMoved() && moveSpots[targetY][targetX] == 2) {
             game.gameLoop(currUnit.getX(), currUnit.getY());
-            delay(200);
+            delay(animationDelay);
             game.gameLoop(targetX, targetY);
-            delay(200);
+            delay(animationDelay);
          }
          // else iterate through all valid spots, find valid spot closest to target
-         else {
+         else if(!currUnit.hasMoved()) {
             Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
             while(moveSetIterator.hasNext()) {
                Coordinate currentSpot = moveSetIterator.next();
@@ -63,12 +85,24 @@ public class ComputerTeamB extends ComputerTeam {
             // if you found a spot to move to go there
             if(moveHere != null) {
                game.gameLoop(currUnit.getX(), currUnit.getY());
-               delay(200);
+               delay(animationDelay);
                game.gameLoop(moveHere.getX(), moveHere.getY());
-               delay(200);
+               delay(animationDelay);
             }
          }
          // if you reached here without moving the unit never moved
+      }
+      
+      Iterator<Factory> factoryIterator = factories.iterator();
+      while(factoryIterator.hasNext()) {
+         Factory currentFactory = factoryIterator.next();
+         Random rand = new Random();
+         int unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+         int attempts = 0;
+         while(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[unitToProduce]) && attempts < 25) {
+            unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+            attempts++;
+         }
       }
    }
    

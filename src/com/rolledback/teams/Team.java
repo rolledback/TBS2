@@ -15,7 +15,7 @@ public class Team {
    
    protected ArrayList<Unit> units;
    private ArrayList<City> cities;
-   private ArrayList<Factory> factories;
+   protected ArrayList<Factory> factories;
    private String name;
    private int teamSize;
    private int resources;
