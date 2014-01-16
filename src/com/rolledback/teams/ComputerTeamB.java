@@ -106,13 +106,6 @@ public class ComputerTeamB extends ComputerTeam {
       }
    }
    
-   public void delay(int n) {
-      long startDelay = System.currentTimeMillis();
-      long endDelay = 0;
-      while(endDelay - startDelay < n)
-         endDelay = System.currentTimeMillis();
-   }
-   
    // conduct a breadth first search to find shortest path between (row, col) and (targetY, targetX)
    public int bfsToBestSpot(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
       LinkedList<Tile> queue = new LinkedList<Tile>();

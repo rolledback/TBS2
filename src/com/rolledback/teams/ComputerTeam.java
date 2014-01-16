@@ -7,7 +7,7 @@ import com.rolledback.units.Unit;
 public class ComputerTeam extends Team {
    
    Game game;
-   private Team opponent;
+   protected Team opponent;
    Coordinate target;
    Unit targetUnit;
    
@@ -17,16 +17,7 @@ public class ComputerTeam extends Team {
    }
    
    public void executeTurn() {
-      for(int x = 0; x < units.size(); x++) {
-         Unit currUnit = units.get(x);
-         int[][] moveSpots = game.getWorld().calcMoveSpots(currUnit);
-         for(int row = 0; row < game.gameHeight; row++)
-            for(int col = 0; col < game.gameWidth; col++)
-               if(moveSpots[row][col] == 1) {
-                  game.gameLoop(currUnit.getX(), currUnit.getY());
-                  game.gameLoop(col, row);
-               }
-      }
+      // do nothing, dumb AI is dumb
    }
 
    public Team getOpponent() {
@@ -35,5 +26,12 @@ public class ComputerTeam extends Team {
 
    public void setOpponent(Team opponent) {
       this.opponent = opponent;
+   }
+   
+   public void delay(int n) {
+      long startDelay = System.currentTimeMillis();
+      long endDelay = 0;
+      while(endDelay - startDelay < n)
+         endDelay = System.currentTimeMillis();
    }
 }

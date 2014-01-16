@@ -14,7 +14,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.rolledback.teams.ComputerTeam;
+import com.rolledback.teams.ComputerTeamA;
 import com.rolledback.teams.ComputerTeamB;
+import com.rolledback.teams.ComputerTeamC;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
@@ -48,19 +50,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    int UNIT_DENSITY = 5;
    
    public Game(int x, int y, int ts, int oH, int oV, int gH) {
+      System.out.println("Making game.");
       gameWidth = x;
       gameHeight = y;
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamB("Player", teamSize, 500, this);
-      teamTwo = new ComputerTeamB("CPU2", teamSize, 500, this);
+      
+      
+      teamOne = new ComputerTeamC("CPU1", teamSize, 500, this);
+      teamTwo = new ComputerTeamC("CPU2", teamSize, 500, this);
       currentTeam = teamTwo;
       
-      if(teamOne.getClass().equals(ComputerTeamB.class))
+      if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
          ((ComputerTeam)teamOne).setOpponent(teamTwo);
-      if(teamTwo.getClass().equals(ComputerTeamB.class))
+      if(teamTwo.getClass().equals(ComputerTeamA.class) || teamTwo.getClass().equals(ComputerTeamB.class) || teamTwo.getClass().equals(ComputerTeamC.class))
          ((ComputerTeam)teamTwo).setOpponent(teamOne);
-      
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo);
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo);      
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
@@ -78,7 +82,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedX = 0;
       selectedY = 0;
       
-      gameDebugFull();
+      System.out.println("Ready to launch.");
    }
    
    public void paintComponent(Graphics g) {
@@ -119,9 +123,25 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.PLAIN)
          tileColor = new Color(126, 208, 102);
       else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.MOUNTAIN)
-         tileColor = Color.lightGray;
-      else
-         tileColor = Color.red;
+         tileColor = Color.LIGHT_GRAY;
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.RIVER)
+         tileColor = new Color(41, 32, 132);
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.BRIDGE)
+         tileColor = new Color(128, 64, 0);
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.CITY) {
+         if(((City)world.getTiles()[selectedY][selectedX]).getOwner() == null)
+            tileColor = Color.MAGENTA;
+         else if(((City)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
+            tileColor = Color.orange;
+         else
+            tileColor = Color.cyan;
+      }
+      else {
+         if(((Factory)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
+            tileColor = Color.red;
+         else
+            tileColor = Color.blue;
+      }
       g.setColor(tileColor);
       g.fillRect(32, this.getHeight() - guiHeight + 32, 64, 64);
       
@@ -148,8 +168,16 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setAttacked(false);
       }
       
-      if(teamOne.getUnits().size() == 0 || teamTwo.getUnits().size() == 0)
+      if(teamTwo.getUnits().size() == 0) {
+         System.out.println("TEAM ONE WIN");
          return;
+      }
+      
+      if(teamOne.getUnits().size() == 0) {
+         System.out.println("TEAM TWO WIN");
+         return;
+      }
+      
       
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
@@ -158,11 +186,23 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       for(City c: currentTeam.getCities())
          c.produceResources();
+      for(Factory f: currentTeam.getFactories())
+         f.produceResources();
       
       state = GAME_STATE.NORMAL;
       
-      if(currentTeam.getClass().equals(ComputerTeamB.class)) {
-         ((ComputerTeamB)currentTeam).executeTurn();
+      System.out.println("----------------------------------");
+      System.out.println("Team one: " + teamOne.toString());
+      System.out.println("Team one units: " + teamOne.getUnits().toString());
+      System.out.println("Team one resources: " + teamOne.getResources());
+      System.out.println("Team one army size: " + teamOne.getUnits().size());
+      System.out.println("----------------------------------");
+      System.out.println("Team two: " + teamTwo.toString());
+      System.out.println("Team two units: " + teamTwo.getUnits().toString());
+      System.out.println("Team two resources: " + teamTwo.getResources());
+      
+      if(currentTeam.getClass().equals(ComputerTeamC.class) || currentTeam.getClass().equals(ComputerTeamA.class) || currentTeam.getClass().equals(ComputerTeamB.class)) {
+         ((ComputerTeam)currentTeam).executeTurn();
          switchTeams();
       }
       else
@@ -345,6 +385,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("State: " + state);
       System.out.println("Selected unit: " + selectedUnit);
       update(this.getGraphics());
+      return;
    }
    
    public void drawMoveSpots(Graphics g) {
@@ -412,9 +453,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("----------------------------------");
       System.out.println("Team one: " + teamOne.toString());
       System.out.println("Team one units: " + teamOne.getUnits().toString());
+      System.out.println("Team one resources: " + teamOne.getResources());
+      System.out.println("Team one army size: " + teamOne.getUnits().size());
       System.out.println("----------------------------------");
       System.out.println("Team two: " + teamTwo.toString());
       System.out.println("Team two units: " + teamTwo.getUnits().toString());
+      System.out.println("Team two resources: " + teamTwo.getResources());
+      System.out.println("Team two army size: " + teamTwo.getUnits().size());
    }
    
    public static void delay(int n) {

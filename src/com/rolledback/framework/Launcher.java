@@ -1,8 +1,5 @@
 package com.rolledback.framework;
 
-import java.awt.BorderLayout;
-
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
 public class Launcher {
@@ -60,7 +57,7 @@ public class Launcher {
       frame.setResizable(false);
       frame.setVisible(true);
       frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
-      //newGame.switchTeams();
+      newGame.switchTeams();
    }
    
 }

@@ -7,10 +7,10 @@ import com.rolledback.units.Unit;
 public class City extends Tile {
    
    private Team owner;
-   private int resourceValue = 100;
+   private int resourceValue = 50;
    
    public City(World w, int x, int y, Team o) {
-      super(w, x, y, new TerrainEffect(0, 0, 0), 'c');
+      super(w, x, y, new TerrainEffect(0, 20, 0), 'c');
       owner = o;
       type = TILE_TYPE.CITY;
    }

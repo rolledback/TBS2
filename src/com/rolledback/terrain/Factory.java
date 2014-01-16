@@ -12,6 +12,7 @@ public class Factory extends Tile {
    
    private Team owner;
    private HashMap<UNIT_TYPE, Integer> productionList;
+   private int resourceValue = 25;
    
    public Factory(World w, int x, int y, Team team) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F');
@@ -63,6 +64,10 @@ public class Factory extends Tile {
       owner.getUnits().get(owner.getUnits().size() - 1).setAttacked(true);
       owner.getUnits().get(owner.getUnits().size() - 1).setMoved(true);
       return true;
+   }
+   
+   public void produceResources() {
+      owner.setResources(owner.getResources() + resourceValue);
    }
    
 }

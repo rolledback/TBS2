@@ -164,7 +164,7 @@ public class World {
          }
       }
       range--;
-      if(valid[y][x] == 1) {
+      if(valid[y][x] == 1 || (valid[y][x] == 0 && tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))) {
          calcMoveSpotsHelper(unit, valid, x + 1, y, range, moveSet);
          calcMoveSpotsHelper(unit, valid, x - 1, y, range, moveSet);
          calcMoveSpotsHelper(unit, valid, x, y + 1, range, moveSet);
@@ -459,8 +459,8 @@ public class World {
    }
    
    public UNIT_TYPE randUnitType() {
-      return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
-      
+     // return UNIT_TYPE.INFANTRY;
+      return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];      
    }
    
    public Tile[][] getTiles() {

@@ -59,7 +59,7 @@ public class Unit {
    }
    
    public void move(Tile tile) {
-      System.out.println("Moving from " + currentTile.toString() + " to: " + tile.toString());
+      //System.out.println("Moving from " + currentTile.toString() + " to: " + tile.toString());
       currentTile.setOccupied(false);
       currentTile.setOccupiedBy(null);
       this.x = tile.getX();
@@ -79,8 +79,9 @@ public class Unit {
    public void takeDamage(int amount) {
       Random random = new Random();
       int adHocDefense = defense + currentTile.getEffect().defenseBonus;
+      if(adHocDefense  <= 0)
+         adHocDefense = 1;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
-      // System.out.println("Actual damage taken: " + percMinus);
       health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
       alive = health > 0;
    }
