@@ -14,7 +14,7 @@ public class Unit {
    }
    
    public enum UNIT_TYPE {
-      TANK, TANK_DEST, INFANTRY
+      TANK, TANK_DEST, INFANTRY, RPG
    }
    
    public enum DIRECTION {
@@ -24,6 +24,8 @@ public class Unit {
    protected ArrayList<Coordinate> moveSet;
    protected int minAttack;
    protected int maxAttack;
+   protected int infAttackBonus;
+   protected int vehAttackBonus;
    protected int defense;
    protected int attackRange;
    protected int moveRange;
@@ -43,6 +45,8 @@ public class Unit {
    public Unit(int x, int y, Tile t, Team o) {
       minAttack = 0;
       maxAttack = 0;
+      infAttackBonus = 0;
+      vehAttackBonus = 0;
       defense = 0;
       attackRange = 0;
       moveRange = 0;
@@ -69,11 +73,18 @@ public class Unit {
       tile.setOccupiedBy(this);
    }
    
-   public int attack() {
+   public void attack(Unit target, boolean isRetaliation) {
       Random random = new Random();
       int adHocMaxAttack = maxAttack + currentTile.getEffect().attackBonus;
       int adHocMinAttack = minAttack + currentTile.getEffect().attackBonus;
-      return random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
+      int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
+      if(target.getClass().equals(UNIT_CLASS.INFANTRY))
+         attackNum += infAttackBonus;
+      else
+         attackNum += vehAttackBonus;
+      if(isRetaliation)
+         attackNum /= 2;
+      target.takeDamage(attackNum);
    }
    
    public void takeDamage(int amount) {

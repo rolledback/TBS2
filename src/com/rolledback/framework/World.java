@@ -125,8 +125,6 @@ public class World {
    public void calcMoveSpotsHelper(Unit unit, int valid[][], int x, int y, int range, ArrayList<Coordinate> moveSet) {
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
-      else if(valid[y][x] == 0)
-         return;
       else if(range <= 0) {
          if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
             valid[y][x] = 2;
@@ -164,7 +162,7 @@ public class World {
          }
       }
       range--;
-      if(valid[y][x] == 1 || (valid[y][x] == 0 && tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))) {
+      if(valid[y][x] == 1 || ((valid[y][x] <= 1 || valid[y][x] == 3) && tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))) {
          calcMoveSpotsHelper(unit, valid, x + 1, y, range, moveSet);
          calcMoveSpotsHelper(unit, valid, x - 1, y, range, moveSet);
          calcMoveSpotsHelper(unit, valid, x, y + 1, range, moveSet);

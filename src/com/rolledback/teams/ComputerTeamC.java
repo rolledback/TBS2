@@ -1,6 +1,7 @@
 package com.rolledback.teams;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,9 +22,10 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamC extends ComputerTeam {
    
-   final int animationDelay = 500;
+   final int animationDelay = 100;
    ArrayList<Coordinate> cityLocations;
    int[][] moveSpots;
+   public int[] unitsProduced = new int[4];
    
    public ComputerTeamC(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -80,6 +82,7 @@ public class ComputerTeamC extends ComputerTeam {
             unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
             attempts++;
          }
+         unitsProduced[unitToProduce]++;
       }
       
    }
@@ -246,6 +249,5 @@ public class ComputerTeamC extends ComputerTeam {
       }
       world[unit.getY()][unit.getX()].setOccupied(true);
       return distance;
-   }
-   
+   }   
 }

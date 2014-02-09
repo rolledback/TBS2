@@ -6,6 +6,7 @@ import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Infantry;
+import com.rolledback.units.RPGTeam;
 import com.rolledback.units.Tank;
 import com.rolledback.units.TankDestroyer;
 import com.rolledback.units.Unit;
@@ -32,10 +33,12 @@ public class Team {
    public void createUnit(Tile t, UNIT_TYPE uType) {
       if(uType == UNIT_TYPE.TANK)
          units.add(new Tank(t.getX(), t.getY(), t, this));
-      if(uType == UNIT_TYPE.TANK_DEST)
+      else if(uType == UNIT_TYPE.TANK_DEST)
          units.add(new TankDestroyer(t.getX(), t.getY(), t, this));
-      if(uType == UNIT_TYPE.INFANTRY)
+      else if(uType == UNIT_TYPE.INFANTRY)
          units.add(new Infantry(t.getX(), t.getY(), t, this));
+      else if(uType == UNIT_TYPE.RPG)
+         units.add(new RPGTeam(t.getX(), t.getY(), t, this));
       t.setOccupied(true);
       t.setOccupiedBy(units.get(units.size() - 1));
    }

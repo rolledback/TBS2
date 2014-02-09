@@ -8,10 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.ComputerTeamA;
@@ -56,8 +58,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       
-      teamOne = new ComputerTeamC("CPU1", teamSize, 500, this);
-      teamTwo = new ComputerTeamC("CPU2", teamSize, 500, this);
+      teamOne = new Team("CPU1", teamSize, 500);
+      teamTwo = new Team("CPU2", teamSize, 500);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
@@ -100,7 +102,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          selectedUnit = null;
          unitSelected = false;
       }
-      drawGui(g);
+      // drawGui(g);
    }
    
    public void drawGui(Graphics g) {
@@ -170,11 +172,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       if(teamTwo.getUnits().size() == 0) {
          System.out.println("TEAM ONE WIN");
+         System.out.println(teamOne.getFactories().get(0).getProductionList().toString());
+         System.out.println(Arrays.toString(((ComputerTeamC)teamOne).unitsProduced));
+         System.out.println(Arrays.toString(((ComputerTeamC)teamTwo).unitsProduced));
+         System.out.println(teamOne.getResources());
+         System.out.println(teamTwo.getResources());
          return;
       }
       
       if(teamOne.getUnits().size() == 0) {
          System.out.println("TEAM TWO WIN");
+         System.out.println(teamOne.getFactories().get(0).getProductionList().toString());
+         System.out.println(Arrays.toString(((ComputerTeamC)teamOne).unitsProduced));
+         System.out.println(Arrays.toString(((ComputerTeamC)teamTwo).unitsProduced));
+         System.out.println(teamOne.getResources());
+         System.out.println(teamTwo.getResources());
          return;
       }
       
@@ -281,6 +293,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             uString = "T";
          if(u == UNIT_TYPE.TANK_DEST)
             uString = "D";
+         if(u == UNIT_TYPE.RPG)
+            uString = "R";
          g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + 10, (temp.getY() * tileSize) + offsetVertical + (tileSize / 2) + 10);
       }
       
@@ -295,6 +309,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             uString = "t";
          if(u == UNIT_TYPE.TANK_DEST)
             uString = "d";
+         if(u == UNIT_TYPE.RPG)
+            uString = "r";
          g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + (tileSize / 2), (temp.getY() * tileSize) + offsetVertical
                + (tileSize / 2) + 10);
       }
@@ -328,13 +344,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && moveSpots[y][x] == 2) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
             attackMove(x, y);
-            int attackNum = selectedUnit.attack();
-            targetUnit.takeDamage(attackNum);
+            selectedUnit.attack(targetUnit, false);
             if(!targetUnit.isAlive())
                world.destroyUnit(targetUnit);
             else {
-               attackNum = targetUnit.attack() / 2;
-               selectedUnit.takeDamage(attackNum);
+               targetUnit.attack(selectedUnit, true);
                if(!selectedUnit.isAlive())
                   world.destroyUnit(selectedUnit);
             }
@@ -377,6 +391,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK_DEST);
             else if(unitType.equals("Infantry"))
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
+            else if(unitType.equals("RPG Team"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
          }
       }
       if(!unitSelected) {
@@ -472,15 +488,18 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    @Override
    public void mouseClicked(MouseEvent arg0) {
       System.out.println("Click.");
-      int eventX = arg0.getX();
-      int eventY = arg0.getY();
-      for(int row = 0; row < gameHeight; row++)
-         for(int col = 0; col < gameWidth; col++)
-            if(grid[row][col].contains(eventX, eventY)) {
-               gameLoop(col, row);
-               return;
-            }
-      switchTeams();
+      if(SwingUtilities.isLeftMouseButton(arg0)){
+         int eventX = arg0.getX();
+         int eventY = arg0.getY();
+         for(int row = 0; row < gameHeight; row++)
+            for(int col = 0; col < gameWidth; col++)
+               if(grid[row][col].contains(eventX, eventY)) {
+                  gameLoop(col, row);
+                  return;
+               }
+      }
+      else
+         switchTeams();
    }
    
    @Override

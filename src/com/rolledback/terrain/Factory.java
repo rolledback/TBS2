@@ -12,7 +12,7 @@ public class Factory extends Tile {
    
    private Team owner;
    private HashMap<UNIT_TYPE, Integer> productionList;
-   private int resourceValue = 25;
+   private int resourceValue = 0;
    
    public Factory(World w, int x, int y, Team team) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F');
@@ -30,6 +30,7 @@ public class Factory extends Tile {
       productionList.put(UNIT_TYPE.INFANTRY, 100);
       productionList.put(UNIT_TYPE.TANK, 250);
       productionList.put(UNIT_TYPE.TANK_DEST, 250);
+      productionList.put(UNIT_TYPE.RPG, 125);
    }
    
    public HashMap<UNIT_TYPE, Integer> getProductionList() {
@@ -47,6 +48,8 @@ public class Factory extends Tile {
             unitString = "Tank";
          else if(entry.getKey() == UNIT_TYPE.TANK_DEST)
             unitString = "Tank Destroyer";
+         else if(entry.getKey() == UNIT_TYPE.RPG)
+            unitString = "RPG Team";
          list[numEntry] = unitString + ", cost: " + entry.getValue().toString();
          numEntry++;
       }
