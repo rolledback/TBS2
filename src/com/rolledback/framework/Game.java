@@ -58,8 +58,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       
-      teamOne = new Team("CPU1", teamSize, 500);
-      teamTwo = new Team("CPU2", teamSize, 500);
+      teamOne = new Team("CPU1", teamSize, 0);
+      teamTwo = new Team("CPU2", teamSize, 0);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
@@ -129,7 +129,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.RIVER)
          tileColor = new Color(41, 32, 132);
       else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.BRIDGE)
-         tileColor = new Color(128, 64, 0);
+         tileColor = new Color(128, 128, 0);
       else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.CITY) {
          if(((City)world.getTiles()[selectedY][selectedX]).getOwner() == null)
             tileColor = Color.MAGENTA;
@@ -145,7 +145,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             tileColor = Color.blue;
       }
       g.setColor(tileColor);
-      g.fillRect(32, this.getHeight() - guiHeight + 32, 64, 64);
+      g.fillRect(32, this.getHeight() - guiHeight + 32, 128, 128);
       
       g.setColor(Color.black);
       Font font = new Font("Arial", Font.BOLD, 12);
@@ -154,7 +154,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       g.drawString("Attack Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().attackBonus, 102, this.getHeight() - guiHeight + 62);
       g.drawString("Defense Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().defenseBonus, 102, this.getHeight() - guiHeight + 79);
       g.drawString("Move Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().moveBonus, 102, this.getHeight() - guiHeight + 96);
-      g.drawRect(32, this.getHeight() - guiHeight + 32, 64, 64);
+      g.drawRect(32, this.getHeight() - guiHeight + 32, 128, 128);
       for(int x = 0; x < 5; x++)
          g.drawRect(24 + x, this.getHeight() - guiHeight + 24 + x, 300 - (2 * x), 80 - (2 * x));
    }
@@ -234,7 +234,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.RIVER)
                tileColor = new Color(41, 32, 132);
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
-               tileColor = new Color(128, 64, 0);
+               tileColor = new Color(128, 128, 0);
             else if(world.getTiles()[y][x].getType() == TILE_TYPE.CITY) {
                if(((City)world.getTiles()[y][x]).getOwner() == null)
                   tileColor = Color.MAGENTA;

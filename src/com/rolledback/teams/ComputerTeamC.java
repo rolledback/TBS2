@@ -130,8 +130,7 @@ public class ComputerTeamC extends ComputerTeam {
       return closest;
    }
    
-   public Coordinate moveInfantry(Infantry unit) {
-      
+   public Coordinate moveInfantry(Infantry unit) {      
       // if infantry is on a city, defend the city if needed
       if(game.getWorld().getTiles()[unit.getY()][unit.getX()].getType() == TILE_TYPE.CITY) {
          int[] yDirs = { 0, 0, 1, -1 };
