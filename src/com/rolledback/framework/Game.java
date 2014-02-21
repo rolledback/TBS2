@@ -29,7 +29,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
 
-   final int animationDelay = 1000;
+   final int animationDelay = 0;
    
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE
@@ -87,8 +87,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Ready to launch.");
    }
    
-   public void paintComponent(Graphics g) {
-      this.delay(animationDelay);
+   public void paintComponent(Graphics g) {  
+      delay(animationDelay);
       drawTiles(g);
       //drawHeightMap(g);
       drawUnits(g);
@@ -161,7 +161,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void switchTeams() {
-      System.out.println("Switch teams.");
       unitSelected = false;
       selectedUnit = null;
       Iterator<Unit> i = currentTeam.getUnits().iterator();
@@ -203,16 +202,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          f.produceResources();
       
       state = GAME_STATE.NORMAL;
-      
-      System.out.println("----------------------------------");
-      System.out.println("Team one: " + teamOne.toString());
-      System.out.println("Team one units: " + teamOne.getUnits().toString());
-      System.out.println("Team one resources: " + teamOne.getResources());
-      System.out.println("Team one army size: " + teamOne.getUnits().size());
-      System.out.println("----------------------------------");
-      System.out.println("Team two: " + teamTwo.toString());
-      System.out.println("Team two units: " + teamTwo.getUnits().toString());
-      System.out.println("Team two resources: " + teamTwo.getResources());
       
       if(currentTeam.getClass().equals(ComputerTeamC.class) || currentTeam.getClass().equals(ComputerTeamA.class) || currentTeam.getClass().equals(ComputerTeamB.class)) {
          ((ComputerTeam)currentTeam).executeTurn();
@@ -399,9 +388,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(!unitSelected) {
          selectedUnit = null;
       }
-      System.out.println("State: " + state);
-      System.out.println("Selected unit: " + selectedUnit);
-      update(this.getGraphics());
+      this.repaint();//update(this.getGraphics());
       return;
    }
    

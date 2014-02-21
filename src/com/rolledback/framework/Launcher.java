@@ -9,7 +9,7 @@ public class Launcher {
    public static void main(String args[]) {
       //init(104, 56); //1920x1080 @ 16x16 tiles
       //init(52, 28); // 1920x1080 @ 32x32 tiles
-      init(26, 15); //1920x1080 @ 64x64 tiles
+      init(26, 14); //1920x1080 @ 64x64 tiles
       //init(13, 7); //1920x1080 @ 128x128 tiles
    }
    
