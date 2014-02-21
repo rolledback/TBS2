@@ -104,72 +104,59 @@ public class World {
       }
    }
    
-   public int[][] calcMoveSpots(Unit unit) {
-      int[][] spots = new int[height][width];
-      for(int x = 0; x < spots.length; x++)
-         Arrays.fill(spots[x], -1);
+   public void calcMoveSpots(Unit unit) {
       int adHocRange = unit.getMoveRange() + unit.getCurrentTile().getEffect().moveBonus;
       if(adHocRange <= 0)
          adHocRange = 1;
-      ArrayList<Coordinate> set = null;
-      set = new ArrayList<Coordinate>();
       unit.getCurrentTile().setOccupied(false);
-      calcMoveSpotsHelper(unit, spots, unit.getX(), unit.getY(), adHocRange + 1, set);
-      spots[unit.getY()][unit.getX()] = 0;
-      set.remove(new Coordinate(unit.getX(), unit.getY()));
+      unit.getAttackSet().clear();
+      unit.getMoveSet().clear();
+      unit.getCaptureSet().clear();
+      calcMoveSpotsHelper(unit, unit.getX(), unit.getY(), adHocRange + 1);
       unit.getCurrentTile().setOccupied(true);
-      unit.setMoveSet(set);
-      return spots;
+      unit.getMoveSet().remove(new Coordinate(unit.getX(), unit.getY()));
    }
    
-   public void calcMoveSpotsHelper(Unit unit, int valid[][], int x, int y, int range, ArrayList<Coordinate> moveSet) {
+   public void calcMoveSpotsHelper(Unit unit, int x, int y, int range) {
+      Coordinate thisCoord = new Coordinate(x, y);
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
       else if(range <= 0) {
-         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
-            valid[y][x] = 2;
-            if(!moveSet.contains(new Coordinate(x, y))) {
-               moveSet.add(new Coordinate(x, y));
-            }
-         }
+         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+            unit.getAttackSet().add(thisCoord);
          return;
       }
       else if(tiles[y][x].isOccupied()) {
-         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
-            valid[y][x] = 2;
-            if(!moveSet.contains(new Coordinate(x, y))) {
-               moveSet.add(new Coordinate(x, y));
-            }
-         }
-         else
-            valid[y][x] = 0;
+         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+            unit.getAttackSet().add(thisCoord);
       }
       else if(unit.getType() == UNIT_TYPE.INFANTRY && tiles[y][x].getType() == TILE_TYPE.CITY
             && (((City)tiles[y][x]).getOwner() == null || !((City)tiles[y][x]).getOwner().equals(unit.getOwner()))) {
-         valid[y][x] = 3;
-         if(!moveSet.contains(new Coordinate(x, y))) {
-            moveSet.add(new Coordinate(x, y));
-         }
+         unit.getCaptureSet().add(thisCoord);
+         
       }
-      else if(!tiles[y][x].isVehiclePassable() && unit.getClassification() == UNIT_CLASS.VEHICLE)
-         valid[y][x] = 0;
-      else if(!tiles[y][x].isInfantryPassable() && unit.getClassification() == UNIT_CLASS.INFANTRY)
-         valid[y][x] = 0;
-      else {
-         valid[y][x] = 1;
-         if(!moveSet.contains(new Coordinate(x, y))) {
-            moveSet.add(new Coordinate(x, y));
-         }
+      else if(tiles[y][x].getType() == TILE_TYPE.CITY)
+         unit.getMoveSet().add(thisCoord);
+      else if(canTraverse(unit, tiles[y][x])){
+         unit.getMoveSet().add(thisCoord);
       }
       range--;
-      if(valid[y][x] == 1 || ((valid[y][x] <= 1 || valid[y][x] == 3) && tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))) {
-         calcMoveSpotsHelper(unit, valid, x + 1, y, range, moveSet);
-         calcMoveSpotsHelper(unit, valid, x - 1, y, range, moveSet);
-         calcMoveSpotsHelper(unit, valid, x, y + 1, range, moveSet);
-         calcMoveSpotsHelper(unit, valid, x, y - 1, range, moveSet);
-      }
-      else
-         return;
+      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
+         calcMoveSpotsHelper(unit, x + 1, y, range);
+         calcMoveSpotsHelper(unit, x - 1, y, range);
+         calcMoveSpotsHelper(unit, x, y + 1, range);
+         calcMoveSpotsHelper(unit, x, y - 1, range);
+     }
+     else
+        return;
+   }
+   
+   public boolean canTraverse(Unit unit, Tile tile) {
+      if(tile.getType() == TILE_TYPE.RIVER)
+         return false;
+      if(tile.getType() == TILE_TYPE.MOUNTAIN && unit.getClassification() != UNIT_CLASS.INFANTRY)
+         return false;
+      return true;
    }
    
    public void buildMap() {

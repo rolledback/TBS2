@@ -28,6 +28,8 @@ import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
+
+   final int animationDelay = 1000;
    
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE
@@ -42,7 +44,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    private World world;
    
    boolean unitSelected, ready;
-   int[][] moveSpots;
    Tile selectedTile;
    Unit selectedUnit;
    Unit targetUnit;
@@ -55,11 +56,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Making game.");
       gameWidth = x;
       gameHeight = y;
-      teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
-      
-      teamOne = new Team("CPU1", teamSize, 0);
-      teamTwo = new Team("CPU2", teamSize, 0);
+      teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);      
+      teamOne = new ComputerTeamC("CPU1", teamSize, 0, this);
+      teamTwo = new ComputerTeamC("CPU2", teamSize, 0, this);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
@@ -88,8 +88,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void paintComponent(Graphics g) {
+      this.delay(animationDelay);
       drawTiles(g);
-      // drawHeightMap(g);
+      //drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -341,7 +342,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedTile = selectTile(x, y);
       
       if(unitSelected) {
-         if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && moveSpots[y][x] == 2) {
+         if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
             attackMove(x, y);
             selectedUnit.attack(targetUnit, false);
@@ -355,14 +356,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
-         if(!selectedUnit.hasMoved() && moveSpots[y][x] == 3) {
+         if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
             if(((City)selectedTile).getOwner() == null || !((City)selectedTile).getOwner().equals(currentTeam)) {
                ((City)selectedTile).capture(selectedUnit);
             }
          }
-         if(!selectedUnit.hasMoved() && moveSpots[y][x] == 1) {
+         if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
@@ -373,7 +374,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
          if(selectedUnit.getOwner().equals(currentTeam)) {
-            moveSpots = world.calcMoveSpots(selectedUnit);
+            world.calcMoveSpots(selectedUnit);
             if(!selectedUnit.hasMoved())
                state = GAME_STATE.DISPLAY_MOVE;
          }
@@ -405,27 +406,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void drawMoveSpots(Graphics g) {
-      Color moveSet = new Color(0, 0, 255, 165);
-      Color attackSet = new Color(255, 0, 0, 165);
-      Color captureSet = new Color(255, 255, 0, 165);
+      Color moveColor = new Color(0, 128, 128, 135);
+      Color attackColor = new Color(255, 0, 0, 165);
+      Color captureColor = new Color(255, 255, 0, 165);
+
+      g.setColor(moveColor);
+      for(Coordinate c: selectedUnit.getMoveSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
       
-      for(int row = 0; row < gameHeight; row++)
-         for(int col = 0; col < gameWidth; col++) {
-            if(state == GAME_STATE.DISPLAY_MOVE) {
-               if(moveSpots[row][col] == 1) {
-                  g.setColor(moveSet);
-                  g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
-               }
-               else if(moveSpots[row][col] == 2) {
-                  g.setColor(attackSet);
-                  g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
-               }
-               else if(moveSpots[row][col] == 3) {
-                  g.setColor(captureSet);
-                  g.fillRect((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
-               }
-            }
-         }
+      g.setColor(attackColor);
+      for(Coordinate c: selectedUnit.getAttackSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      
+      g.setColor(captureColor);
+      for(Coordinate c: selectedUnit.getCaptureSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
    }
    
    public void attackMove(int x, int y) {
@@ -433,16 +428,16 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          return;
       if(Math.abs(selectedUnit.getY() - targetUnit.getY()) == 1 && targetUnit.getX() == selectedUnit.getX())
          return;
-      else if(x - 1 >= 0 && moveSpots[y][x - 1] == 1) {
+      else if(x - 1 >= 0 && selectedUnit.getMoveSet().contains(new Coordinate(x - 1, y))) {
          selectedUnit.move(world.getTiles()[y][x - 1]);
       }
-      else if(x + 1 < gameWidth && moveSpots[y][x + 1] == 1) {
+      else if(x + 1 < gameWidth && selectedUnit.getMoveSet().contains(new Coordinate(x + 1, y))) {
          selectedUnit.move(world.getTiles()[y][x + 1]);
       }
-      else if(y - 1 >= 0 && moveSpots[y - 1][x] == 1) {
+      else if(y - 1 >= 0 && selectedUnit.getMoveSet().contains(new Coordinate(x, y - 1))) {
          selectedUnit.move(world.getTiles()[y - 1][x]);
       }
-      else if(y + 1 < gameHeight && moveSpots[y + 1][x] == 1) {
+      else if(y + 1 < gameHeight && selectedUnit.getMoveSet().contains(new Coordinate(x, y + 1))) {
          selectedUnit.move(world.getTiles()[y + 1][x]);
       }
       

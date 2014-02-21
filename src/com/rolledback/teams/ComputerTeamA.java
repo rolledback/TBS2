@@ -30,13 +30,13 @@ public class ComputerTeamA extends ComputerTeam {
       for(int x = 0; x < units.size(); x++) {
          Unit currUnit = units.get(x);
          // generate valid move spots for unit
-         int[][] moveSpots = game.getWorld().calcMoveSpots(currUnit);
+         game.getWorld().calcMoveSpots(currUnit);
          Coordinate moveHere = null;
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
          
          // if unit can attack target, do it
-         if(moveSpots[targetY][targetX] == 2) {
+         if(currUnit.getAttackSet().contains(new Coordinate(targetX, targetY))) {
             game.gameLoop(currUnit.getX(), currUnit.getY());
             game.gameLoop(targetX, targetY);
          }
@@ -44,7 +44,7 @@ public class ComputerTeamA extends ComputerTeam {
          else {
             for(int row = 0; row < game.gameHeight; row++) {
                for(int col = 0; col < game.gameWidth; col++) {
-                  if(moveSpots[row][col] == 1) {
+                  if(currUnit.getMoveSet().contains(new Coordinate(col, row))) {
                      // calculate distance from spot to target using a breadth first search
                      currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), col, row, targetX, targetY, currUnit);
                      if(currentDistance < lowestDistance) {
@@ -123,10 +123,10 @@ public class ComputerTeamA extends ComputerTeam {
       ListIterator<Unit> teamI = units.listIterator();
       while(teamI.hasNext()) {
          Unit currUnit = teamI.next();
-         int[][] currMS = game.getWorld().calcMoveSpots(currUnit);
+         game.getWorld().calcMoveSpots(currUnit);
          for(int row = 0; row < game.gameHeight; row++) {
             for(int col = 0; col < game.gameWidth; col++) {
-               if(currMS[row][col] == 2) {
+               if(currUnit.getAttackSet().contains(new Coordinate(col, row))) {
                   // increment HashMap value of any enemy unit you can attack
                   Unit temp = game.getWorld().getTiles()[row][col].getOccupiedBy();
                   numInRange.put(temp, numInRange.get(temp) + 1);
@@ -208,10 +208,10 @@ public class ComputerTeamA extends ComputerTeam {
       ListIterator<Unit> teamI = units.listIterator();
       while(teamI.hasNext()) {
          Unit currUnit = teamI.next();
-         int[][] currMS = game.getWorld().calcMoveSpots(currUnit);
+         game.getWorld().calcMoveSpots(currUnit);
          for(int row = 0; row < game.gameHeight; row++) {
             for(int col = 0; col < game.gameWidth; col++) {
-               if(currMS[row][col] == 2)
+               if(currUnit.getAttackSet().contains(new Coordinate(col, row)))
                   numInRange.put(game.getWorld().getTiles()[row][col].getOccupiedBy(), numInRange.get(game.getWorld().getTiles()[row][col].getOccupiedBy())
                         + currUnit.getMaxAttack());
             }

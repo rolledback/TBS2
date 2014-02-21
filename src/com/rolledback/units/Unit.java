@@ -1,7 +1,9 @@
 package com.rolledback.units;
 
-import java.util.ArrayList;
+import java.util.AbstractSet;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.TreeSet;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.teams.Team;
@@ -21,7 +23,9 @@ public class Unit {
       LEFT, RIGHT
    }
    
-   protected ArrayList<Coordinate> moveSet;
+   protected HashSet<Coordinate> moveSet;
+   protected HashSet<Coordinate> attackSet;
+   protected HashSet<Coordinate> captureSet;
    protected int minAttack;
    protected int maxAttack;
    protected int infAttackBonus;
@@ -60,6 +64,9 @@ public class Unit {
       currentTile = t;
       classification = UNIT_CLASS.NONE;
       owner = o;
+      moveSet = new HashSet<Coordinate>();
+      attackSet = new HashSet<Coordinate>();
+      captureSet = new HashSet<Coordinate>();
    }
    
    public void move(Tile tile) {
@@ -202,12 +209,28 @@ public class Unit {
       this.defense = defense;
    }
    
-   public ArrayList<Coordinate> getMoveSet() {
+   public HashSet<Coordinate> getMoveSet() {
       return moveSet;
    }
    
-   public void setMoveSet(ArrayList<Coordinate> moveSet) {
+   public void setMoveSet(HashSet<Coordinate> moveSet) {
       this.moveSet = moveSet;
+   }
+   
+   public HashSet<Coordinate> getAttackSet() {
+      return attackSet;
+   }
+   
+   public void setAttackSet(HashSet<Coordinate> attackSet) {
+      this.attackSet = attackSet;
+   }
+   
+   public HashSet<Coordinate> getCaptureSet() {
+      return captureSet;
+   }
+   
+   public void getCaptureSet(HashSet<Coordinate> captureSet) {
+      this.captureSet = captureSet;
    }
 
    public int getHealth() {

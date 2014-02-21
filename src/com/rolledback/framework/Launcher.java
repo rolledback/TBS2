@@ -9,8 +9,8 @@ public class Launcher {
    public static void main(String args[]) {
       //init(104, 56); //1920x1080 @ 16x16 tiles
       //init(52, 28); // 1920x1080 @ 32x32 tiles
-      //init(26, 14); //1920x1080 @ 64x64 tiles
-      init(13, 7); //1920x1080 @ 128x128 tiles
+      init(26, 15); //1920x1080 @ 64x64 tiles
+      //init(13, 7); //1920x1080 @ 128x128 tiles
    }
    
    public static void init(int x, int y) {
@@ -51,6 +51,7 @@ public class Launcher {
       int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
       newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight);
       newGame.setDoubleBuffered(true);
+      newGame.setIgnoreRepaint(true);
       newGame.setSize(screenWidth, screenHeight);
       frame.getContentPane().add(newGame);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

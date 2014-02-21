@@ -1,7 +1,6 @@
 package com.rolledback.teams;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,7 +23,6 @@ public class ComputerTeamC extends ComputerTeam {
    
    final int animationDelay = 100;
    ArrayList<Coordinate> cityLocations;
-   int[][] moveSpots;
    public int[] unitsProduced = new int[4];
    
    public ComputerTeamC(String name, int size, int r, Game g) {
@@ -46,7 +44,7 @@ public class ComputerTeamC extends ComputerTeam {
             continue;
          
          Coordinate moveHere = null;
-         moveSpots = game.getWorld().calcMoveSpots(currUnit);
+         game.getWorld().calcMoveSpots(currUnit);
          
          // if you can't move, go to the next unit
          if(currUnit.getMoveSet().size() <= 0)
@@ -108,7 +106,7 @@ public class ComputerTeamC extends ComputerTeam {
       Unit closestUnit = minEntry.getKey();
       
       // if you can attack the enemy, do so
-      if(moveSpots[closestUnit.getY()][closestUnit.getX()] == 2)
+      if(unit.getAttackSet().contains(new Coordinate(closestUnit.getY(), closestUnit.getX())))
          return new Coordinate(closestUnit.getX(), closestUnit.getY());
       
       // if not, find move spot closest to that unit
@@ -139,7 +137,7 @@ public class ComputerTeamC extends ComputerTeam {
             try {
                int r = unit.getY() + yDirs[i];
                int c = unit.getX() + xDirs[i];
-               if(moveSpots[r][c] == 2)
+               if(unit.getAttackSet().contains(new Coordinate(r, c)))
                   return new Coordinate(c, r);
             }
             catch(Exception e) {
@@ -177,7 +175,7 @@ public class ComputerTeamC extends ComputerTeam {
          Coordinate closest = minEntry.getKey();
          
          // if you are in capture/siege range, capture/siege the city
-         if(moveSpots[closest.getY()][closest.getX()] >= 2)
+         if(unit.getAttackSet().contains(closest) || unit.getCaptureSet().contains(closest))
             return closest;
          
          // find move spot closest to the city
@@ -185,7 +183,7 @@ public class ComputerTeamC extends ComputerTeam {
          Iterator<Coordinate> moveSetIterator = unit.getMoveSet().iterator();
          while(moveSetIterator.hasNext()) {
             Coordinate currMoveSpot = moveSetIterator.next();
-            if(moveSpots[currMoveSpot.getY()][currMoveSpot.getX()] == 1) {
+            if(unit.getMoveSet().contains(currMoveSpot)) {
                int distance = bfsToBestSpot(game.getWorld().getTiles().clone(), currMoveSpot.getX(), currMoveSpot.getY(), closest.getX(),
                      closest.getY(), unit);
                distancesToCity.put(currMoveSpot, distance);

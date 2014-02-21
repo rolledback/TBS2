@@ -40,7 +40,7 @@ public class ComputerTeamB extends ComputerTeam {
          int targetY = targetUnit.getY();
          
          // generate valid move spots for unit
-         int[][] moveSpots = game.getWorld().calcMoveSpots(currUnit);
+         game.getWorld().calcMoveSpots(currUnit);
          Coordinate moveHere = null;
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
@@ -50,7 +50,7 @@ public class ComputerTeamB extends ComputerTeam {
             Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
             while(moveSetIterator.hasNext()) {
                Coordinate currentSpot = moveSetIterator.next();
-               if(moveSpots[currentSpot.getY()][currentSpot.getX()] == 3) {
+               if(currUnit.getCaptureSet().contains(currentSpot)) {
                   game.gameLoop(currUnit.getX(), currUnit.getY());
                   delay(animationDelay);
                   game.gameLoop(currentSpot.getX(), currentSpot.getY());
@@ -61,7 +61,7 @@ public class ComputerTeamB extends ComputerTeam {
          }
          
          // if unit can attack target, do it
-         if(!currUnit.hasMoved() && moveSpots[targetY][targetX] == 2) {
+         if(!currUnit.hasMoved() && currUnit.getAttackSet().contains(new Coordinate(targetX, targetY))) {
             game.gameLoop(currUnit.getX(), currUnit.getY());
             delay(animationDelay);
             game.gameLoop(targetX, targetY);
@@ -72,7 +72,7 @@ public class ComputerTeamB extends ComputerTeam {
             Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
             while(moveSetIterator.hasNext()) {
                Coordinate currentSpot = moveSetIterator.next();
-               if(moveSpots[currentSpot.getY()][currentSpot.getX()] == 1) {
+               if(currUnit.getMoveSet().contains(currentSpot)) {
                   // calculate distance from spot to target using a breadth first search
                   currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), currentSpot.getX(), currentSpot.getY(), targetX, targetY,
                         currUnit);
@@ -158,11 +158,11 @@ public class ComputerTeamB extends ComputerTeam {
       
       // determine what enemy units attacker can attack
       Unit currUnit = attacker;
-      int[][] currMS = game.getWorld().calcMoveSpots(currUnit);
+      game.getWorld().calcMoveSpots(currUnit);
       Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
       while(moveSetIterator.hasNext()) {
          Coordinate currentSpot = moveSetIterator.next();
-         if(currMS[currentSpot.getY()][currentSpot.getX()] == 2) {
+         if(currUnit.getAttackSet().contains(currentSpot)) {
             // increment HashMap value of any enemy unit you can attack
             Unit temp = game.getWorld().getTiles()[currentSpot.getY()][currentSpot.getX()].getOccupiedBy();
             numInRange.put(temp, numInRange.get(temp) + 1);
@@ -232,11 +232,11 @@ public class ComputerTeamB extends ComputerTeam {
       
       // go through all enemy units in range and determine how much damage attacker can inflict
       Unit currUnit = attacker;
-      int[][] currMS = game.getWorld().calcMoveSpots(currUnit);
+      game.getWorld().calcMoveSpots(currUnit);
       Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
       while(moveSetIterator.hasNext()) {
          Coordinate currentSpot = moveSetIterator.next();
-         if(currMS[currentSpot.getY()][currentSpot.getX()] == 2) {
+         if(currUnit.getAttackSet().contains(currentSpot)) {
             // increment HashMap value of any enemy unit you can attack
             Unit temp = game.getWorld().getTiles()[currentSpot.getY()][currentSpot.getX()].getOccupiedBy();
             numInRange.put(temp, numInRange.get(temp) + currUnit.getMaxAttack() + currUnit.getCurrentTile().getEffect().attackBonus);

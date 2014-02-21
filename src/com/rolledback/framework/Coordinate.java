@@ -36,8 +36,12 @@ public class Coordinate {
    public boolean equals(Object compare) {
       if(compare == null)
          return false;
-      if(compare.getClass() != this.getClass())
+      if(compare.getClass() != this.getClass())   
          return false;
       return ((Coordinate)compare).getX() == this.x && ((Coordinate)compare).getY() == this.y;
+   }
+   
+   public int hashCode() {
+      return (this.x * 31) + this.y;
    }
 }
