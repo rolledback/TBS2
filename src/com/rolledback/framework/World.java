@@ -113,7 +113,6 @@ public class World {
       unit.getAttackSet().clear();
       unit.getMoveSet().clear();
       unit.getCaptureSet().clear();
-      System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^");
       calcMoveSpotsHelper(unit, unit.getX(), unit.getY(), adHocRange + 1, false);
       unit.getCurrentTile().setOccupied(true);
       unit.getMoveSet().remove(new Coordinate(unit.getX(), unit.getY()));

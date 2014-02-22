@@ -1,5 +1,7 @@
 package com.rolledback.framework;
 
+import java.util.Arrays;
+
 import javax.swing.JFrame;
 
 public class Launcher {
@@ -7,11 +9,12 @@ public class Launcher {
    static Game newGame;
    
    public static void main(String args[]) {
-      int[] dimensions = calcDimensions(128);
+      int[] dimensions = autoCalcDimensions(64);
+      System.out.println(Arrays.toString(dimensions));
       init(dimensions[0], dimensions[1]);
    }
    
-   public static int[] calcDimensions(int size) {
+   public static int[] autoCalcDimensions(int size) {
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
@@ -51,7 +54,7 @@ public class Launcher {
          tileSize /= 2;
       }
       
-      if(tileSize < 16) {
+      if(tileSize < 8) {
          System.out.println("Bad dimensions.");
          System.out.println("Final width attempted: " + (gameWidth * 16) + " w/screen width: " + screenWidth);
          if(gameWidth * 16 > screenWidth)
@@ -64,16 +67,27 @@ public class Launcher {
       
       int offsetHorizontal = screenWidth - (gameWidth * tileSize);
       int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
-      newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight);
-      newGame.setDoubleBuffered(true);
-      newGame.setIgnoreRepaint(true);
-      newGame.setSize(screenWidth, screenHeight);
-      frame.getContentPane().add(newGame);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setResizable(false);
-      frame.setVisible(true);
-      frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
-      newGame.switchTeams();
+      int winner[] = {0, 0};
+         for(int i = 0; i < 10; i++) {
+         System.out.print(i);
+         newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight);
+         newGame.setDoubleBuffered(true);
+         newGame.setIgnoreRepaint(true);
+         newGame.setSize(screenWidth, screenHeight);
+         frame.getContentPane().add(newGame);
+         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         frame.setResizable(false);
+         frame.setVisible(true);
+         frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
+         newGame.setVisible(true);
+         newGame.switchTeams();
+         if(newGame.winner.equals(newGame.getWorld().getTeamOne()))
+            winner[0]++;
+         else
+            winner[1]++;
+         frame.setVisible(false);
+         System.out.println(Arrays.toString(winner));
+      }
    }
    
 }

@@ -40,6 +40,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public Team teamOne, teamTwo;
    
    Team currentTeam;
+   public Team winner;
    private World world;
    
    boolean unitSelected, ready;
@@ -53,15 +54,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    int UNIT_DENSITY = 5;
    
    public Game(int x, int y, int ts, int oH, int oV, int gH) {
-      System.out.println("Making game.");
       gameWidth = x;
       gameHeight = y;
       
       manager = new GraphicsManager();
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);      
-      teamOne = new Team("CPU1", teamSize, 0);
-      teamTwo = new Team("CPU2", teamSize, 0);
+      teamOne = new ComputerTeamC("CPU1", teamSize, 0, this);
+      teamTwo = new ComputerTeamC("CPU2", teamSize, 0, this);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
@@ -85,8 +85,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       selectedX = 0;
       selectedY = 0;
-      
-      System.out.println("Ready to launch.");
    }
    
    public void paintComponent(Graphics g) {  
@@ -172,22 +170,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
       
       if(teamTwo.getUnits().size() == 0) {
-         System.out.println("TEAM ONE WIN");
-         System.out.println(teamOne.getFactories().get(0).getProductionList().toString());
-         System.out.println(Arrays.toString(((ComputerTeamC)teamOne).unitsProduced));
-         System.out.println(Arrays.toString(((ComputerTeamC)teamTwo).unitsProduced));
-         System.out.println(teamOne.getResources());
-         System.out.println(teamTwo.getResources());
+         winner = teamOne;
+         this.setVisible(false);
          return;
       }
       
       if(teamOne.getUnits().size() == 0) {
-         System.out.println("TEAM TWO WIN");
-         System.out.println(teamOne.getFactories().get(0).getProductionList().toString());
-         System.out.println(Arrays.toString(((ComputerTeamC)teamOne).unitsProduced));
-         System.out.println(Arrays.toString(((ComputerTeamC)teamTwo).unitsProduced));
-         System.out.println(teamOne.getResources());
-         System.out.println(teamTwo.getResources());
+         winner = teamTwo;
+         this.setVisible(false);
          return;
       }
       
