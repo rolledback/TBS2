@@ -1,8 +1,6 @@
 package com.rolledback.framework;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Random;
 
 import com.rolledback.teams.Team;
@@ -16,6 +14,7 @@ import com.rolledback.terrain.River;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
+import com.rolledback.units.Unit.DIRECTION;
 import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
@@ -24,7 +23,8 @@ public class World {
    private Tile tiles[][];
    private int heightMap[][];
    private int width, height;
-   
+   private GraphicsManager manager;
+
    public World(int w, int h, Team a, Team b) {
       width = w;
       height = h;
@@ -32,6 +32,7 @@ public class World {
       heightMap = new int[h][w];
       teamOne = a;
       teamTwo = b;
+      manager = new GraphicsManager();
       buildMap();
       buildArmy(teamOne, 0, w / 5);
       buildArmy(teamTwo, w - (w / 5), w);
@@ -112,22 +113,23 @@ public class World {
       unit.getAttackSet().clear();
       unit.getMoveSet().clear();
       unit.getCaptureSet().clear();
-      calcMoveSpotsHelper(unit, unit.getX(), unit.getY(), adHocRange + 1);
+      System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+      calcMoveSpotsHelper(unit, unit.getX(), unit.getY(), adHocRange + 1, false);
       unit.getCurrentTile().setOccupied(true);
       unit.getMoveSet().remove(new Coordinate(unit.getX(), unit.getY()));
    }
    
-   public void calcMoveSpotsHelper(Unit unit, int x, int y, int range) {
+   public void calcMoveSpotsHelper(Unit unit, int x, int y, int range, boolean movedThrough) {
       Coordinate thisCoord = new Coordinate(x, y);
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
       else if(range <= 0) {
-         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             unit.getAttackSet().add(thisCoord);
          return;
       }
       else if(tiles[y][x].isOccupied()) {
-         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()))
+         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             unit.getAttackSet().add(thisCoord);
       }
       else if(unit.getType() == UNIT_TYPE.INFANTRY && tiles[y][x].getType() == TILE_TYPE.CITY
@@ -142,10 +144,11 @@ public class World {
       }
       range--;
       if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
-         calcMoveSpotsHelper(unit, x + 1, y, range);
-         calcMoveSpotsHelper(unit, x - 1, y, range);
-         calcMoveSpotsHelper(unit, x, y + 1, range);
-         calcMoveSpotsHelper(unit, x, y - 1, range);
+         boolean mT = tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner());
+         calcMoveSpotsHelper(unit, x + 1, y, range, mT);
+         calcMoveSpotsHelper(unit, x - 1, y, range, mT);
+         calcMoveSpotsHelper(unit, x, y + 1, range, mT);
+         calcMoveSpotsHelper(unit, x, y - 1, range, mT);
      }
      else
         return;
@@ -164,11 +167,11 @@ public class World {
          for(int col = 0; col < tiles[row].length; col++) {
             double type = Math.random();
             if(type <= .75)
-               tiles[row][col] = new Plain(this, col, row);
+               tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
             else if(type > .75 && type <= .96)
-               tiles[row][col] = new Forest(this, col, row);
+               tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
             else
-               tiles[row][col] = new Mountain(this, col, row);
+               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures[2]);
          }
       }
       createHeightMap();
@@ -178,6 +181,7 @@ public class World {
          if(riverPath.size() >= 5)
             for(int y = 0; y < riverPath.size() / 5; y++)
                placeBridge(riverPath);
+         setRiverTileDirections(riverPath);
       }
       
       placeFactories(teamOne, 0, width / 5);
@@ -195,7 +199,7 @@ public class World {
             col = rand.nextInt(max - min) + min;
             row = rand.nextInt(height - 1) + 1;
          }
-         tiles[row][col] = new City(this, col, row, null);
+         tiles[row][col] = new City(this, col, row, null, manager.tileTextures[15]);
       }
       
    }
@@ -225,15 +229,94 @@ public class World {
          attempts++;
       }
       if(attempts < 100)
-         tiles[riverPath.get(spot).getY()][riverPath.get(spot).getX()] = new Bridge(this, riverPath.get(spot).getX(), riverPath.get(spot).getY());
+         tiles[riverPath.get(spot).getY()][riverPath.get(spot).getX()] = new Bridge(this, riverPath.get(spot).getX(), riverPath.get(spot).getY(), null);
    }
    
    public void setRiverTileDirections(ArrayList<Coordinate> riverPath) {
-      Iterator<Coordinate> riverBoat = riverPath.iterator();
-      while(riverBoat.hasNext()) {
-         // you should implement this at some point
+      int currX = riverPath.get(0).getX();
+      int currY = riverPath.get(0).getY();
+      
+      int nextX = riverPath.get(1).getX();
+      int nextY = riverPath.get(1).getY();
+      
+      int prevX = 0;
+      int prevY = 0;
+      
+      if(currX == nextX) {
+         if(currY < nextY)
+            tiles[currY][currX].setTexture(manager.tileTextures[22]);
+         else
+            tiles[currY][currX].setTexture(manager.tileTextures[20]);;
       }
-   }
+      else {
+         if(currX < nextX)
+            tiles[currY][currX].setTexture(manager.tileTextures[21]);
+         else
+            tiles[currY][currX].setTexture(manager.tileTextures[23]);
+      }
+      
+      for(int x = 1; x < riverPath.size() - 1; x++) {
+         prevX = currX;
+         prevY = currY;         
+         currX = riverPath.get(x).getX();
+         currY = riverPath.get(x).getY();         
+         nextX = riverPath.get(x + 1).getX();
+         nextY = riverPath.get(x + 1).getY();
+         
+         if(prevX == currX && currX == nextX)
+            if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
+               tiles[currY][currX].setTexture(manager.tileTextures[19]);
+            else
+               tiles[currY][currX].setTexture(manager.tileTextures[28]);
+         else if(prevY == currY && currY == nextY)
+            if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
+               tiles[currY][currX].setTexture(manager.tileTextures[18]);
+            else
+               tiles[currY][currX].setTexture(manager.tileTextures[29]);
+         else if(prevX < nextX) {
+            if(prevY < nextY) {
+               if(prevX == currX)
+                  tiles[currY][currX].setTexture(manager.tileTextures[25]);
+               if(prevY  == currY)
+                  tiles[currY][currX].setTexture(manager.tileTextures[26]);
+            }
+            else {
+               if(prevX == currX)
+                  tiles[currY][currX].setTexture(manager.tileTextures[27]);
+               else
+                  tiles[currY][currX].setTexture(manager.tileTextures[24]);
+            }
+               
+         }
+         else if(prevX > nextX) {
+            if(prevY > nextY) {
+               if(prevX == currX)
+                  tiles[currY][currX].setTexture(manager.tileTextures[26]);
+               if(prevY  == currY)
+                  tiles[currY][currX].setTexture(manager.tileTextures[25]);
+            }
+            else {
+               if(prevX == currX)
+                  tiles[currY][currX].setTexture(manager.tileTextures[24]);
+               else
+                  tiles[currY][currX].setTexture(manager.tileTextures[27]);
+            }          
+         }         
+      }
+      
+      if(nextX == currX) {
+         if(nextY < currY)
+            tiles[nextY][nextX].setTexture(manager.tileTextures[22]);
+         else
+            tiles[nextY][nextX].setTexture(manager.tileTextures[20]); 
+      }
+      else {
+         if(nextX < currX)
+            tiles[nextY][nextX].setTexture(manager.tileTextures[21]);
+         else
+            tiles[nextY][nextX].setTexture(manager.tileTextures[23]);
+      }      
+   }  
    
    public ArrayList<Coordinate> generateRiver(int MLE) {
       ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
@@ -247,7 +330,7 @@ public class World {
          attempts++;
       }
       riverPath.add(new Coordinate(col, row));
-      tiles[row][col] = new River(this, col, row);
+      tiles[row][col] = new River(this, col, row,null);
       int maxLength = rand.nextInt(MLE - (MLE / 2)) + (MLE / 2);
       int length = 0;
       while(length < maxLength) {
@@ -257,7 +340,7 @@ public class World {
          riverPath.add(next);
          col = next.getX();
          row = next.getY();
-         tiles[row][col] = new River(this, col, row);
+         tiles[row][col] = new River(this, col, row, null);
          length++;
       }
       return riverPath;
@@ -357,13 +440,13 @@ public class World {
             west = col - 1 < 0 || tiles[row][col - 1].getType() == TILE_TYPE.MOUNTAIN;
             if(north && south && east && west)
                if(!(row - 1 < 0))
-                  tiles[row - 1][col] = new Plain(this, col, row - 1);
+                  tiles[row - 1][col] = new Plain(this, col, row - 1, manager.tileTextures[0]);
                else if(!(row + 1 >= height))
-                  tiles[row + 1][col] = new Plain(this, col, row + 1);
+                  tiles[row + 1][col] = new Plain(this, col, row + 1, manager.tileTextures[0]);
                else if(!(col + 1 >= width))
-                  tiles[row][col + 1] = new Plain(this, col + 1, row);
+                  tiles[row][col + 1] = new Plain(this, col + 1, row, manager.tileTextures[0]);
                else
-                  tiles[row][col - 1] = new Plain(this, col - 1, row);
+                  tiles[row][col - 1] = new Plain(this, col - 1, row, manager.tileTextures[0]);
          }
       }
    }
@@ -377,7 +460,10 @@ public class World {
             row = (int)(Math.random() * height);
             spot = tiles[row][col];
          }
-         tiles[row][col] = new Factory(this, col, row, team);
+         if(team.equals(teamOne))
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[12]);
+         else
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[13]);
          team.getFactories().add((Factory)tiles[row][col]);
       }
    }
@@ -422,6 +508,8 @@ public class World {
             row = (int)(Math.random() * height);
          }
          team.createUnit(tiles[row][col], randUnitType());
+         if(team.equals(teamTwo))
+            team.getUnits().get(x).setDir(DIRECTION.LEFT);
          if((x + 1) % (double)(team.getTeamSize() / (width / 5)) == 0)
             col++;
          if(col >= width)
@@ -463,4 +551,29 @@ public class World {
    public void setHeightMap(int heightMap[][]) {
       this.heightMap = heightMap;
    }
+   
+   public GraphicsManager getManager() {
+      return manager;
+   }
+
+   public void setManager(GraphicsManager manager) {
+      this.manager = manager;
+   }
+   
+   public Team getTeamTwo() {
+      return teamTwo;
+   }
+
+   public void setTeamTwo(Team teamTwo) {
+      this.teamTwo = teamTwo;
+   }
+
+   public Team getTeamOne() {
+      return teamOne;
+   }
+
+   public void setTeamOne(Team teamOne) {
+      this.teamOne = teamOne;
+   }
+
 }

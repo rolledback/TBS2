@@ -25,12 +25,11 @@ import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
+import com.rolledback.units.Unit.DIRECTION;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
 
-   final int animationDelay = 0;
-   
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE
    }
@@ -49,6 +48,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    Unit targetUnit;
    Rectangle[][] grid;
    GAME_STATE state;
+   GraphicsManager manager;
    
    int UNIT_DENSITY = 5;
    
@@ -57,9 +57,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       gameWidth = x;
       gameHeight = y;
       
+      manager = new GraphicsManager();
+      
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);      
-      teamOne = new ComputerTeamC("CPU1", teamSize, 0, this);
-      teamTwo = new ComputerTeamC("CPU2", teamSize, 0, this);
+      teamOne = new Team("CPU1", teamSize, 0);
+      teamTwo = new Team("CPU2", teamSize, 0);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
@@ -88,7 +90,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void paintComponent(Graphics g) {  
-      delay(animationDelay);
       drawTiles(g);
       //drawHeightMap(g);
       drawUnits(g);
@@ -212,40 +213,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void drawTiles(Graphics g) {
-      for(int x = 0; x < gameWidth; x++) {
+      for(int x = 0; x < gameWidth; x++)
          for(int y = 0; y < gameHeight; y++) {
-            Color tileColor;
-            if(world.getTiles()[y][x].getType() == TILE_TYPE.FOREST)
-               tileColor = new Color(0, 128, 0);
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.PLAIN)
-               tileColor = new Color(126, 208, 102);
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.MOUNTAIN)
-               tileColor = Color.lightGray;
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.RIVER)
-               tileColor = new Color(41, 32, 132);
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
-               tileColor = new Color(128, 128, 0);
-            else if(world.getTiles()[y][x].getType() == TILE_TYPE.CITY) {
-               if(((City)world.getTiles()[y][x]).getOwner() == null)
-                  tileColor = Color.MAGENTA;
-               else if(((City)world.getTiles()[y][x]).getOwner().equals(teamOne))
-                  tileColor = Color.orange;
-               else
-                  tileColor = Color.cyan;
-            }
-            else {
-               if(((Factory)world.getTiles()[y][x]).getOwner().equals(teamOne))
-                  tileColor = Color.red;
-               else
-                  tileColor = Color.blue;
-            }
-            
-            g.setColor(tileColor);
-            g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
-            g.setColor(Color.black);
-            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
+            Tile currTile = world.getTiles()[y][x];
+            g.drawImage(currTile.getTexture(), tileSize * x, tileSize * y, tileSize, tileSize, this);
          }
-      }
    }
    
    public void drawHeightMap(Graphics g) {
@@ -276,33 +248,52 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       while(i.hasNext()) {
          Unit temp = i.next();
          UNIT_TYPE u = temp.getType();
-         String uString = "";
          if(u == UNIT_TYPE.INFANTRY)
-            uString = "I";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[0], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[4], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
-            uString = "T";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[2], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[6], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
-            uString = "D";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[3], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[7], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
-            uString = "R";
-         g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + 10, (temp.getY() * tileSize) + offsetVertical + (tileSize / 2) + 10);
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[1], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[5], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
       }
       
       i = teamTwo.getUnits().iterator();
       while(i.hasNext()) {
          Unit temp = i.next();
          UNIT_TYPE u = temp.getType();
-         String uString = "";
          if(u == UNIT_TYPE.INFANTRY)
-            uString = "i";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[8], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[12], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);         
          if(u == UNIT_TYPE.TANK)
-            uString = "t";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[10], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[14], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);        
          if(u == UNIT_TYPE.TANK_DEST)
-            uString = "d";
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[11], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[15], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);         
          if(u == UNIT_TYPE.RPG)
-            uString = "r";
-         g.drawString(uString, (temp.getX() * tileSize) + offsetHorizontal + (tileSize / 2), (temp.getY() * tileSize) + offsetVertical
-               + (tileSize / 2) + 10);
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[9], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+            else
+               g.drawImage(manager.unitImages[13], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
       }
    }
    
@@ -473,6 +464,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(SwingUtilities.isLeftMouseButton(arg0)){
          int eventX = arg0.getX();
          int eventY = arg0.getY();
+         if(eventY < 64)
+            switchTeams();
+         else
          for(int row = 0; row < gameHeight; row++)
             for(int col = 0; col < gameWidth; col++)
                if(grid[row][col].contains(eventX, eventY)) {

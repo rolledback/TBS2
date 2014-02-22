@@ -1,5 +1,6 @@
 package com.rolledback.terrain;
 
+import java.awt.Image;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,11 +15,12 @@ public class Factory extends Tile {
    private HashMap<UNIT_TYPE, Integer> productionList;
    private int resourceValue = 0;
    
-   public Factory(World w, int x, int y, Team team) {
+   public Factory(World w, int x, int y, Team team, Image t) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F');
       owner = team;
       productionList = new HashMap<UNIT_TYPE, Integer>();
       type = TILE_TYPE.FACTORY;
+      texture = t;
       initProductionList();
    }
    

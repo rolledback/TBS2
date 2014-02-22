@@ -1,5 +1,7 @@
 package com.rolledback.terrain;
 
+import java.awt.Image;
+
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.units.Unit;
@@ -9,10 +11,11 @@ public class City extends Tile {
    private Team owner;
    private int resourceValue = 50;
    
-   public City(World w, int x, int y, Team o) {
+   public City(World w, int x, int y, Team o, Image t) {
       super(w, x, y, new TerrainEffect(0, 20, 0), 'c');
       owner = o;
       type = TILE_TYPE.CITY;
+      texture = t;
    }
    
    public Team getOwner() {
@@ -32,6 +35,10 @@ public class City extends Tile {
          owner.getCities().remove(this);
       owner = unit.getOwner();
       unit.getOwner().getCities().add(this);
+      if(owner.equals(world.getTeamOne()))
+         texture = world.getManager().tileTextures[8];
+      else
+         texture = world.getManager().tileTextures[9];
    }
    
 }

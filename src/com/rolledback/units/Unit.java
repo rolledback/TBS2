@@ -1,9 +1,7 @@
 package com.rolledback.units;
 
-import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.TreeSet;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.teams.Team;
@@ -43,7 +41,7 @@ public class Unit {
    protected UNIT_CLASS classification;
    protected UNIT_TYPE type;
    
-   DIRECTION dir;
+   private DIRECTION dir;
    private Team owner;
    
    public Unit(int x, int y, Tile t, Team o) {
@@ -56,7 +54,7 @@ public class Unit {
       moveRange = 0;
       this.x = x;
       this.y = y;
-      dir = DIRECTION.RIGHT;
+      setDir(DIRECTION.RIGHT);
       health = 100;
       maxHealth = 100;
       alive = true;
@@ -70,7 +68,10 @@ public class Unit {
    }
    
    public void move(Tile tile) {
-      //System.out.println("Moving from " + currentTile.toString() + " to: " + tile.toString());
+      if(x < tile.getX())
+         setDir(DIRECTION.RIGHT);
+      if(x > tile.getX())
+         setDir(DIRECTION.LEFT);
       currentTile.setOccupied(false);
       currentTile.setOccupiedBy(null);
       this.x = tile.getX();
@@ -239,5 +240,13 @@ public class Unit {
 
    public void setHealth(int health) {
       this.health = health;
+   }
+
+   public DIRECTION getDir() {
+      return dir;
+   }
+
+   public void setDir(DIRECTION dir) {
+      this.dir = dir;
    }
 }

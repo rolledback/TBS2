@@ -1,7 +1,9 @@
 package com.rolledback.terrain;
 
+import java.awt.Image;
+
 import com.rolledback.framework.World;
-import com.rolledback.units.*;
+import com.rolledback.units.Unit;
 
 public class Tile {
    
@@ -17,6 +19,7 @@ public class Tile {
    private char mapChar;
    protected World world;
    Unit occupiedBy;
+   protected Image texture;
    
    public Tile(World w, int x, int y, TerrainEffect e, char m) {
       this.x = x;
@@ -28,6 +31,7 @@ public class Tile {
       mapChar = m;
       world = w;
       occupiedBy = null;
+      texture = null;
    }
    
    public void setOccupiedBy(Unit u) {
@@ -92,6 +96,14 @@ public class Tile {
    
    public TILE_TYPE getType() {
       return type;
+   }
+
+   public Image getTexture() {
+      return texture;
+   }
+
+   public void setTexture(Image texture) {
+      this.texture = texture;
    }
    
 }

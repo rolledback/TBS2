@@ -21,7 +21,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamC extends ComputerTeam {
    
-   final int animationDelay = 100;
+   final int animationDelay = 750;
    ArrayList<Coordinate> cityLocations;
    public int[] unitsProduced = new int[4];
    
@@ -106,7 +106,7 @@ public class ComputerTeamC extends ComputerTeam {
       Unit closestUnit = minEntry.getKey();
       
       // if you can attack the enemy, do so
-      if(unit.getAttackSet().contains(new Coordinate(closestUnit.getY(), closestUnit.getX())))
+      if(unit.getAttackSet().contains(new Coordinate(closestUnit.getX(), closestUnit.getY())))
          return new Coordinate(closestUnit.getX(), closestUnit.getY());
       
       // if not, find move spot closest to that unit
@@ -137,7 +137,7 @@ public class ComputerTeamC extends ComputerTeam {
             try {
                int r = unit.getY() + yDirs[i];
                int c = unit.getX() + xDirs[i];
-               if(unit.getAttackSet().contains(new Coordinate(r, c)))
+               if(unit.getAttackSet().contains(new Coordinate(c, r)))
                   return new Coordinate(c, r);
             }
             catch(Exception e) {

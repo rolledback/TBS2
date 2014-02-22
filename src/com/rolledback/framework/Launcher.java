@@ -7,10 +7,25 @@ public class Launcher {
    static Game newGame;
    
    public static void main(String args[]) {
-      //init(104, 56); //1920x1080 @ 16x16 tiles
-      //init(52, 28); // 1920x1080 @ 32x32 tiles
-      init(26, 14); //1920x1080 @ 64x64 tiles
-      //init(13, 7); //1920x1080 @ 128x128 tiles
+      int[] dimensions = calcDimensions(128);
+      init(dimensions[0], dimensions[1]);
+   }
+   
+   public static int[] calcDimensions(int size) {
+      int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+      int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+      
+      screenHeight -= (int)((double)screenHeight / 10);
+      screenWidth -= (int)((double)screenWidth / 10);
+      
+      while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
+         screenWidth--;
+      while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
+         screenHeight--;
+      
+      int[] d = {screenWidth / size, screenHeight / size};
+      
+      return d;
    }
    
    public static void init(int x, int y) {
