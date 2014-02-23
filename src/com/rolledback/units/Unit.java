@@ -98,7 +98,7 @@ public class Unit {
    public void takeDamage(int amount) {
       Random random = new Random();
       int adHocDefense = defense + currentTile.getEffect().defenseBonus;
-      if(adHocDefense  <= 0)
+      if(adHocDefense <= 0)
          adHocDefense = 1;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
       health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
@@ -233,19 +233,19 @@ public class Unit {
    public void getCaptureSet(HashSet<Coordinate> captureSet) {
       this.captureSet = captureSet;
    }
-
+   
    public int getHealth() {
       return health;
    }
-
+   
    public void setHealth(int health) {
       this.health = health;
    }
-
+   
    public DIRECTION getDir() {
       return dir;
    }
-
+   
    public void setDir(DIRECTION dir) {
       this.dir = dir;
    }

@@ -2,8 +2,6 @@ package com.rolledback.framework;
 
 import java.awt.Image;
 import java.io.IOException;
-import java.util.Arrays;
-
 import javax.imageio.ImageIO;
 
 public class GraphicsManager {
@@ -20,33 +18,34 @@ public class GraphicsManager {
    }
    
    public String toString() {
-      return tileTextures.length + " " + unitImages.length; 
+      return tileTextures.length + " " + unitImages.length;
    }
    
    public void initTileImages() {
       try {
          tileTextures[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png"));
          tileTextures[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("forest.png"));
-         tileTextures[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("mountain.png"));     
-         tileTextures[3] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge.png"));         
-         tileTextures[4] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river.png"));      
+         tileTextures[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("mountain.png"));
+         tileTextures[3] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge.png"));
+         tileTextures[4] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river.png"));
          tileTextures[5] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner.png"));
          tileTextures[6] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd.png"));
          tileTextures[8] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityRed.png"));
-         tileTextures[9] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityBlue.png"));     
+         tileTextures[9] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityBlue.png"));
          tileTextures[15] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityGrey.png"));
-         tileTextures[12] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryRed.png"));         
-         tileTextures[13] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryBlue.png"));      
+         tileTextures[12] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryRed.png"));
+         tileTextures[13] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryBlue.png"));
          tileTextures[17] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryGrey.png"));
+         
          tileTextures[18] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_horizontal.png"));
          tileTextures[19] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_vertical.png"));
          
-         tileTextures[20] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_up.png"));      
+         tileTextures[20] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_up.png"));
          tileTextures[21] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_right.png"));
          tileTextures[22] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_down.png"));
          tileTextures[23] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_left.png"));
          
-         tileTextures[24] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_one.png"));      
+         tileTextures[24] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_one.png"));
          tileTextures[25] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_two.png"));
          tileTextures[26] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_three.png"));
          tileTextures[27] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_four.png"));
@@ -57,7 +56,7 @@ public class GraphicsManager {
       catch(IOException e) {
          System.out.println("Error loading image. " + e.toString());
          e.printStackTrace();
-      }     
+      }
    }
    
    public void initUnitImages() {
@@ -85,7 +84,7 @@ public class GraphicsManager {
       catch(IOException e) {
          System.out.println("Error loading image. " + e.toString());
          e.printStackTrace();
-      }      
-   }   
+      }
+   }
    
 }

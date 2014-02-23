@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.JOptionPane;
@@ -29,13 +28,12 @@ import com.rolledback.units.Unit.DIRECTION;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
-
+   
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE
    }
    
    private static final long serialVersionUID = 1L;
-   
    public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, guiHeight, selectedX, selectedY;
    public Team teamOne, teamTwo;
    
@@ -59,16 +57,18 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       manager = new GraphicsManager();
       
-      teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);      
-      teamOne = new ComputerTeamC("CPU1", teamSize, 0, this);
-      teamTwo = new ComputerTeamC("CPU2", teamSize, 0, this);
+      teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
+      teamOne = new Team("team one", teamSize, 0);
+      teamTwo = new Team("team two", teamSize, 0);
       currentTeam = teamTwo;
       
-      if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class) || teamOne.getClass().equals(ComputerTeamC.class))
+      if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class)
+            || teamOne.getClass().equals(ComputerTeamC.class))
          ((ComputerTeam)teamOne).setOpponent(teamTwo);
-      if(teamTwo.getClass().equals(ComputerTeamA.class) || teamTwo.getClass().equals(ComputerTeamB.class) || teamTwo.getClass().equals(ComputerTeamC.class))
+      if(teamTwo.getClass().equals(ComputerTeamA.class) || teamTwo.getClass().equals(ComputerTeamB.class)
+            || teamTwo.getClass().equals(ComputerTeamC.class))
          ((ComputerTeam)teamTwo).setOpponent(teamOne);
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo);      
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
@@ -87,9 +87,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedY = 0;
    }
    
-   public void paintComponent(Graphics g) {  
+   public void paintComponent(Graphics g) {
       drawTiles(g);
-      //drawHeightMap(g);
+      // drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -168,19 +168,19 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setMoved(false);
          temp.setAttacked(false);
       }
-      
-      if(teamTwo.getUnits().size() == 0) {
-         winner = teamOne;
-         this.setVisible(false);
-         return;
-      }
-      
-      if(teamOne.getUnits().size() == 0) {
-         winner = teamTwo;
-         this.setVisible(false);
-         return;
-      }
-      
+      //
+      // if(teamTwo.getUnits().size() == 0) {
+      // winner = teamOne;
+      // this.setVisible(false);
+      // return;
+      // }
+      //
+      // if(teamOne.getUnits().size() == 0) {
+      // winner = teamTwo;
+      // this.setVisible(false);
+      // return;
+      // }
+      //
       
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
@@ -194,7 +194,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       state = GAME_STATE.NORMAL;
       
-      if(currentTeam.getClass().equals(ComputerTeamC.class) || currentTeam.getClass().equals(ComputerTeamA.class) || currentTeam.getClass().equals(ComputerTeamB.class)) {
+      if(currentTeam.getClass().equals(ComputerTeamC.class) || currentTeam.getClass().equals(ComputerTeamA.class)
+            || currentTeam.getClass().equals(ComputerTeamB.class)) {
          ((ComputerTeam)currentTeam).executeTurn();
          switchTeams();
       }
@@ -268,17 +269,17 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             if(temp.getDir() == DIRECTION.LEFT)
                g.drawImage(manager.unitImages[8], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[12], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);         
+               g.drawImage(manager.unitImages[12], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
             if(temp.getDir() == DIRECTION.LEFT)
                g.drawImage(manager.unitImages[10], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[14], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);        
+               g.drawImage(manager.unitImages[14], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
             if(temp.getDir() == DIRECTION.LEFT)
                g.drawImage(manager.unitImages[11], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[15], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);         
+               g.drawImage(manager.unitImages[15], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
             if(temp.getDir() == DIRECTION.LEFT)
                g.drawImage(manager.unitImages[9], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
@@ -307,6 +308,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public void gameLoop(int xTile, int yTile) {
       int x = xTile; // click data
       int y = yTile; // click data
+      
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
@@ -369,7 +371,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(!unitSelected) {
          selectedUnit = null;
       }
-      this.repaint();//update(this.getGraphics());
+      this.repaint();// update(this.getGraphics());
       return;
    }
    
@@ -377,7 +379,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       Color moveColor = new Color(0, 128, 128, 135);
       Color attackColor = new Color(255, 0, 0, 165);
       Color captureColor = new Color(255, 255, 0, 165);
-
+      
       g.setColor(moveColor);
       for(Coordinate c: selectedUnit.getMoveSet())
          g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
@@ -416,6 +418,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       return selectedTile;
    }
    
+   public void gameDebugMini() {
+      System.out.println("Unit selected: " + unitSelected);
+      System.out.println(selectedUnit);
+      System.out.println(selectedTile);
+      System.out.println("Team one: " + teamOne.toString());
+      System.out.println("Team two: " + teamTwo.toString());
+   }
+   
    public void gameDebugFull() {
       System.out.println("----------------------------------");
       System.out.println("Game Debug: Full");
@@ -451,12 +461,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    @Override
    public void mouseClicked(MouseEvent arg0) {
       System.out.println("Click.");
-      if(SwingUtilities.isLeftMouseButton(arg0)){
+      if(SwingUtilities.isLeftMouseButton(arg0)) {
          int eventX = arg0.getX();
          int eventY = arg0.getY();
-         if(eventY < 64)
-            switchTeams();
-         else
          for(int row = 0; row < gameHeight; row++)
             for(int col = 0; col < gameWidth; col++)
                if(grid[row][col].contains(eventX, eventY)) {

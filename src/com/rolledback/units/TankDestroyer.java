@@ -8,8 +8,8 @@ public class TankDestroyer extends Unit {
    public TankDestroyer(int x, int y, Tile t, Team o) {
       super(x, y, t, o);
       classification = UNIT_CLASS.VEHICLE;
-      minAttack = 15;
-      maxAttack = 25;
+      minAttack = 20;
+      maxAttack = 250;
       infAttackBonus = -10;
       vehAttackBonus = 10;
       defense = 6;

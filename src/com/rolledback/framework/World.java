@@ -1,5 +1,6 @@
 package com.rolledback.framework;
 
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,7 +25,7 @@ public class World {
    private int heightMap[][];
    private int width, height;
    private GraphicsManager manager;
-
+   
    public World(int w, int h, Team a, Team b) {
       width = w;
       height = h;
@@ -34,8 +35,8 @@ public class World {
       teamTwo = b;
       manager = new GraphicsManager();
       buildMap();
-      buildArmy(teamOne, 0, w / 5);
-      buildArmy(teamTwo, w - (w / 5), w);
+      // buildArmy(teamOne, 0, w / 5);
+      // buildArmy(teamTwo, w - (w / 5), w);
    }
    
    public void printMap() {
@@ -138,19 +139,20 @@ public class World {
       }
       else if(tiles[y][x].getType() == TILE_TYPE.CITY)
          unit.getMoveSet().add(thisCoord);
-      else if(canTraverse(unit, tiles[y][x])){
+      else if(canTraverse(unit, tiles[y][x])) {
          unit.getMoveSet().add(thisCoord);
       }
       range--;
-      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
+      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || tiles[y][x].isOccupied()
+            && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
          boolean mT = tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner());
          calcMoveSpotsHelper(unit, x + 1, y, range, mT);
          calcMoveSpotsHelper(unit, x - 1, y, range, mT);
          calcMoveSpotsHelper(unit, x, y + 1, range, mT);
          calcMoveSpotsHelper(unit, x, y - 1, range, mT);
-     }
-     else
-        return;
+      }
+      else
+         return;
    }
    
    public boolean canTraverse(Unit unit, Tile tile) {
@@ -162,73 +164,226 @@ public class World {
    }
    
    public void buildMap() {
-      for(int row = 0; row < tiles.length; row++) {
-         for(int col = 0; col < tiles[row].length; col++) {
-            double type = Math.random();
-            if(type <= .75)
-               tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
-            else if(type > .75 && type <= .96)
-               tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
-            else
-               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures[2]);
-         }
-      }
+      long start = System.currentTimeMillis();
+      System.out.println("> building map");
+      System.out.println("> dimensions: " + width + ", " + height);
+      initialTerrain();
       createHeightMap();
-      int maxLengthLimit = (int)(Math.sqrt(Math.pow(height, 2) + Math.pow(width, 2))) / 2;
-      for(int x = 0; x < (int)Math.sqrt(maxLengthLimit); x++) {
-         ArrayList<Coordinate> riverPath = generateRiver(maxLengthLimit);
-         if(riverPath.size() >= 5)
-            for(int y = 0; y < riverPath.size() / 5; y++)
-               placeBridge(riverPath);
-         setRiverTileDirections(riverPath);
-      }
-      
+      generateRivers();
       placeFactories(teamOne, 0, width / 5);
       placeFactories(teamTwo, width - (width / 5), width);
       placeCities((int)Math.sqrt(width + height), (int)(width / 5), (int)(width - (width / 5)));
-      lookForTraps();
+      long end = System.currentTimeMillis();
+      System.out.println("> map building complete (" + (end - start) + " milliseconds)");
    }
    
-   public void placeCities(int numCities, int min, int max) {
-      for(int x = 0; x < numCities; x++) {
-         Random rand = new Random();
-         int col = rand.nextInt(max - min) + min;
-         int row = rand.nextInt(height - 1) + 1;
-         while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
-            col = rand.nextInt(max - min) + min;
-            row = rand.nextInt(height - 1) + 1;
+   public void initialTerrain() {
+      System.out.println("> creating initial terrain");
+      double numPlains = 0;
+      double numForests = 0;
+      double numMountains = 0;
+      
+      for(int row = 0; row < tiles.length; row++)
+         for(int col = 0; col < tiles[row].length; col++) {
+            double type = Math.random();
+            if(type <= .75) {
+               numPlains++;
+               tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
+            }
+            else if(type > .75 && type <= .94) {
+               numForests++;
+               tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
+            }
+            else {
+               numMountains++;
+               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures[2]);
+            }
          }
-         tiles[row][col] = new City(this, col, row, null, manager.tileTextures[15]);
-      }
-      
+      numPlains /= (double)(width * height);
+      numForests /= (double)(width * height);
+      numMountains /= (double)(width * height);
+      System.out.println("> creation completed");
+      System.out.println("> plains: " + numPlains * 100 + "% forest: " + numForests * 100 + "% mountains: " + numMountains * 100 + "%");
    }
    
-   public void placeBridge(ArrayList<Coordinate> riverPath) {
-      Random rand = new Random();
-      int spot = rand.nextInt(riverPath.size() - 2) + 1;
-      int prevX = riverPath.get(spot - 1).getX();
-      int prevY = riverPath.get(spot - 1).getY();
-      
-      int curX = riverPath.get(spot).getX();
-      int curY = riverPath.get(spot).getY();
-      
-      int nextX = riverPath.get(spot + 1).getX();
-      int nextY = riverPath.get(spot + 1).getY();
-      int attempts = 0;
-      while(!(prevX == curX && nextX == curX) && !(prevY == curY && nextY == curY) && attempts < 100) {
-         spot = rand.nextInt(riverPath.size() - 2) + 1;
-         prevX = riverPath.get(spot - 1).getX();
-         prevY = riverPath.get(spot - 1).getY();
-         
-         curX = riverPath.get(spot).getX();
-         curY = riverPath.get(spot).getY();
-         
-         nextX = riverPath.get(spot + 1).getX();
-         nextY = riverPath.get(spot + 1).getY();
-         attempts++;
+   public void createHeightMap() {
+      System.out.println("> creating height map");
+      double heightAvg = 0;
+      for(int row = 0; row < tiles.length; row++)
+         for(int col = 0; col < tiles[row].length; col++) {
+            if(tiles[row][col].getType() == TILE_TYPE.MOUNTAIN)
+               heightAvg += heightMap[row][col] = 3;
+            else if(mountainNextTo(col, row)) {
+               heightAvg += heightMap[row][col] = 2;
+               if(row < height - 1 && heightMap[row + 1][col] != 2 && heightMap[row + 1][col] != 3)
+                  heightAvg += heightMap[row + 1][col] = 1;
+               
+               if(row > 0 && heightMap[row - 1][col] != 2 && heightMap[row - 1][col] != 3)
+                  heightAvg += heightMap[row - 1][col] = 1;
+               
+               if(col < width - 1 && heightMap[row][col + 1] != 2 && heightMap[row][col + 1] != 3)
+                  heightAvg += heightMap[row][col + 1] = 1;
+               
+               if(col > 0 && heightMap[row][col - 1] != 2 && heightMap[row][col - 1] != 3)
+                  heightAvg += heightMap[row][col - 1] = 1;
+            }
+         }
+      System.out.println("> height map complete");
+      System.out.println("> average height: " + heightAvg / (width * height));
+   }
+   
+   public void generateRivers() {
+      System.out.println("> creating rivers");
+      int maxLength = (int)(Math.sqrt(height * height + width * width) / 2);
+      int minLength = maxLength - (maxLength / 2);
+      int numRivers = maxLength / 5;
+      int numGenerated = 0;
+      int numAttempted = 0;
+      int riverFraction = 3;
+      int minRivers = (numRivers < riverFraction) ? 1 : numRivers / riverFraction;
+      System.out.println("> max river length = " + maxLength);
+      System.out.println("> min river length = " + minLength);
+      System.out.println("> num rivers wanted = " + numRivers);
+      System.out.println("> min rivers needed = " + minRivers);
+      for(int x = 0; x < numRivers; x++) {
+         System.out.print("> generation attempt " + numAttempted + "...");
+         int genAttempts = 0;
+         ArrayList<Coordinate> river = new ArrayList<Coordinate>();
+         while(river.size() < 2 && genAttempts < 250) {
+            river = generateRiver(maxLength);
+            genAttempts++;
+            if(river.size() < 2 || river.size() < minLength)
+               river.clear();
+         }
+         numAttempted++;
+         if(genAttempts < 25) {
+            for(Coordinate c: river)
+               tiles[c.getY()][c.getX()] = new River(this, c.getX(), c.getY(), null);
+            setRiverTileDirections(river);
+            int b = placeBridges(river);
+            System.out.println("success (length " + river.size() + ", " + b + " bridges)");
+            numGenerated++;
+         }
+         else
+            System.out.println("generation failure");
+         if(x == numRivers - 1 && numGenerated < minRivers)
+            x = 0;
       }
-      if(attempts < 100)
-         tiles[riverPath.get(spot).getY()][riverPath.get(spot).getX()] = new Bridge(this, riverPath.get(spot).getX(), riverPath.get(spot).getY(), null);
+      double rate = ((double)(numAttempted - numGenerated) / (double)numAttempted * 100.0);
+      System.out.println("> " + numGenerated + " rivers generated (" + rate + "% failure)");
+   }
+   
+   public ArrayList<Coordinate> generateRiver(int MLE) {
+      ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
+      Random rand = new Random();
+      int bound = 5;
+      int row = rand.nextInt(height - (height / bound) - (height / bound)) + (height / bound);
+      int col = rand.nextInt(width - (width / bound) - (width / bound)) + (width / bound);
+      int attempts = 0;
+      while(heightMap[row][col] != 2 || tiles[row][col].getType() == TILE_TYPE.RIVER || numRiverNextTo(col, row, riverPath) != 0) {
+         row = rand.nextInt(height - (height / bound) - (height / bound)) + (height / bound);
+         col = rand.nextInt(width - (width / bound) - (width / bound)) + (width / bound);
+         attempts++;
+         if(attempts > 25)
+            break;
+      }
+      if(attempts > 25) {
+         riverPath.clear();
+         return riverPath;
+      }
+      riverPath.add(new Coordinate(col, row));
+      int maxLength = rand.nextInt(MLE - (MLE / 2)) + (MLE / 2);
+      int length = 0;
+      while(length < maxLength) {
+         Coordinate next = nextRiverSpot(col, row, riverPath);
+         if(next == null)
+            break;
+         riverPath.add(next);
+         length++;
+         col = next.getX();
+         row = next.getY();
+      }
+      return riverPath;
+   }
+   
+   public Coordinate nextRiverSpot(int col, int row, ArrayList<Coordinate> pathSoFar) {
+      Coordinate next = null;
+      int height = heightMap[row][col];
+      int attempts = 0;
+      
+      while(next == null && attempts < 100) {
+         double dir = Math.random();
+         try {
+            if(dir < .35 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1, pathSoFar) <= 1
+                  && !pathSoFar.contains(new Coordinate(col, row + 1)) && tiles[row + 1][col].getType() != TILE_TYPE.RIVER)
+               next = new Coordinate(col, row + 1);
+            else if(dir >= .65 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1, pathSoFar) <= 1
+                  && !pathSoFar.contains(new Coordinate(col, row - 1)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+               next = new Coordinate(col, row - 1);
+            else if(dir >= .5 && dir < .65 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row, pathSoFar) <= 1
+                  && !pathSoFar.contains(new Coordinate(col + 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+               next = new Coordinate(col + 1, row);
+            else if(dir >= .35 && dir < .5 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row, pathSoFar) <= 1
+                  && !pathSoFar.contains(new Coordinate(col - 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+               next = new Coordinate(col - 1, row);
+            if(next == null)
+               attempts++;
+         }
+         catch(Exception e) {
+         }
+      }
+      return next;
+   }
+   
+   public int numRiverNextTo(int col, int row, ArrayList<Coordinate> pathSoFar) {
+      int numRivers = 0;
+      if(row + 1 < height && (pathSoFar.contains(new Coordinate(col, row + 1)) || tiles[row + 1][col].getType() == TILE_TYPE.RIVER))
+         numRivers++;
+      if(row - 1 >= 0 && (pathSoFar.contains(new Coordinate(col, row - 1)) || tiles[row - 1][col].getType() == TILE_TYPE.RIVER))
+         numRivers++;
+      if(col + 1 < width && (pathSoFar.contains(new Coordinate(col + 1, row)) || tiles[row][col + 1].getType() == TILE_TYPE.RIVER))
+         numRivers++;
+      if(col - 1 >= 0 && (pathSoFar.contains(new Coordinate(col - 1, row)) || tiles[row][col - 1].getType() == TILE_TYPE.RIVER))
+         numRivers++;
+      return numRivers;
+   }
+   
+   public int placeBridges(ArrayList<Coordinate> path) {
+      Random rand = new Random();
+      int spot = rand.nextInt(path.size());
+      int attempts = 0;
+      int numBridges = 0;
+      int limit = (path.size() <= 4) ? 1 : path.size() / 5;
+      while(numBridges < limit && attempts < 50) {
+         Tile currTile = tiles[path.get(spot).getY()][path.get(spot).getX()];
+         Image spotImage = currTile.getTexture();
+         if(currTile.getY() > 0 && currTile.getY() < height - 1) {
+            if(spotImage.equals(manager.tileTextures[18])) {
+               Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
+               Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
+               if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
+                        manager.tileTextures[29]);
+                  numBridges++;
+               }
+            }
+            else if(spotImage.equals(manager.tileTextures[19])) {
+               Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
+               Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
+               if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
+                        manager.tileTextures[28]);
+                  numBridges++;
+               }
+            }
+            else
+               attempts++;
+         }
+         else
+            attempts++;
+         spot = rand.nextInt(path.size());
+      }
+      return numBridges;
    }
    
    public void setRiverTileDirections(ArrayList<Coordinate> riverPath) {
@@ -245,7 +400,8 @@ public class World {
          if(currY < nextY)
             tiles[currY][currX].setTexture(manager.tileTextures[22]);
          else
-            tiles[currY][currX].setTexture(manager.tileTextures[20]);;
+            tiles[currY][currX].setTexture(manager.tileTextures[20]);
+         ;
       }
       else {
          if(currX < nextX)
@@ -256,9 +412,9 @@ public class World {
       
       for(int x = 1; x < riverPath.size() - 1; x++) {
          prevX = currX;
-         prevY = currY;         
+         prevY = currY;
          currX = riverPath.get(x).getX();
-         currY = riverPath.get(x).getY();         
+         currY = riverPath.get(x).getY();
          nextX = riverPath.get(x + 1).getX();
          nextY = riverPath.get(x + 1).getY();
          
@@ -276,7 +432,7 @@ public class World {
             if(prevY < nextY) {
                if(prevX == currX)
                   tiles[currY][currX].setTexture(manager.tileTextures[25]);
-               if(prevY  == currY)
+               if(prevY == currY)
                   tiles[currY][currX].setTexture(manager.tileTextures[26]);
             }
             else {
@@ -285,13 +441,13 @@ public class World {
                else
                   tiles[currY][currX].setTexture(manager.tileTextures[24]);
             }
-               
+            
          }
          else if(prevX > nextX) {
             if(prevY > nextY) {
                if(prevX == currX)
                   tiles[currY][currX].setTexture(manager.tileTextures[26]);
-               if(prevY  == currY)
+               if(prevY == currY)
                   tiles[currY][currX].setTexture(manager.tileTextures[25]);
             }
             else {
@@ -299,117 +455,52 @@ public class World {
                   tiles[currY][currX].setTexture(manager.tileTextures[24]);
                else
                   tiles[currY][currX].setTexture(manager.tileTextures[27]);
-            }          
-         }         
+            }
+         }
       }
       
       if(nextX == currX) {
          if(nextY < currY)
             tiles[nextY][nextX].setTexture(manager.tileTextures[22]);
          else
-            tiles[nextY][nextX].setTexture(manager.tileTextures[20]); 
+            tiles[nextY][nextX].setTexture(manager.tileTextures[20]);
       }
       else {
          if(nextX < currX)
             tiles[nextY][nextX].setTexture(manager.tileTextures[21]);
          else
             tiles[nextY][nextX].setTexture(manager.tileTextures[23]);
-      }      
-   }  
-   
-   public ArrayList<Coordinate> generateRiver(int MLE) {
-      ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
-      Random rand = new Random();
-      int row = rand.nextInt(height);
-      int col = rand.nextInt(width - (width / 4) - (width / 4)) + (width / 4);
-      int attempts = 0;
-      while(heightMap[row][col] != 2 || tiles[row][col].getType() == TILE_TYPE.RIVER || numRiverNextTo(col, row) != 0 || attempts > 200) {
-         row = rand.nextInt(height);
-         col = rand.nextInt(width - (width / 4) - (width / 4)) + (width / 4);
-         attempts++;
       }
-      riverPath.add(new Coordinate(col, row));
-      tiles[row][col] = new River(this, col, row,null);
-      int maxLength = rand.nextInt(MLE - (MLE / 2)) + (MLE / 2);
-      int length = 0;
-      while(length < maxLength) {
-         Coordinate next = nextRiverSpot(col, row);
-         if(next == null)
-            break;
-         riverPath.add(next);
-         col = next.getX();
-         row = next.getY();
-         tiles[row][col] = new River(this, col, row, null);
-         length++;
-      }
-      return riverPath;
    }
    
-   public Coordinate nextRiverSpot(int col, int row) {
-      Coordinate next = null;
-      int height = heightMap[row][col];
-      int attempts = 0;
+   public void placeCities(int numCities, int min, int max) {
+      System.out.println("> placing cities");
+      for(int x = 0; x < numCities; x++) {
+         Random rand = new Random();
+         int col = rand.nextInt(max - min) + min;
+         int row = rand.nextInt(height - 1) + 1;
+         while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
+            col = rand.nextInt(max - min) + min;
+            row = rand.nextInt(height - 1) + 1;
+         }
+         tiles[row][col] = new City(this, col, row, null, manager.tileTextures[15]);
+      }
       
-      while(next == null && attempts < 100) {
-         double dir = Math.random();
-         try {
-            if(dir < .25 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1) <= 1
-                  && tiles[row + 1][col].getType() != TILE_TYPE.RIVER)
-               next = new Coordinate(col, row + 1);
-            if(dir >= .75 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1) <= 1
-                  && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
-               next = new Coordinate(col, row - 1);
-            if(dir >= .5 && dir < .75 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row) <= 1
-                  && tiles[row][col + 1].getType() != TILE_TYPE.RIVER)
-               next = new Coordinate(col + 1, row);
-            if(dir >= .25 && dir < .5 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row) <= 1
-                  && tiles[row][col - 1].getType() != TILE_TYPE.RIVER)
-               next = new Coordinate(col - 1, row);
-            if(next == null)
-               attempts++;
-         }
-         catch(Exception e) {
-         }
-      }
-      return next;
    }
    
-   public int numRiverNextTo(int col, int row) {
-      int numRivers = 0;
-      if(row + 1 < height && tiles[row + 1][col].getType() == TILE_TYPE.RIVER)
-         numRivers++;
-      if(row - 1 >= 0 && tiles[row - 1][col].getType() == TILE_TYPE.RIVER)
-         numRivers++;
-      if(col + 1 < width && tiles[row][col + 1].getType() == TILE_TYPE.RIVER)
-         numRivers++;
-      if(col - 1 >= 0 && tiles[row][col - 1].getType() == TILE_TYPE.RIVER)
-         numRivers++;
-      return numRivers;
-   }
-   
-   public void createHeightMap() {
-      for(int row = 0; row < tiles.length; row++)
-         for(int col = 0; col < tiles[row].length; col++)
-            if(tiles[row][col].getType() == TILE_TYPE.MOUNTAIN)
-               heightMap[row][col] = 3;
-            else if(mountainNextTo(col, row))
-               heightMap[row][col] = 2;
-      for(int row = 0; row < tiles.length; row++) {
-         for(int col = 0; col < tiles[row].length; col++) {
-            if(heightMap[row][col] == 2) {
-               if(row < height - 1 && heightMap[row + 1][col] != 2 && heightMap[row + 1][col] != 3)
-                  heightMap[row + 1][col] = 1;
-               
-               if(row > 0 && heightMap[row - 1][col] != 2 && heightMap[row - 1][col] != 3)
-                  heightMap[row - 1][col] = 1;
-               
-               if(col < width - 1 && heightMap[row][col + 1] != 2 && heightMap[row][col + 1] != 3)
-                  heightMap[row][col + 1] = 1;
-               
-               if(col > 0 && heightMap[row][col - 1] != 2 && heightMap[row][col - 1] != 3)
-                  heightMap[row][col - 1] = 1;
-            }
+   public void placeFactories(Team team, int min, int max) {
+      System.out.println("> placing factories for " + team.getName());
+      for(int col = min; col < max; col += 2) {
+         int row = (int)(Math.random() * height);
+         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN
+               || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+            row = (int)(Math.random() * height);
          }
+         if(team.equals(teamOne))
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[12]);
+         else
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[13]);
+         team.getFactories().add((Factory)tiles[row][col]);
       }
    }
    
@@ -447,23 +538,6 @@ public class World {
                else
                   tiles[row][col - 1] = new Plain(this, col - 1, row, manager.tileTextures[0]);
          }
-      }
-   }
-   
-   public void placeFactories(Team team, int min, int max) {
-      for(int col = min; col < max; col += 2) {
-         int row = (int)(Math.random() * height);
-         Tile spot = tiles[row][col];
-         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN
-               || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
-            row = (int)(Math.random() * height);
-            spot = tiles[row][col];
-         }
-         if(team.equals(teamOne))
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[12]);
-         else
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[13]);
-         team.getFactories().add((Factory)tiles[row][col]);
       }
    }
    
@@ -531,8 +605,8 @@ public class World {
    }
    
    public UNIT_TYPE randUnitType() {
-     // return UNIT_TYPE.INFANTRY;
-      return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];      
+      // return UNIT_TYPE.INFANTRY;
+      return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
    }
    
    public Tile[][] getTiles() {
@@ -554,7 +628,7 @@ public class World {
    public GraphicsManager getManager() {
       return manager;
    }
-
+   
    public void setManager(GraphicsManager manager) {
       this.manager = manager;
    }
@@ -562,17 +636,17 @@ public class World {
    public Team getTeamTwo() {
       return teamTwo;
    }
-
+   
    public void setTeamTwo(Team teamTwo) {
       this.teamTwo = teamTwo;
    }
-
+   
    public Team getTeamOne() {
       return teamOne;
    }
-
+   
    public void setTeamOne(Team teamOne) {
       this.teamOne = teamOne;
    }
-
+   
 }
