@@ -89,7 +89,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void paintComponent(Graphics g) {
       drawTiles(g);
-      // drawHeightMap(g);
+      //drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {

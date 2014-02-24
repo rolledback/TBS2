@@ -35,8 +35,8 @@ public class World {
       teamTwo = b;
       manager = new GraphicsManager();
       buildMap();
-      // buildArmy(teamOne, 0, w / 5);
-      // buildArmy(teamTwo, w - (w / 5), w);
+      buildArmy(teamOne, 0, w / 5);
+      buildArmy(teamTwo, w - (w / 5), w);
    }
    
    public void printMap() {
@@ -132,20 +132,16 @@ public class World {
          if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             unit.getAttackSet().add(thisCoord);
       }
-      else if(unit.getType() == UNIT_TYPE.INFANTRY && tiles[y][x].getType() == TILE_TYPE.CITY
-            && (((City)tiles[y][x]).getOwner() == null || !((City)tiles[y][x]).getOwner().equals(unit.getOwner()))) {
+      else if(canCapture(unit, tiles[y][x]))
          unit.getCaptureSet().add(thisCoord);
-         
-      }
       else if(tiles[y][x].getType() == TILE_TYPE.CITY)
          unit.getMoveSet().add(thisCoord);
       else if(canTraverse(unit, tiles[y][x])) {
          unit.getMoveSet().add(thisCoord);
       }
       range--;
-      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || tiles[y][x].isOccupied()
-            && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner())) {
-         boolean mT = tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner());
+      boolean mT = tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner());
+      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || mT) {
          calcMoveSpotsHelper(unit, x + 1, y, range, mT);
          calcMoveSpotsHelper(unit, x - 1, y, range, mT);
          calcMoveSpotsHelper(unit, x, y + 1, range, mT);
@@ -161,6 +157,14 @@ public class World {
       if(tile.getType() == TILE_TYPE.MOUNTAIN && unit.getClassification() != UNIT_CLASS.INFANTRY)
          return false;
       return true;
+   }
+   
+   public boolean canCapture(Unit unit, Tile tile) {
+      if(tile.getType() != TILE_TYPE.CITY)
+         return false;
+      if(unit.getType() != UNIT_TYPE.INFANTRY)
+         return false;
+      return !unit.getOwner().equals(((City)tile).getOwner());
    }
    
    public void buildMap() {
@@ -249,14 +253,14 @@ public class World {
          System.out.print("> generation attempt " + numAttempted + "...");
          int genAttempts = 0;
          ArrayList<Coordinate> river = new ArrayList<Coordinate>();
-         while(river.size() < 2 && genAttempts < 250) {
+         while(river.size() < 2 && genAttempts < 256) {
             river = generateRiver(maxLength);
             genAttempts++;
             if(river.size() < 2 || river.size() < minLength)
                river.clear();
          }
          numAttempted++;
-         if(genAttempts < 25) {
+         if(genAttempts < 64) {
             for(Coordinate c: river)
                tiles[c.getY()][c.getX()] = new River(this, c.getX(), c.getY(), null);
             setRiverTileDirections(river);
@@ -265,9 +269,12 @@ public class World {
             numGenerated++;
          }
          else
-            System.out.println("generation failure");
-         if(x == numRivers - 1 && numGenerated < minRivers)
+            System.out.println("failure");
+         if(x == numRivers - 1 && numGenerated < minRivers) {
+            minLength = Math.max(minLength - (int)((double)minLength * .1), 4);
+            System.out.println("> redefining min length to " + minLength);
             x = 0;
+         }
       }
       double rate = ((double)(numAttempted - numGenerated) / (double)numAttempted * 100.0);
       System.out.println("> " + numGenerated + " rivers generated (" + rate + "% failure)");
@@ -276,18 +283,19 @@ public class World {
    public ArrayList<Coordinate> generateRiver(int MLE) {
       ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
       Random rand = new Random();
-      int bound = 5;
-      int row = rand.nextInt(height - (height / bound) - (height / bound)) + (height / bound);
-      int col = rand.nextInt(width - (width / bound) - (width / bound)) + (width / bound);
+      int hBound = 5;
+      int wBound = 5;
+      int row = rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
+      int col = rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
       int attempts = 0;
       while(heightMap[row][col] != 2 || tiles[row][col].getType() == TILE_TYPE.RIVER || numRiverNextTo(col, row, riverPath) != 0) {
-         row = rand.nextInt(height - (height / bound) - (height / bound)) + (height / bound);
-         col = rand.nextInt(width - (width / bound) - (width / bound)) + (width / bound);
+         row = rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
+         col = rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
          attempts++;
-         if(attempts > 25)
+         if(attempts > 64)
             break;
       }
-      if(attempts > 25) {
+      if(attempts > 64) {
          riverPath.clear();
          return riverPath;
       }
@@ -311,19 +319,19 @@ public class World {
       int height = heightMap[row][col];
       int attempts = 0;
       
-      while(next == null && attempts < 100) {
+      while(next == null && attempts < 16) {
          double dir = Math.random();
          try {
-            if(dir < .35 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1, pathSoFar) <= 1
+            if(dir < .30 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1, pathSoFar) <= 1
                   && !pathSoFar.contains(new Coordinate(col, row + 1)) && tiles[row + 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col, row + 1);
-            else if(dir >= .65 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1, pathSoFar) <= 1
+            else if(dir >= .95 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1, pathSoFar) <= 1
                   && !pathSoFar.contains(new Coordinate(col, row - 1)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col, row - 1);
-            else if(dir >= .5 && dir < .65 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row, pathSoFar) <= 1
+            else if(dir >= .60 && dir < .90 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row, pathSoFar) <= 1
                   && !pathSoFar.contains(new Coordinate(col + 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col + 1, row);
-            else if(dir >= .35 && dir < .5 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row, pathSoFar) <= 1
+            else if(dir >= .30 && dir < .60 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row, pathSoFar) <= 1
                   && !pathSoFar.contains(new Coordinate(col - 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col - 1, row);
             if(next == null)
@@ -357,7 +365,7 @@ public class World {
       while(numBridges < limit && attempts < 50) {
          Tile currTile = tiles[path.get(spot).getY()][path.get(spot).getX()];
          Image spotImage = currTile.getTexture();
-         if(currTile.getY() > 0 && currTile.getY() < height - 1) {
+         if(currTile.getY() > 0 && currTile.getY() < height - 1 && currTile.getX() > 0 && currTile.getX() < width - 1) {
             if(spotImage.equals(manager.tileTextures[18])) {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
