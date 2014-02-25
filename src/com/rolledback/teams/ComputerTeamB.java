@@ -40,7 +40,7 @@ public class ComputerTeamB extends ComputerTeam {
          int targetY = targetUnit.getY();
          
          // generate valid move spots for unit
-         game.getWorld().calcMoveSpots(currUnit);
+         currUnit.calcMoveSpots();
          Coordinate moveHere = null;
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
@@ -158,7 +158,7 @@ public class ComputerTeamB extends ComputerTeam {
       
       // determine what enemy units attacker can attack
       Unit currUnit = attacker;
-      game.getWorld().calcMoveSpots(currUnit);
+      currUnit.calcMoveSpots();
       Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
       while(moveSetIterator.hasNext()) {
          Coordinate currentSpot = moveSetIterator.next();
@@ -232,7 +232,7 @@ public class ComputerTeamB extends ComputerTeam {
       
       // go through all enemy units in range and determine how much damage attacker can inflict
       Unit currUnit = attacker;
-      game.getWorld().calcMoveSpots(currUnit);
+      currUnit.calcMoveSpots();
       Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
       while(moveSetIterator.hasNext()) {
          Coordinate currentSpot = moveSetIterator.next();

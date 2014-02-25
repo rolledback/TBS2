@@ -44,7 +44,7 @@ public class ComputerTeamC extends ComputerTeam {
             continue;
          
          Coordinate moveHere = null;
-         game.getWorld().calcMoveSpots(currUnit);
+         currUnit.calcMoveSpots();
          
          // if you can't move, go to the next unit
          if(currUnit.getMoveSet().size() <= 0)

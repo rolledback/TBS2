@@ -18,6 +18,7 @@ import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.ComputerTeamA;
 import com.rolledback.teams.ComputerTeamB;
 import com.rolledback.teams.ComputerTeamC;
+import com.rolledback.teams.ComputerTeamD;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
@@ -58,7 +59,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       manager = new GraphicsManager();
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", teamSize, 0);
+      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
       teamTwo = new Team("team two", teamSize, 0);
       currentTeam = teamTwo;
       
@@ -195,7 +196,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       state = GAME_STATE.NORMAL;
       
       if(currentTeam.getClass().equals(ComputerTeamC.class) || currentTeam.getClass().equals(ComputerTeamA.class)
-            || currentTeam.getClass().equals(ComputerTeamB.class)) {
+            || currentTeam.getClass().equals(ComputerTeamB.class) || currentTeam.getClass().equals(ComputerTeamD.class)) {
          ((ComputerTeam)currentTeam).executeTurn();
          switchTeams();
       }
@@ -346,7 +347,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
          if(selectedUnit.getOwner().equals(currentTeam)) {
-            world.calcMoveSpots(selectedUnit);
+            selectedUnit.calcMoveSpots();
             if(!selectedUnit.hasMoved())
                state = GAME_STATE.DISPLAY_MOVE;
          }
@@ -377,8 +378,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void drawMoveSpots(Graphics g) {
       Color moveColor = new Color(0, 128, 128, 135);
-      Color attackColor = new Color(255, 0, 0, 165);
-      Color captureColor = new Color(255, 255, 0, 165);
+      Color attackColor = new Color(255, 0, 0, 135);
+      Color captureColor = new Color(255, 225, 0, 135);
       
       g.setColor(moveColor);
       for(Coordinate c: selectedUnit.getMoveSet())

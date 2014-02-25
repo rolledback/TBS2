@@ -11,7 +11,7 @@ public class Launcher {
    
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "Random" };
-      int tileSize = 64;
+      int tileSize = -1;
       if(tileSize == -1) {
          Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:\n(default 64x64)", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
                possibilities, possibilities[0]);
@@ -33,6 +33,8 @@ public class Launcher {
             }
          }
       }
+      if(tileSize == -1)
+         tileSize = 64;
       int[] dimensions = autoCalcDimensions(tileSize);
       init(dimensions[0], dimensions[1]);
    }

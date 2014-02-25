@@ -106,66 +106,7 @@ public class World {
       }
    }
    
-   public void calcMoveSpots(Unit unit) {
-      int adHocRange = unit.getMoveRange() + unit.getCurrentTile().getEffect().moveBonus;
-      if(adHocRange <= 0)
-         adHocRange = 1;
-      unit.getCurrentTile().setOccupied(false);
-      unit.getAttackSet().clear();
-      unit.getMoveSet().clear();
-      unit.getCaptureSet().clear();
-      calcMoveSpotsHelper(unit, unit.getX(), unit.getY(), adHocRange + 1, false);
-      unit.getCurrentTile().setOccupied(true);
-      unit.getMoveSet().remove(new Coordinate(unit.getX(), unit.getY()));
-   }
-   
-   public void calcMoveSpotsHelper(Unit unit, int x, int y, int range, boolean movedThrough) {
-      Coordinate thisCoord = new Coordinate(x, y);
-      if(x < 0 || x >= width || y < 0 || y >= height)
-         return;
-      else if(range <= 0) {
-         if(tiles[y][x].isOccupied() && !unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
-            unit.getAttackSet().add(thisCoord);
-         return;
-      }
-      else if(tiles[y][x].isOccupied()) {
-         if(!unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
-            unit.getAttackSet().add(thisCoord);
-      }
-      else if(canCapture(unit, tiles[y][x]))
-         unit.getCaptureSet().add(thisCoord);
-      else if(tiles[y][x].getType() == TILE_TYPE.CITY)
-         unit.getMoveSet().add(thisCoord);
-      else if(canTraverse(unit, tiles[y][x])) {
-         unit.getMoveSet().add(thisCoord);
-      }
-      range--;
-      boolean mT = tiles[y][x].isOccupied() && unit.getOwner().equals(tiles[y][x].getOccupiedBy().getOwner());
-      if(unit.getCaptureSet().contains(thisCoord) || unit.getMoveSet().contains(thisCoord) || mT) {
-         calcMoveSpotsHelper(unit, x + 1, y, range, mT);
-         calcMoveSpotsHelper(unit, x - 1, y, range, mT);
-         calcMoveSpotsHelper(unit, x, y + 1, range, mT);
-         calcMoveSpotsHelper(unit, x, y - 1, range, mT);
-      }
-      else
-         return;
-   }
-   
-   public boolean canTraverse(Unit unit, Tile tile) {
-      if(tile.getType() == TILE_TYPE.RIVER)
-         return false;
-      if(tile.getType() == TILE_TYPE.MOUNTAIN && unit.getClassification() != UNIT_CLASS.INFANTRY)
-         return false;
-      return true;
-   }
-   
-   public boolean canCapture(Unit unit, Tile tile) {
-      if(tile.getType() != TILE_TYPE.CITY)
-         return false;
-      if(unit.getType() != UNIT_TYPE.INFANTRY)
-         return false;
-      return !unit.getOwner().equals(((City)tile).getOwner());
-   }
+  
    
    public void buildMap() {
       long start = System.currentTimeMillis();
@@ -194,7 +135,7 @@ public class World {
                numPlains++;
                tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
             }
-            else if(type > .75 && type <= .94) {
+            else if(type > .75 && type <= .99) {
                numForests++;
                tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
             }
@@ -285,12 +226,12 @@ public class World {
       Random rand = new Random();
       int hBound = 5;
       int wBound = 5;
-      int row = rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
-      int col = rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
+      int row = rand.nextInt(height); //rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
+      int col = rand.nextInt(width); //rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
       int attempts = 0;
       while(heightMap[row][col] != 2 || tiles[row][col].getType() == TILE_TYPE.RIVER || numRiverNextTo(col, row, riverPath) != 0) {
-         row = rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
-         col = rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
+         row = rand.nextInt(height);// rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
+         col = rand.nextInt(width);//rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
          attempts++;
          if(attempts > 64)
             break;
@@ -655,6 +596,22 @@ public class World {
    
    public void setTeamOne(Team teamOne) {
       this.teamOne = teamOne;
+   }
+   
+   public int getHeight() {
+      return height;
+   }
+
+   public void setHeight(int height) {
+      this.height = height;
+   }
+
+   public int getWidth() {
+      return width;
+   }
+
+   public void setWidth(int width) {
+      this.width = width;
    }
    
 }

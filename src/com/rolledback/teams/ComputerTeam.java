@@ -4,7 +4,7 @@ import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
 import com.rolledback.units.Unit;
 
-public class ComputerTeam extends Team {
+public abstract class ComputerTeam extends Team {
    
    Game game;
    protected Team opponent;
@@ -16,9 +16,7 @@ public class ComputerTeam extends Team {
       game = g;
    }
    
-   public void executeTurn() {
-      // do nothing, dumb AI is dumb
-   }
+   public abstract void executeTurn();
 
    public Team getOpponent() {
       return opponent;

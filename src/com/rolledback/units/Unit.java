@@ -4,8 +4,11 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
+import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
+import com.rolledback.terrain.City;
 import com.rolledback.terrain.Tile;
+import com.rolledback.terrain.Tile.TILE_TYPE;
 
 public class Unit {
    
@@ -65,6 +68,71 @@ public class Unit {
       moveSet = new HashSet<Coordinate>();
       attackSet = new HashSet<Coordinate>();
       captureSet = new HashSet<Coordinate>();
+   }
+   
+   public void calcMoveSpots() {
+      World world = this.currentTile.getWorld();
+      int adHocRange = moveRange + currentTile.getEffect().moveBonus;
+      if(adHocRange <= 0)
+         adHocRange = 1;
+      currentTile.setOccupied(false);
+      attackSet.clear();
+      moveSet.clear();
+      captureSet.clear();
+      calcMoveSpotsHelper(world, x, y, adHocRange + 1, false);
+      currentTile.setOccupied(true);
+      moveSet.remove(new Coordinate(x, y));
+   }
+   
+   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
+      Coordinate thisCoord = new Coordinate(x, y);
+      Tile tiles[][]  = world.getTiles();
+      int height = world.getHeight();;
+      int width = world.getWidth();
+      if(x < 0 || x >= width || y < 0 || y >= height)
+         return;
+      else if(range <= 0) {
+         if(tiles[y][x].isOccupied() && !owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
+            attackSet.add(thisCoord);
+         return;
+      }
+      else if(tiles[y][x].isOccupied()) {
+         if(!owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
+            attackSet.add(thisCoord);
+      }
+      else if(canCapture(tiles[y][x]))
+         captureSet.add(thisCoord);
+      else if(tiles[y][x].getType() == TILE_TYPE.CITY)
+         moveSet.add(thisCoord);
+      else if(canTraverse(tiles[y][x])) {
+         moveSet.add(thisCoord);
+      }
+      range--;
+      boolean mT = tiles[y][x].isOccupied() && owner.equals(tiles[y][x].getOccupiedBy().getOwner());
+      if(captureSet.contains(thisCoord) || moveSet.contains(thisCoord) || mT) {
+         calcMoveSpotsHelper(world, x + 1, y, range, mT);
+         calcMoveSpotsHelper(world, x - 1, y, range, mT);
+         calcMoveSpotsHelper(world, x, y + 1, range, mT);
+         calcMoveSpotsHelper(world, x, y - 1, range, mT);
+      }
+      else
+         return;
+   }
+   
+   public boolean canTraverse(Tile tile) {
+      if(tile.getType() == TILE_TYPE.RIVER)
+         return false;
+      if(tile.getType() == TILE_TYPE.MOUNTAIN && classification != UNIT_CLASS.INFANTRY)
+         return false;
+      return true;
+   }
+   
+   public boolean canCapture(Tile tile) {
+      if(tile.getType() != TILE_TYPE.CITY)
+         return false;
+      if(type != UNIT_TYPE.INFANTRY)
+         return false;
+      return !owner.equals(((City)tile).getOwner());
    }
    
    public void move(Tile tile) {

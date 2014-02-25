@@ -30,7 +30,7 @@ public class ComputerTeamA extends ComputerTeam {
       for(int x = 0; x < units.size(); x++) {
          Unit currUnit = units.get(x);
          // generate valid move spots for unit
-         game.getWorld().calcMoveSpots(currUnit);
+         currUnit.calcMoveSpots();
          Coordinate moveHere = null;
          double lowestDistance = Integer.MAX_VALUE;
          double currentDistance = 0;
@@ -123,7 +123,7 @@ public class ComputerTeamA extends ComputerTeam {
       ListIterator<Unit> teamI = units.listIterator();
       while(teamI.hasNext()) {
          Unit currUnit = teamI.next();
-         game.getWorld().calcMoveSpots(currUnit);
+         currUnit.calcMoveSpots();
          for(int row = 0; row < game.gameHeight; row++) {
             for(int col = 0; col < game.gameWidth; col++) {
                if(currUnit.getAttackSet().contains(new Coordinate(col, row))) {
@@ -208,7 +208,7 @@ public class ComputerTeamA extends ComputerTeam {
       ListIterator<Unit> teamI = units.listIterator();
       while(teamI.hasNext()) {
          Unit currUnit = teamI.next();
-         game.getWorld().calcMoveSpots(currUnit);
+         currUnit.calcMoveSpots();
          for(int row = 0; row < game.gameHeight; row++) {
             for(int col = 0; col < game.gameWidth; col++) {
                if(currUnit.getAttackSet().contains(new Coordinate(col, row)))

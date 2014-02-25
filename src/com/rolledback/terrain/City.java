@@ -35,10 +35,10 @@ public class City extends Tile {
          owner.getCities().remove(this);
       owner = unit.getOwner();
       unit.getOwner().getCities().add(this);
-      if(owner.equals(world.getTeamOne()))
-         texture = world.getManager().tileTextures[8];
+      if(owner.equals(getWorld().getTeamOne()))
+         texture = getWorld().getManager().tileTextures[8];
       else
-         texture = world.getManager().tileTextures[9];
+         texture = getWorld().getManager().tileTextures[9];
    }
    
 }

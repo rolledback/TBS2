@@ -105,5 +105,13 @@ public class Tile {
    public void setTexture(Image texture) {
       this.texture = texture;
    }
+
+   public World getWorld() {
+      return world;
+   }
+
+   public void setWorld(World world) {
+      this.world = world;
+   }
    
 }
