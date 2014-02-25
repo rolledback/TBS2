@@ -21,7 +21,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamC extends ComputerTeam {
    
-   final int animationDelay = 100;
+   final int animationDelay = 50;
    ArrayList<Coordinate> cityLocations;
    public int[] unitsProduced = new int[4];
    

@@ -59,15 +59,15 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       manager = new GraphicsManager();
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
-      teamTwo = new Team("team two", teamSize, 0);
+      teamOne = new ComputerTeamC("team one", teamSize, 0, this);
+      teamTwo = new ComputerTeamD("team two", teamSize, 0, this);
       currentTeam = teamTwo;
       
       if(teamOne.getClass().equals(ComputerTeamA.class) || teamOne.getClass().equals(ComputerTeamB.class)
-            || teamOne.getClass().equals(ComputerTeamC.class))
+            || teamOne.getClass().equals(ComputerTeamC.class) || teamOne.getClass().equals(ComputerTeamD.class))
          ((ComputerTeam)teamOne).setOpponent(teamTwo);
       if(teamTwo.getClass().equals(ComputerTeamA.class) || teamTwo.getClass().equals(ComputerTeamB.class)
-            || teamTwo.getClass().equals(ComputerTeamC.class))
+            || teamTwo.getClass().equals(ComputerTeamC.class) || teamTwo.getClass().equals(ComputerTeamD.class))
          ((ComputerTeam)teamTwo).setOpponent(teamOne);
       world = new World(gameWidth, gameHeight, teamOne, teamTwo);
       tileSize = ts;
@@ -169,19 +169,17 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setMoved(false);
          temp.setAttacked(false);
       }
-      //
-      // if(teamTwo.getUnits().size() == 0) {
-      // winner = teamOne;
-      // this.setVisible(false);
-      // return;
-      // }
-      //
-      // if(teamOne.getUnits().size() == 0) {
-      // winner = teamTwo;
-      // this.setVisible(false);
-      // return;
-      // }
-      //
+      
+      if(teamTwo.getUnits().size() == 0) {
+         winner = teamOne;
+         return;
+      }
+      
+      if(teamOne.getUnits().size() == 0) {
+         winner = teamTwo;
+         return;
+      }
+      
       
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;

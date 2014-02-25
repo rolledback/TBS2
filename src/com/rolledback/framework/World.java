@@ -554,7 +554,7 @@ public class World {
    }
    
    public UNIT_TYPE randUnitType() {
-      // return UNIT_TYPE.INFANTRY;
+       //return UNIT_TYPE.INFANTRY;
       return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
    }
    

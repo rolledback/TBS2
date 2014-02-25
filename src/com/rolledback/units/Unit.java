@@ -132,7 +132,7 @@ public class Unit {
          return false;
       if(type != UNIT_TYPE.INFANTRY)
          return false;
-      return !owner.equals(((City)tile).getOwner());
+      return ((City)tile).getOwner() == null || !owner.equals(((City)tile).getOwner());
    }
    
    public void move(Tile tile) {
