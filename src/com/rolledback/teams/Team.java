@@ -52,7 +52,8 @@ public class Team {
    }
    
    public String toString() {
-      return "Team: " + name + "\nResources: " + resources + "\nNum units: " + units.size() + "\nFactories: " + factories.toString() + "\nCities: " + cities.toString();
+      return "Team: " + name + " Resources: " + resources + " Num units: " + units.size() + " Num factories: " + factories.size() + " Num cities: "
+            + cities.size();
    }
    
    public int getResources() {
@@ -62,35 +63,35 @@ public class Team {
    public void setResources(int resources) {
       this.resources = resources;
    }
-
+   
    public String getName() {
       return name;
    }
-
+   
    public void setName(String name) {
       this.name = name;
    }
-
+   
    public int getTeamSize() {
       return teamSize;
    }
-
+   
    public void setTeamSize(int teamSize) {
       this.teamSize = teamSize;
    }
-
+   
    public ArrayList<City> getCities() {
       return cities;
    }
-
+   
    public void setCities(ArrayList<City> cities) {
       this.cities = cities;
    }
-
+   
    public ArrayList<Factory> getFactories() {
       return factories;
    }
-
+   
    public void setFactories(ArrayList<Factory> factories) {
       this.factories = factories;
    }

@@ -1,6 +1,8 @@
 package com.rolledback.framework;
 
+import java.util.Arrays;
 import java.util.Random;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -89,20 +91,34 @@ public class Launcher {
             System.out.println("Make game less tall.");
          System.exit(-1);
       }
-      
-      int offsetHorizontal = screenWidth - (gameWidth * tileSize);
-      int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
-      newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight);
-      newGame.setDoubleBuffered(true);
-      newGame.setIgnoreRepaint(true);
-      newGame.setSize(screenWidth, screenHeight);
-      frame.getContentPane().add(newGame);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setResizable(false);
-      frame.setVisible(true);
-      frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
-      newGame.setVisible(true);
-      newGame.switchTeams();
+      GraphicsManager manager = new GraphicsManager();
+      int winner[] = { 0, 0 };
+      for(int i = 0; i < 1; i++) {
+         Logger.consolePrint("Game " + i);
+         long start = System.currentTimeMillis();
+         int offsetHorizontal = screenWidth - (gameWidth * tileSize);
+         int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
+         newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight, manager);
+         newGame.setDoubleBuffered(true);
+         newGame.setIgnoreRepaint(true);
+         newGame.setSize(screenWidth, screenHeight);
+         frame.getContentPane().add(newGame);
+         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         frame.setResizable(false);
+         frame.setVisible(true);
+         frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top
+               + frame.getInsets().bottom);
+         newGame.setVisible(true);
+         newGame.switchTeams();
+         long end = System.currentTimeMillis();
+         if(newGame.winner.equals(newGame.getWorld().getTeamOne()))
+            winner[0]++;
+         else
+            winner[1]++;
+         frame.setVisible(false);
+         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start));
+         newGame = null;
+      }
    }
    
 }

@@ -16,7 +16,6 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
-import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class World {
@@ -26,14 +25,14 @@ public class World {
    private int width, height;
    private GraphicsManager manager;
    
-   public World(int w, int h, Team a, Team b) {
+   public World(int w, int h, Team a, Team b, GraphicsManager m) {
       width = w;
       height = h;
       tiles = new Tile[h][w];
       heightMap = new int[h][w];
       teamOne = a;
       teamTwo = b;
-      manager = new GraphicsManager();
+      manager = m;
       buildMap();
       buildArmy(teamOne, 0, w / 5);
       buildArmy(teamTwo, w - (w / 5), w);
@@ -106,12 +105,10 @@ public class World {
       }
    }
    
-  
-   
    public void buildMap() {
       long start = System.currentTimeMillis();
-      System.out.println("> building map");
-      System.out.println("> dimensions: " + width + ", " + height);
+      Logger.consolePrint("building map");
+      Logger.consolePrint("dimensions: " + width + ", " + height);
       initialTerrain();
       createHeightMap();
       generateRivers();
@@ -119,11 +116,11 @@ public class World {
       placeFactories(teamTwo, width - (width / 5), width);
       placeCities((int)Math.sqrt(width + height), (int)(width / 5), (int)(width - (width / 5)));
       long end = System.currentTimeMillis();
-      System.out.println("> map building complete (" + (end - start) + " milliseconds)");
+      Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)");
    }
    
    public void initialTerrain() {
-      System.out.println("> creating initial terrain");
+      Logger.consolePrint("creating initial terrain");
       double numPlains = 0;
       double numForests = 0;
       double numMountains = 0;
@@ -135,7 +132,7 @@ public class World {
                numPlains++;
                tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
             }
-            else if(type > .75 && type <= .99) {
+            else if(type > .75 && type <= .95) {
                numForests++;
                tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
             }
@@ -147,12 +144,12 @@ public class World {
       numPlains /= (double)(width * height);
       numForests /= (double)(width * height);
       numMountains /= (double)(width * height);
-      System.out.println("> creation completed");
-      System.out.println("> plains: " + numPlains * 100 + "% forest: " + numForests * 100 + "% mountains: " + numMountains * 100 + "%");
+      Logger.consolePrint("creation completed");
+      Logger.consolePrint("plains: " + numPlains * 100 + "% forest: " + numForests * 100 + "% mountains: " + numMountains * 100 + "%");
    }
    
    public void createHeightMap() {
-      System.out.println("> creating height map");
+      Logger.consolePrint("creating height map");
       double heightAvg = 0;
       for(int row = 0; row < tiles.length; row++)
          for(int col = 0; col < tiles[row].length; col++) {
@@ -173,12 +170,12 @@ public class World {
                   heightAvg += heightMap[row][col - 1] = 1;
             }
          }
-      System.out.println("> height map complete");
-      System.out.println("> average height: " + heightAvg / (width * height));
+      Logger.consolePrint("height map complete");
+      Logger.consolePrint("average height: " + heightAvg / (width * height));
    }
    
    public void generateRivers() {
-      System.out.println("> creating rivers");
+      Logger.consolePrint("creating rivers");
       int maxLength = (int)(Math.sqrt(height * height + width * width) / 2);
       int minLength = maxLength - (maxLength / 2);
       int numRivers = maxLength / 5;
@@ -186,12 +183,12 @@ public class World {
       int numAttempted = 0;
       int riverFraction = 3;
       int minRivers = (numRivers < riverFraction) ? 1 : numRivers / riverFraction;
-      System.out.println("> max river length = " + maxLength);
-      System.out.println("> min river length = " + minLength);
-      System.out.println("> num rivers wanted = " + numRivers);
-      System.out.println("> min rivers needed = " + minRivers);
+      Logger.consolePrint("max river length = " + maxLength);
+      Logger.consolePrint("min river length = " + minLength);
+      Logger.consolePrint("num rivers wanted = " + numRivers);
+      Logger.consolePrint("min rivers needed = " + minRivers);
       for(int x = 0; x < numRivers; x++) {
-         System.out.print("> generation attempt " + numAttempted + "...");
+         Logger.consolePrint("generation attempt " + numAttempted + "...");
          int genAttempts = 0;
          ArrayList<Coordinate> river = new ArrayList<Coordinate>();
          while(river.size() < 2 && genAttempts < 256) {
@@ -206,32 +203,36 @@ public class World {
                tiles[c.getY()][c.getX()] = new River(this, c.getX(), c.getY(), null);
             setRiverTileDirections(river);
             int b = placeBridges(river);
-            System.out.println("success (length " + river.size() + ", " + b + " bridges)");
+            Logger.consolePrint("success (length " + river.size() + ", " + b + " bridges)");
             numGenerated++;
          }
          else
-            System.out.println("failure");
+            Logger.consolePrint("failure");
          if(x == numRivers - 1 && numGenerated < minRivers) {
             minLength = Math.max(minLength - (int)((double)minLength * .1), 4);
-            System.out.println("> redefining min length to " + minLength);
+            Logger.consolePrint("redefining min length to " + minLength);
             x = 0;
          }
       }
       double rate = ((double)(numAttempted - numGenerated) / (double)numAttempted * 100.0);
-      System.out.println("> " + numGenerated + " rivers generated (" + rate + "% failure)");
+      Logger.consolePrint(numGenerated + " rivers generated (" + rate + "% failure)");
    }
    
    public ArrayList<Coordinate> generateRiver(int MLE) {
       ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
       Random rand = new Random();
-      int hBound = 5;
-      int wBound = 5;
-      int row = rand.nextInt(height); //rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
-      int col = rand.nextInt(width); //rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
+      // int hBound = 5;
+      // int wBound = 5;
+      int row = rand.nextInt(height); // rand.nextInt(height - (height / hBound) - (height /
+                                      // hBound)) + (height / hBound);
+      int col = rand.nextInt(width); // rand.nextInt(width - (width / wBound) - (width / wBound)) +
+                                     // (width / wBound);
       int attempts = 0;
       while(heightMap[row][col] != 2 || tiles[row][col].getType() == TILE_TYPE.RIVER || numRiverNextTo(col, row, riverPath) != 0) {
-         row = rand.nextInt(height);// rand.nextInt(height - (height / hBound) - (height / hBound)) + (height / hBound);
-         col = rand.nextInt(width);//rand.nextInt(width - (width / wBound) - (width / wBound)) + (width / wBound);
+         row = rand.nextInt(height);// rand.nextInt(height - (height / hBound) - (height / hBound))
+                                    // + (height / hBound);
+         col = rand.nextInt(width);// rand.nextInt(width - (width / wBound) - (width / wBound)) +
+                                   // (width / wBound);
          attempts++;
          if(attempts > 64)
             break;
@@ -423,7 +424,7 @@ public class World {
    }
    
    public void placeCities(int numCities, int min, int max) {
-      System.out.println("> placing cities");
+      Logger.consolePrint("placing cities");
       for(int x = 0; x < numCities; x++) {
          Random rand = new Random();
          int col = rand.nextInt(max - min) + min;
@@ -438,7 +439,7 @@ public class World {
    }
    
    public void placeFactories(Team team, int min, int max) {
-      System.out.println("> placing factories for " + team.getName());
+      Logger.consolePrint("placing factories for " + team.getName());
       for(int col = min; col < max; col += 2) {
          int row = (int)(Math.random() * height);
          while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN
@@ -529,7 +530,10 @@ public class World {
                || tiles[row][col].getType() == TILE_TYPE.FACTORY || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
          }
-         team.createUnit(tiles[row][col], randUnitType());
+         if(x == team.getTeamSize() - 1)
+            team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY);
+         else
+            team.createUnit(tiles[row][col], randUnitType());
          if(team.equals(teamTwo))
             team.getUnits().get(x).setDir(DIRECTION.LEFT);
          if((x + 1) % (double)(team.getTeamSize() / (width / 5)) == 0)
@@ -554,7 +558,7 @@ public class World {
    }
    
    public UNIT_TYPE randUnitType() {
-       //return UNIT_TYPE.INFANTRY;
+      // return UNIT_TYPE.INFANTRY;
       return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
    }
    
@@ -601,15 +605,15 @@ public class World {
    public int getHeight() {
       return height;
    }
-
+   
    public void setHeight(int height) {
       this.height = height;
    }
-
+   
    public int getWidth() {
       return width;
    }
-
+   
    public void setWidth(int width) {
       this.width = width;
    }

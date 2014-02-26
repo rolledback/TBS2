@@ -86,8 +86,8 @@ public class Unit {
    
    public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
       Coordinate thisCoord = new Coordinate(x, y);
-      Tile tiles[][]  = world.getTiles();
-      int height = world.getHeight();;
+      Tile tiles[][] = world.getTiles();
+      int height = world.getHeight();
       int width = world.getWidth();
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;

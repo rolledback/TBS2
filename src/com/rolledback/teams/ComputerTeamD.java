@@ -1,5 +1,6 @@
 package com.rolledback.teams;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,7 +21,7 @@ import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
-   
+   int bfsCalls = 0;
    final int animationDelay = 50;
    ArrayList<Coordinate> cityLocations;
    
@@ -28,23 +29,20 @@ public class ComputerTeamD extends ComputerTeam {
       super(name, size, r, g);
       cityLocations = null;
    }
-
+   
    public void executeTurn() {
       sortUnits(units);
-      System.out.println("-------------------------------------" + units.size());
-      for(int i = 0; i < units.size(); i++){
+      for(int i = 0; i < units.size(); i++) {
          Unit u = units.get(i);
-         System.out.println(u);
          Coordinate moveSpot = moveUnit(u);
          if(moveSpot != null) {
-            System.out.println(moveSpot);
             game.gameLoop(u.getX(), u.getY());
             delay(animationDelay);
             game.gameLoop(moveSpot.getX(), moveSpot.getY());
-            delay(animationDelay); 
+            delay(animationDelay);
          }
          if(!units.contains(u))
-            i--;       
+            i--;
       }
       
       Iterator<Factory> factoryIterator = factories.iterator();
@@ -61,35 +59,29 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public Coordinate moveUnit(Unit u) {
-      System.out.println(u.getCaptureSet());
-      System.out.println(u.getAttackSet());
-      System.out.println(u.getMoveSet());
       u.calcMoveSpots();
       if(u.getCaptureSet().size() != 0)
          return captureMove(u);
       else if(u.getAttackSet().size() != 0)
          return attackMove(u);
       else if(u.getMoveSet().size() != 0)
-         return simpleMove(u); 
+         return simpleMove(u);
       return null;
    }
    
-   public Coordinate simpleMove(Unit u) { 
-      System.out.println("Simple move");
+   public Coordinate simpleMove(Unit u) {
       HashMap<Coordinate, Integer> enemyDistances = new HashMap<Coordinate, Integer>();
-     
-      for(Unit t: opponent.getUnits()) {     
-         for(Coordinate c: u.getMoveSet()) {
-            int[] yDirs = { 0, 0, 1, -1 };
-            int[] xDirs = { 1, -1, 0, 0 };
-            for(int i = 0; i < 4; i++)
-               try {
-                  int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), t.getX() + xDirs[i], t.getY() + yDirs[i], u);
-                  if(d != Integer.MAX_VALUE)
-                     enemyDistances.put(c, d);
-               }
-               catch(Exception e) {}
-         }         
+      int closestEnemy = Integer.MAX_VALUE;
+      for(Unit t: opponent.getUnits()) {
+         int dToEnemy = distance(game.getWorld().getTiles(), u.getX(), u.getY(), t.getX(), t.getY(), u);
+         if(dToEnemy < closestEnemy) {
+            enemyDistances.clear();
+            for(Coordinate c: u.getMoveSet()) {
+               int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), t.getX(), t.getY(), u);
+               if(d != Integer.MAX_VALUE)
+                  enemyDistances.put(c, d);
+            }
+         }
       }
       if(u.getType() == UNIT_TYPE.INFANTRY) {
          if(cityLocations == null) {
@@ -100,18 +92,12 @@ public class ComputerTeamD extends ComputerTeam {
                      cityLocations.add(new Coordinate(col, row));
          }
          
-         for(Coordinate city: cityLocations) {     
+         for(Coordinate city: cityLocations) {
             for(Coordinate c: u.getMoveSet()) {
-               int[] yDirs = { 0, 0, 1, -1 };
-               int[] xDirs = { 1, -1, 0, 0 };
-               for(int i = 0; i < 4; i++)
-                  try {
-                     int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), city.getX() + xDirs[i], city.getY() + yDirs[i], u);
-                     if(d != Integer.MAX_VALUE)
-                        enemyDistances.put(c, d);
-                  }
-                  catch(Exception e) {}
-            }         
+               int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), city.getX(), city.getY(), u);
+               if(d != Integer.MAX_VALUE)
+                  enemyDistances.put(c, d);
+            }
          }
       }
       cityLocations = null;
@@ -121,11 +107,10 @@ public class ComputerTeamD extends ComputerTeam {
             minEntry = entry;
       if(minEntry != null)
          return minEntry.getKey();
-      return null;      
+      return null;
    }
    
    public Coordinate attackMove(Unit u) {
-      System.out.println("attack move");
       HashMap<Coordinate, Integer> attackDistances = new HashMap<Coordinate, Integer>();
       for(Coordinate c: u.getAttackSet()) {
          attackDistances.put(c, Integer.MAX_VALUE);
@@ -133,18 +118,17 @@ public class ComputerTeamD extends ComputerTeam {
          if(d < attackDistances.get(c))
             attackDistances.put(c, d);
       }
-      System.out.println(attackDistances);
+      
       Map.Entry<Coordinate, Integer> minEntry = null;
       for(Map.Entry<Coordinate, Integer> entry: attackDistances.entrySet())
          if(minEntry == null || entry.getValue().compareTo(minEntry.getValue()) < 0)
             minEntry = entry;
       if(minEntry != null)
          return minEntry.getKey();
-      return null; 
+      return null;
    }
    
    public Coordinate captureMove(Unit u) {
-      System.out.println("capture move");
       HashMap<Coordinate, Integer> captureDistances = new HashMap<Coordinate, Integer>();
       for(Coordinate c: u.getCaptureSet()) {
          captureDistances.put(c, Integer.MAX_VALUE);
@@ -152,14 +136,14 @@ public class ComputerTeamD extends ComputerTeam {
          if(d < captureDistances.get(c))
             captureDistances.put(c, d);
       }
-      System.out.println(captureDistances);
+      
       Map.Entry<Coordinate, Integer> minEntry = null;
       for(Map.Entry<Coordinate, Integer> entry: captureDistances.entrySet())
          if(minEntry == null || entry.getValue().compareTo(minEntry.getValue()) < 0)
             minEntry = entry;
       if(minEntry != null)
          return minEntry.getKey();
-      return null; 
+      return null;
    }
    
    public void sortUnits(ArrayList<Unit> unitList) {
@@ -194,6 +178,7 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
+      bfsCalls++;
       if(!unit.canTraverse(world[targetY][targetX]))
          return Integer.MAX_VALUE;
       LinkedList<Tile> queue = new LinkedList<Tile>();
@@ -237,6 +222,4 @@ public class ComputerTeamD extends ComputerTeam {
       return Integer.MAX_VALUE;
    }
    
-   
-
 }

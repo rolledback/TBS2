@@ -52,14 +52,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    int UNIT_DENSITY = 5;
    
-   public Game(int x, int y, int ts, int oH, int oV, int gH) {
+   public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
       gameHeight = y;
       
-      manager = new GraphicsManager();
+      manager = m;
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamC("team one", teamSize, 0, this);
+      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
       teamTwo = new ComputerTeamD("team two", teamSize, 0, this);
       currentTeam = teamTwo;
       
@@ -69,7 +69,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(teamTwo.getClass().equals(ComputerTeamA.class) || teamTwo.getClass().equals(ComputerTeamB.class)
             || teamTwo.getClass().equals(ComputerTeamC.class) || teamTwo.getClass().equals(ComputerTeamD.class))
          ((ComputerTeam)teamTwo).setOpponent(teamOne);
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo);
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
@@ -90,7 +90,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void paintComponent(Graphics g) {
       drawTiles(g);
-      //drawHeightMap(g);
+      // drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -161,6 +161,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void switchTeams() {
+      Logger.consolePrint("switching teams");
       unitSelected = false;
       selectedUnit = null;
       Iterator<Unit> i = currentTeam.getUnits().iterator();
@@ -180,11 +181,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          return;
       }
       
-      
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
+      Logger.consolePrint(currentTeam.toString());
       
       for(City c: currentTeam.getCities())
          c.produceResources();
@@ -307,27 +308,32 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public void gameLoop(int xTile, int yTile) {
       int x = xTile; // click data
       int y = yTile; // click data
-      
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
       
-      if(unitSelected) {
+      if(unitSelected) {         
          if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
+            Logger.consolePrint("selected unit attacking: " + targetUnit);
             attackMove(x, y);
             selectedUnit.attack(targetUnit, false);
-            if(!targetUnit.isAlive())
+            if(!targetUnit.isAlive()) {
                world.destroyUnit(targetUnit);
+               Logger.consolePrint("target destroyed");
+            }
             else {
                targetUnit.attack(selectedUnit, true);
-               if(!selectedUnit.isAlive())
+               if(!selectedUnit.isAlive()) {
                   world.destroyUnit(selectedUnit);
+                  Logger.consolePrint("unit destroyed");
+               }
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
          if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
+            Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
             if(((City)selectedTile).getOwner() == null || !((City)selectedTile).getOwner().equals(currentTeam)) {
@@ -335,6 +341,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             }
          }
          if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
+            Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
@@ -344,6 +351,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(selectedTile.isOccupied()) {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
+         Logger.consolePrint("unit selected: " + selectedUnit);
          if(selectedUnit.getOwner().equals(currentTeam)) {
             selectedUnit.calcMoveSpots();
             if(!selectedUnit.hasMoved())
@@ -352,6 +360,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
+         Logger.consolePrint("factory selected");
          Object[] possibilities = ((Factory)selectedTile).dialogBoxList();
          Object s = JOptionPane.showInputDialog(this, "Choose unit to produce:\n" + "Current resource points: " + currentTeam.getResources(),
                "Factory", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
@@ -365,6 +374,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
             else if(unitType.equals("RPG Team"))
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
+            Logger.consolePrint("producing " + unitType);
          }
       }
       if(!unitSelected) {
@@ -408,8 +418,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
       else if(y + 1 < gameHeight && selectedUnit.getMoveSet().contains(new Coordinate(x, y + 1))) {
          selectedUnit.move(world.getTiles()[y + 1][x]);
-      }
-      
+      }      
+   }
+   
+   public void highLightTile(int x, int y, Color c) {
+      Graphics g = this.getGraphics();
+      g.setColor(c);
+      g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
    }
    
    public Tile selectTile(int x, int y) {
