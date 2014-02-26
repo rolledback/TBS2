@@ -7,6 +7,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import com.rolledback.terrain.CapturableTile;
+import com.rolledback.terrain.City;
+
 public class Launcher {
    
    static Game newGame;
@@ -94,7 +97,7 @@ public class Launcher {
       GraphicsManager manager = new GraphicsManager();
       int winner[] = { 0, 0 };
       for(int i = 0; i < 1; i++) {
-         Logger.consolePrint("Game " + i);
+         Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();
          int offsetHorizontal = screenWidth - (gameWidth * tileSize);
          int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
@@ -115,9 +118,9 @@ public class Launcher {
             winner[0]++;
          else
             winner[1]++;
-         frame.setVisible(false);
-         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start));
-         newGame = null;
+         //frame.setVisible(false);
+         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
+         //newGame = null;
       }
    }
    

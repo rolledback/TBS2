@@ -22,7 +22,7 @@ public class GraphicsManager {
    }
    
    public void initTileImages() {
-      Logger.consolePrint("loading tile textures");
+      Logger.consolePrint("loading tile textures", "manager");
       try {
          tileTextures[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png"));
          tileTextures[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("forest.png"));
@@ -55,14 +55,14 @@ public class GraphicsManager {
          tileTextures[29] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_vertical.png"));
       }
       catch(IOException e) {
-         Logger.consolePrint("ERROR loading image. " + e.toString());
+         Logger.consolePrint("ERROR loading image. " + e.toString(), "manager");
          e.printStackTrace();
       }
    }
    
    public void initUnitImages() {
       try {
-         Logger.consolePrint("loading unit images");
+         Logger.consolePrint("loading unit images", "manager");
          unitImages[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryRed_left.png"));
          unitImages[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgRed_left.png"));
          unitImages[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankRed_left.png"));
@@ -84,7 +84,7 @@ public class GraphicsManager {
          unitImages[15] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerBlue_right.png"));
       }
       catch(IOException e) {
-         Logger.consolePrint("ERROR loading image. " + e.toString());
+         Logger.consolePrint("ERROR loading image. " + e.toString(), "manager");
          e.printStackTrace();
       }
    }

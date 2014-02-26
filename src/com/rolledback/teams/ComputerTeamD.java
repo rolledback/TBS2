@@ -1,6 +1,6 @@
 package com.rolledback.teams;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,28 +8,29 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
+import com.rolledback.framework.Logger;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
+import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    int bfsCalls = 0;
    final int animationDelay = 50;
-   ArrayList<Coordinate> cityLocations;
    
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
-      cityLocations = null;
    }
    
    public void executeTurn() {
-      sortUnits(units);
+      sortUnits();
       for(int i = 0; i < units.size(); i++) {
+         if(opponent.getUnits().size() == 0)
+            return;
          Unit u = units.get(i);
          Coordinate moveSpot = moveUnit(u);
          if(moveSpot != null) {
@@ -37,21 +38,21 @@ public class ComputerTeamD extends ComputerTeam {
             delay(animationDelay);
             game.gameLoop(moveSpot.getX(), moveSpot.getY());
             delay(animationDelay);
-         }
-         if(!units.contains(u))
-            i--;
+            if(!units.contains(u))
+               i--;
+         }         
       }
       
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
-         Random rand = new Random();
-         int unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
-         int attempts = 0;
-         while(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[unitToProduce]) && attempts < 25) {
-            unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
-            attempts++;
+         int x = 0; 
+         for(; x < currentFactory.getProductionList().size(); x++) {
+            if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
+               break;
          }
+         if(x < currentFactory.getProductionList().size())
+            Logger.consolePrint("AI is making: " + (UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x], "ai");
       }
    }
    
@@ -72,37 +73,40 @@ public class ComputerTeamD extends ComputerTeam {
       Unit closestEnemy = null;
       for(Unit t: opponent.getUnits()) {
          int dToEnemy = distance(game.getWorld().getTiles(), u.getX(), u.getY(), t.getX(), t.getY(), u);
-         if(dToEnemy < closestEnemyDistance) {
+         if(dToEnemy < closestEnemyDistance && !(u.getType() == UNIT_TYPE.INFANTRY && t.getClassification() == UNIT_CLASS.VEHICLE)) {
            closestEnemyDistance = dToEnemy;
            closestEnemy = t;
          }
       }
-      
       for(Coordinate c: u.getMoveSet()) {
          int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestEnemy.getX(), closestEnemy.getY(), u);
          if(d != Integer.MAX_VALUE)
             moveDistances.put(c, d);
       }
       
+
       if(u.getType() == UNIT_TYPE.INFANTRY) {
-         if(cityLocations == null) {
-            cityLocations = new ArrayList<Coordinate>();
-            for(int row = 0; row < game.gameHeight; row++)
-               for(int col = 0; col < game.gameWidth; col++)
-                  if(u.canCapture(game.getWorld().getTiles()[row][col]))
-                     cityLocations.add(new Coordinate(col, row));
-         }
-         
-         for(Coordinate city: cityLocations) {
+         int closestCaptureableDistance = Integer.MAX_VALUE;
+         Coordinate closestCapturable = null;
+         for(int row = 0; row < game.gameHeight; row++)
+            for(int col = 0; col < game.gameWidth; col++)
+               if(u.canCapture(game.getWorld().getTiles()[row][col])) {
+                  int dToCapture = distance(game.getWorld().getTiles(), u.getX(), u.getY(), col, row, u);
+                  if(dToCapture < closestCaptureableDistance) {
+                     closestCapturable = new Coordinate(col, row);
+                     closestCaptureableDistance = dToCapture;
+                  }
+               }
+         if(closestCaptureableDistance < closestEnemyDistance) {
+            moveDistances.clear();
             for(Coordinate c: u.getMoveSet()) {
-               int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), city.getX(), city.getY(), u);
+               int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestCapturable.getX(), closestCapturable.getY(), u);
                if(d != Integer.MAX_VALUE)
                   moveDistances.put(c, d);
             }
          }
       }
       
-      cityLocations = null;
       Map.Entry<Coordinate, Integer> minEntry = null;
       for(Map.Entry<Coordinate, Integer> entry: moveDistances.entrySet())
          if(minEntry == null || entry.getValue().compareTo(minEntry.getValue()) < 0)
@@ -118,7 +122,7 @@ public class ComputerTeamD extends ComputerTeam {
          attackDistances.put(c, Integer.MAX_VALUE);
          int d = distance(game.getWorld().getTiles(), u.getX(), u.getY(), c.getX(), c.getY(), u);
          if(d < attackDistances.get(c))
-            attackDistances.put(c, d);
+            attackDistances.put(c, d);                 
       }
       
       Map.Entry<Coordinate, Integer> minEntry = null;
@@ -148,12 +152,12 @@ public class ComputerTeamD extends ComputerTeam {
       return null;
    }
    
-   public void sortUnits(ArrayList<Unit> unitList) {
-      for(Unit u: unitList) {
+   public void sortUnits() {
+      for(Unit u: units) {
          u.calcMoveSpots();
       }
       
-      Collections.sort(unitList, new Comparator<Unit>() {
+      Collections.sort(units, new Comparator<Unit>() {
          @Override
          public int compare(Unit u1, Unit u2) {
             if(u1.getCaptureSet().size() != 0 && u2.getCaptureSet().size() == 0)
@@ -178,7 +182,7 @@ public class ComputerTeamD extends ComputerTeam {
          }
       });
    }
-   
+
    public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
       bfsCalls++;
       if(!unit.canTraverse(world[targetY][targetX]))

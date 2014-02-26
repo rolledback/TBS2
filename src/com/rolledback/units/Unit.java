@@ -6,6 +6,7 @@ import java.util.Random;
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
+import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
@@ -128,11 +129,11 @@ public class Unit {
    }
    
    public boolean canCapture(Tile tile) {
-      if(tile.getType() != TILE_TYPE.CITY)
+      if(!(tile instanceof CapturableTile))
          return false;
       if(type != UNIT_TYPE.INFANTRY)
          return false;
-      return ((City)tile).getOwner() == null || !owner.equals(((City)tile).getOwner());
+      return ((CapturableTile)tile).getOwner() == null || !owner.equals(((CapturableTile)tile).getOwner());
    }
    
    public void move(Tile tile) {

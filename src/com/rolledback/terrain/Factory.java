@@ -7,32 +7,27 @@ import java.util.Map;
 
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
+import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
-public class Factory extends Tile {
+public class Factory extends CapturableTile {
    
-   private Team owner;
    private HashMap<UNIT_TYPE, Integer> productionList;
    private int resourceValue = 0;
    
    public Factory(World w, int x, int y, Team team, Image t) {
-      super(w, x, y, new TerrainEffect(0, 10, 0), 'F');
-      owner = team;
+      super(w, x, y, new TerrainEffect(0, 10, 0), 'F', team);
       productionList = new HashMap<UNIT_TYPE, Integer>();
       type = TILE_TYPE.FACTORY;
       texture = t;
       initProductionList();
    }
    
-   public Team getOwner() {
-      return owner;
-   }
-   
    public void initProductionList() {
       productionList.put(UNIT_TYPE.INFANTRY, 100);
-      productionList.put(UNIT_TYPE.TANK, 250);
-      productionList.put(UNIT_TYPE.TANK_DEST, 250);
       productionList.put(UNIT_TYPE.RPG, 125);
+      productionList.put(UNIT_TYPE.TANK_DEST, 250);
+      productionList.put(UNIT_TYPE.TANK, 250);      
    }
    
    public HashMap<UNIT_TYPE, Integer> getProductionList() {
@@ -73,6 +68,19 @@ public class Factory extends Tile {
    
    public void produceResources() {
       owner.setResources(owner.getResources() + resourceValue);
+   }
+
+   @Override
+   public void capture(Unit unit) {
+      if(owner != null)
+         owner.getCities().remove(this);
+      owner = unit.getOwner();
+      unit.getOwner().getFactories().add(this);
+      if(owner.equals(getWorld().getTeamOne()))
+         texture = getWorld().getManager().tileTextures[12];
+      else
+         texture = getWorld().getManager().tileTextures[13];
+      
    }
    
 }

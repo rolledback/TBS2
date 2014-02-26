@@ -20,6 +20,7 @@ import com.rolledback.teams.ComputerTeamB;
 import com.rolledback.teams.ComputerTeamC;
 import com.rolledback.teams.ComputerTeamD;
 import com.rolledback.teams.Team;
+import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
@@ -55,7 +56,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
       gameHeight = y;
-      
       manager = m;
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
@@ -161,7 +161,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void switchTeams() {
-      Logger.consolePrint("switching teams");
+      Logger.consolePrint("switching teams", "game");
       unitSelected = false;
       selectedUnit = null;
       Iterator<Unit> i = currentTeam.getUnits().iterator();
@@ -185,7 +185,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
-      Logger.consolePrint(currentTeam.toString());
+      Logger.consolePrint(currentTeam.toString(), "game");
       
       for(City c: currentTeam.getCities())
          c.produceResources();
@@ -315,33 +315,33 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(unitSelected) {         
          if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
-            Logger.consolePrint("selected unit attacking: " + targetUnit);
+            Logger.consolePrint("selected unit attacking: " + targetUnit, "game");
             attackMove(x, y);
             selectedUnit.attack(targetUnit, false);
             if(!targetUnit.isAlive()) {
                world.destroyUnit(targetUnit);
-               Logger.consolePrint("target destroyed");
+               Logger.consolePrint("target destroyed", "game");
             }
             else {
                targetUnit.attack(selectedUnit, true);
                if(!selectedUnit.isAlive()) {
                   world.destroyUnit(selectedUnit);
-                  Logger.consolePrint("unit destroyed");
+                  Logger.consolePrint("unit destroyed", "game");
                }
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
          if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")");
+            Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
-            if(((City)selectedTile).getOwner() == null || !((City)selectedTile).getOwner().equals(currentTeam)) {
-               ((City)selectedTile).capture(selectedUnit);
+            if(((CapturableTile)selectedTile).getOwner() == null || !((CapturableTile)selectedTile).getOwner().equals(currentTeam)) {
+               ((CapturableTile)selectedTile).capture(selectedUnit);
             }
          }
          if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")");
+            Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
@@ -351,7 +351,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(selectedTile.isOccupied()) {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
-         Logger.consolePrint("unit selected: " + selectedUnit);
+         Logger.consolePrint("unit selected: " + selectedUnit, "game");
          if(selectedUnit.getOwner().equals(currentTeam)) {
             selectedUnit.calcMoveSpots();
             if(!selectedUnit.hasMoved())
@@ -360,7 +360,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
-         Logger.consolePrint("factory selected");
+         Logger.consolePrint("factory selected", "game");
          Object[] possibilities = ((Factory)selectedTile).dialogBoxList();
          Object s = JOptionPane.showInputDialog(this, "Choose unit to produce:\n" + "Current resource points: " + currentTeam.getResources(),
                "Factory", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
@@ -374,7 +374,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
             else if(unitType.equals("RPG Team"))
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
-            Logger.consolePrint("producing " + unitType);
+            Logger.consolePrint("producing " + unitType, "game");
          }
       }
       if(!unitSelected) {

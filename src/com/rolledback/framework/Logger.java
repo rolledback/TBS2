@@ -2,10 +2,19 @@ package com.rolledback.framework;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import static java.util.Arrays.asList;
 
 public class Logger {
    
-   private static boolean consolePrintingOn = false;
+   // World.java = map
+   // Game.java = game
+   // Launcher.java = launcher
+   // GraphicsManager.java = manager
+   // Any of the CPU teams = ai
+   
+   private static boolean consolePrintingOn = true;
+   private static List<String> validTags = asList("map");   
    
    public static String timeStamp() {
       Date date = new Date();
@@ -14,9 +23,17 @@ public class Logger {
       return formattedDate;
    }
    
-   public static void consolePrint(String message) {
-      if(consolePrintingOn)
-         System.out.println("> " + timeStamp() + " " + message);
+   public static void consolePrint(String message, String tag) {
+      if(consolePrintingOn && validTags.contains(tag.toLowerCase())) {
+         if(tag.length() > 3)
+            tag = tag.substring(0, 3);
+         if(tag.length() < 3) {
+            int spacesNeeded = 3 - tag.length();
+            for(int x = 0; x < spacesNeeded; x++)
+               tag += " ";
+         }            
+         System.out.println("[" + tag.toUpperCase() + "] > " + timeStamp() + " " + message);
+      }
    }
    
    public static boolean isConsolePrintingOn() {
