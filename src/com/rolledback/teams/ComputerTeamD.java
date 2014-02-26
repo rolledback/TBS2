@@ -1,6 +1,5 @@
 package com.rolledback.teams;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,10 +12,8 @@ import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
-import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
-import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
@@ -70,19 +67,23 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public Coordinate simpleMove(Unit u) {
-      HashMap<Coordinate, Integer> enemyDistances = new HashMap<Coordinate, Integer>();
-      int closestEnemy = Integer.MAX_VALUE;
+      HashMap<Coordinate, Integer> moveDistances = new HashMap<Coordinate, Integer>();
+      int closestEnemyDistance = Integer.MAX_VALUE;
+      Unit closestEnemy = null;
       for(Unit t: opponent.getUnits()) {
          int dToEnemy = distance(game.getWorld().getTiles(), u.getX(), u.getY(), t.getX(), t.getY(), u);
-         if(dToEnemy < closestEnemy) {
-            enemyDistances.clear();
-            for(Coordinate c: u.getMoveSet()) {
-               int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), t.getX(), t.getY(), u);
-               if(d != Integer.MAX_VALUE)
-                  enemyDistances.put(c, d);
-            }
+         if(dToEnemy < closestEnemyDistance) {
+           closestEnemyDistance = dToEnemy;
+           closestEnemy = t;
          }
       }
+      
+      for(Coordinate c: u.getMoveSet()) {
+         int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestEnemy.getX(), closestEnemy.getY(), u);
+         if(d != Integer.MAX_VALUE)
+            moveDistances.put(c, d);
+      }
+      
       if(u.getType() == UNIT_TYPE.INFANTRY) {
          if(cityLocations == null) {
             cityLocations = new ArrayList<Coordinate>();
@@ -96,13 +97,14 @@ public class ComputerTeamD extends ComputerTeam {
             for(Coordinate c: u.getMoveSet()) {
                int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), city.getX(), city.getY(), u);
                if(d != Integer.MAX_VALUE)
-                  enemyDistances.put(c, d);
+                  moveDistances.put(c, d);
             }
          }
       }
+      
       cityLocations = null;
       Map.Entry<Coordinate, Integer> minEntry = null;
-      for(Map.Entry<Coordinate, Integer> entry: enemyDistances.entrySet())
+      for(Map.Entry<Coordinate, Integer> entry: moveDistances.entrySet())
          if(minEntry == null || entry.getValue().compareTo(minEntry.getValue()) < 0)
             minEntry = entry;
       if(minEntry != null)

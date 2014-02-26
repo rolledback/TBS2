@@ -59,7 +59,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       manager = m;
       
       teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
+      teamOne = new ComputerTeamC("team one", teamSize, 0, this);
       teamTwo = new ComputerTeamD("team two", teamSize, 0, this);
       currentTeam = teamTwo;
       
