@@ -13,7 +13,7 @@ public class RPGTeam extends Unit{
       minAttack = 10;
       maxAttack = 15;
       infAttackBonus = -5;
-      vehAttackBonus = 10;
+      vehAttackBonus = 5;
       defense = 4;
       moveRange = 2;
       type = UNIT_TYPE.RPG;

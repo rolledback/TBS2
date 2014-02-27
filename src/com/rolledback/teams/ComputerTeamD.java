@@ -20,7 +20,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    int bfsCalls = 0;
-   final int animationDelay = 1000;
+   final int animationDelay = 0;
    
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);

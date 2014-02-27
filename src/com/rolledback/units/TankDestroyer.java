@@ -10,7 +10,7 @@ public class TankDestroyer extends Unit {
       classification = UNIT_CLASS.VEHICLE;
       minAttack = 20;
       maxAttack = 25;
-      infAttackBonus = -10;
+      infAttackBonus = -15;
       vehAttackBonus = 10;
       defense = 6;
       moveRange = 3;
