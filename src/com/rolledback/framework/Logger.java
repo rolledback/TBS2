@@ -12,9 +12,10 @@ public class Logger {
    // Launcher.java = launcher
    // GraphicsManager.java = manager
    // Any of the CPU teams = ai
+   // General error messages = error
    
    private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("map");   
+   private static List<String> validTags = asList("map", "launcher");   
    
    public static String timeStamp() {
       Date date = new Date();

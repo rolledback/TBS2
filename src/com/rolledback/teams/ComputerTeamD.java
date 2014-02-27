@@ -20,7 +20,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    int bfsCalls = 0;
-   final int animationDelay = 50;
+   final int animationDelay = 1000;
    
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -78,11 +78,12 @@ public class ComputerTeamD extends ComputerTeam {
            closestEnemy = t;
          }
       }
-      for(Coordinate c: u.getMoveSet()) {
-         int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestEnemy.getX(), closestEnemy.getY(), u);
-         if(d != Integer.MAX_VALUE)
-            moveDistances.put(c, d);
-      }
+      if(closestEnemy != null)
+         for(Coordinate c: u.getMoveSet()) {
+            int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestEnemy.getX(), closestEnemy.getY(), u);
+            if(d != Integer.MAX_VALUE)
+               moveDistances.put(c, d);
+         }
       
 
       if(u.getType() == UNIT_TYPE.INFANTRY) {
@@ -97,6 +98,7 @@ public class ComputerTeamD extends ComputerTeam {
                      closestCaptureableDistance = dToCapture;
                   }
                }
+         
          if(closestCaptureableDistance < closestEnemyDistance) {
             moveDistances.clear();
             for(Coordinate c: u.getMoveSet()) {

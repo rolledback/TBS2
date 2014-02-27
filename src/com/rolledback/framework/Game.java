@@ -52,6 +52,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    GraphicsManager manager;
    
    int UNIT_DENSITY = 5;
+   int drawDetectorOne = 0;
+   int drawDetectorTwo = 0;
    
    public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
@@ -90,7 +92,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void paintComponent(Graphics g) {
       drawTiles(g);
-      // drawHeightMap(g);
+     // drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
       if(state == GAME_STATE.DISPLAY_MOVE) {
@@ -170,6 +172,26 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setMoved(false);
          temp.setAttacked(false);
       }
+      
+      if(teamOne.getUnits().size() == 1) {
+         drawDetectorOne++;
+         if(drawDetectorOne == 30) {
+            teamOne.getUnits().clear();
+            Logger.consolePrint("draw detected", "game");
+         }
+      }
+      else
+         drawDetectorOne = 0;
+      
+      if(teamTwo.getUnits().size() == 1) {
+         drawDetectorTwo++;
+         if(drawDetectorTwo == 30) {
+            teamTwo.getUnits().clear();
+            Logger.consolePrint("draw detected", "game");
+         }
+      }
+      else
+         drawDetectorTwo = 0;
       
       if(teamTwo.getUnits().size() == 0) {
          winner = teamOne;
@@ -346,12 +368,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             selectedUnit.setMoved(true);
          }
          unitSelected = false;
+         state = GAME_STATE.NORMAL;
       }
       
-      if(selectedTile.isOccupied()) {
+      else if(selectedTile.isOccupied()) {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
-         Logger.consolePrint("unit selected: " + selectedUnit, "game");
          if(selectedUnit.getOwner().equals(currentTeam)) {
             selectedUnit.calcMoveSpots();
             if(!selectedUnit.hasMoved())
@@ -376,11 +398,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
             Logger.consolePrint("producing " + unitType, "game");
          }
+         state = GAME_STATE.NORMAL;
       }
       if(!unitSelected) {
          selectedUnit = null;
+         state = GAME_STATE.NORMAL;
       }
-      this.repaint();// update(this.getGraphics());
+      this.repaint();
       return;
    }
    
@@ -388,18 +412,19 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       Color moveColor = new Color(0, 128, 128, 135);
       Color attackColor = new Color(255, 0, 0, 135);
       Color captureColor = new Color(255, 225, 0, 135);
-      
       g.setColor(moveColor);
+
       for(Coordinate c: selectedUnit.getMoveSet())
          g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-      
+
       g.setColor(attackColor);
       for(Coordinate c: selectedUnit.getAttackSet())
          g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-      
+
       g.setColor(captureColor);
       for(Coordinate c: selectedUnit.getCaptureSet())
          g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      
    }
    
    public void attackMove(int x, int y) {

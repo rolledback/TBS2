@@ -43,7 +43,7 @@ public class Tile {
    }
    
    public String toString() {
-      return "Type: " + type + " x: " + x + " y: " + y + " " + getEffect().toString() + " Occupied: " + occupied;
+      return "Type: " + type + " x: " + x + " y: " + y + " " + getEffect().toString() + " Occupied: " + occupied + " by " + occupiedBy;
    }
    
    public TerrainEffect getEffect() {

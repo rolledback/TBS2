@@ -114,7 +114,7 @@ public class World {
       generateRivers();
       placeFactories(teamOne, 0, width / 5);
       placeFactories(teamTwo, width - (width / 5), width);
-      placeCities((int)Math.sqrt(width + height), (int)(width / 5), (int)(width - (width / 5)));
+      placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5)));
       long end = System.currentTimeMillis();
       Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)", "map");
    }
@@ -424,7 +424,7 @@ public class World {
    }
    
    public void placeCities(int numCities, int min, int max) {
-      Logger.consolePrint("placing cities", "map");
+      Logger.consolePrint("placing " +  numCities + " cities", "map");
       for(int x = 0; x < numCities; x++) {
          Random rand = new Random();
          int col = rand.nextInt(max - min) + min;

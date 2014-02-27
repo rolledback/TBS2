@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
+import com.rolledback.framework.Logger;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.CapturableTile;
@@ -85,7 +86,7 @@ public class Unit {
       moveSet.remove(new Coordinate(x, y));
    }
    
-   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
+   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {     
       Coordinate thisCoord = new Coordinate(x, y);
       Tile tiles[][] = world.getTiles();
       int height = world.getHeight();
