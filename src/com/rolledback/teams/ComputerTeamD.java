@@ -160,27 +160,14 @@ public class ComputerTeamD extends ComputerTeam {
       }
       
       Collections.sort(units, new Comparator<Unit>() {
-         @Override
          public int compare(Unit u1, Unit u2) {
-            if(u1.getCaptureSet().size() != 0 && u2.getCaptureSet().size() == 0)
-               return -1;
-            if(u1.getCaptureSet().size() == 0 && u2.getCaptureSet().size() != 0)
-               return 1;
-            if(u1.getCaptureSet().size() == u2.getCaptureSet().size() && u1.getCaptureSet().size() != 0)
-               return 0;
-            
-            if(u1.getAttackSet().size() != 0 && u2.getAttackSet().size() == 0)
-               return -1;
-            if(u1.getAttackSet().size() == 0 && u2.getAttackSet().size() != 0)
-               return 1;
-            if(u1.getAttackSet().size() == u2.getAttackSet().size() && u1.getAttackSet().size() != 0)
-               return 0;
-            
-            if(u1.getMoveSet().size() > u2.getMoveSet().size())
-               return -1;
-            if(u1.getMoveSet().size() < u2.getMoveSet().size())
-               return 1;
-            return 0;
+            if (u1.getCaptureSet().size() != u2.getCaptureSet().size()) {
+               return u1.getCaptureSet().size() - u2.getCaptureSet().size();
+            }
+            if (u1.getAttackSet().size() != u2.getAttackSet().size()) {
+               return u1.getAttackSet().size() - u2.getAttackSet().size();
+            }
+            return u1.getMoveSet().size() - u2.getMoveSet().size();
          }
       });
    }

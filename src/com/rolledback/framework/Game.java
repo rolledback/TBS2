@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -55,14 +56,18 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    int UNIT_DENSITY = 5;
    int drawDetectorOne = 0;
    int drawDetectorTwo = 0;
+   
+   ReentrantLock logicLock;
 
    public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
       gameHeight = y;
       manager = m;
+      
+      logicLock = new ReentrantLock();
 
-      teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamC("team one", teamSize, 0, this);
+      teamSize = 1;//(gameWidth / 5) * (gameHeight / UNIT_DENSITY);
+      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
       teamTwo = new ComputerTeamD("team two", teamSize, 0, this);
       currentTeam = teamTwo;
 
@@ -97,6 +102,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
 
    public void paintComponent(Graphics g) {
+      logicLock.lock();
       drawTiles(g);
       // drawHeightMap(g);
       drawUnits(g);
@@ -113,6 +119,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          unitSelected = false;
       }
       // drawGui(g);
+      logicLock.unlock();
    }
 
    public void drawGui(Graphics g) {
@@ -371,6 +378,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
 
    public void gameLoop(int xTile, int yTile) {
+      logicLock.lock();
       int x = xTile; // click data
       int y = yTile; // click data
       selectedX = xTile;
@@ -460,17 +468,19 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          state = GAME_STATE.NORMAL;
       }
 
-      try {
-         SwingUtilities.invokeAndWait(new Runnable() {
-            public void run() {
-               repaint();
-            }
-            
-            public String fooBazz() { return "radha"; }
-         });
-      } 
-      catch (Exception e) {
-      }
+//      try {
+//         SwingUtilities.invokeAndWait(new Runnable() {
+//            public void run() {
+//               
+//            }
+//            
+//            public String fooBazz() { return "radha"; }
+//         });
+//      } 
+//      catch (Exception e) {
+//      }
+      logicLock.unlock();
+      repaint();
    }
 
    public void drawMoveSpots(Graphics g) {

@@ -523,6 +523,7 @@ public class World {
    }
    
    public void buildArmy(Team team, int minCol, int maxCol) {
+      Logger.consolePrint("Building army for: " +  team.getName(), "map");
       int col = minCol;
       for(int x = 0; x < team.getTeamSize(); x++) {
          int row = (int)(Math.random() * height);
@@ -541,6 +542,7 @@ public class World {
          if(col >= width)
             col--;
       }
+      Logger.consolePrint("Done building army for: " +  team.getName(), "map");
    }
    
    public void destroyUnit(Tile t) {
