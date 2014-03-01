@@ -62,9 +62,11 @@ public class ComputerTeamC extends ComputerTeam {
          }
          
          if(moveHere != null) {
-            game.gameLoop(currUnit.getX(), currUnit.getY());
+            game.gameLogic(currUnit.getX(), currUnit.getY());
+            game.repaint();
             delay(animationDelay);
-            game.gameLoop(moveHere.getX(), moveHere.getY());
+            game.gameLogic(moveHere.getX(), moveHere.getY());
+            game.repaint();
             delay(animationDelay);
          }
          

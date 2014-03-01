@@ -1,6 +1,5 @@
 package com.rolledback.teams;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    int bfsCalls = 0;
-   final int animationDelay = 0;
+   final int animationDelay = 500;
    
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -34,19 +33,21 @@ public class ComputerTeamD extends ComputerTeam {
          Unit u = units.get(i);
          Coordinate moveSpot = moveUnit(u);
          if(moveSpot != null) {
-            game.gameLoop(u.getX(), u.getY());
+            game.gameLogic(u.getX(), u.getY());
+            game.repaint();
             delay(animationDelay);
-            game.gameLoop(moveSpot.getX(), moveSpot.getY());
+            game.gameLogic(moveSpot.getX(), moveSpot.getY());
+            game.repaint();
             delay(animationDelay);
             if(!units.contains(u))
                i--;
-         }         
+         }
       }
       
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
-         int x = 0; 
+         int x = 0;
          for(; x < currentFactory.getProductionList().size(); x++) {
             if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
                break;
@@ -74,8 +75,8 @@ public class ComputerTeamD extends ComputerTeam {
       for(Unit t: opponent.getUnits()) {
          int dToEnemy = distance(game.getWorld().getTiles(), u.getX(), u.getY(), t.getX(), t.getY(), u);
          if(dToEnemy < closestEnemyDistance && !(u.getType() == UNIT_TYPE.INFANTRY && t.getClassification() == UNIT_CLASS.VEHICLE)) {
-           closestEnemyDistance = dToEnemy;
-           closestEnemy = t;
+            closestEnemyDistance = dToEnemy;
+            closestEnemy = t;
          }
       }
       if(closestEnemy != null)
@@ -85,7 +86,6 @@ public class ComputerTeamD extends ComputerTeam {
                moveDistances.put(c, d);
          }
       
-
       if(u.getType() == UNIT_TYPE.INFANTRY) {
          int closestCaptureableDistance = Integer.MAX_VALUE;
          Coordinate closestCapturable = null;
@@ -124,7 +124,7 @@ public class ComputerTeamD extends ComputerTeam {
          attackDistances.put(c, Integer.MAX_VALUE);
          int d = distance(game.getWorld().getTiles(), u.getX(), u.getY(), c.getX(), c.getY(), u);
          if(d < attackDistances.get(c))
-            attackDistances.put(c, d);                 
+            attackDistances.put(c, d);
       }
       
       Map.Entry<Coordinate, Integer> minEntry = null;
@@ -161,17 +161,17 @@ public class ComputerTeamD extends ComputerTeam {
       
       Collections.sort(units, new Comparator<Unit>() {
          public int compare(Unit u1, Unit u2) {
-            if (u1.getCaptureSet().size() != u2.getCaptureSet().size()) {
+            if(u1.getCaptureSet().size() != u2.getCaptureSet().size()) {
                return u1.getCaptureSet().size() - u2.getCaptureSet().size();
             }
-            if (u1.getAttackSet().size() != u2.getAttackSet().size()) {
+            if(u1.getAttackSet().size() != u2.getAttackSet().size()) {
                return u1.getAttackSet().size() - u2.getAttackSet().size();
             }
             return u1.getMoveSet().size() - u2.getMoveSet().size();
          }
       });
    }
-
+   
    public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
       bfsCalls++;
       if(!unit.canTraverse(world[targetY][targetX]))

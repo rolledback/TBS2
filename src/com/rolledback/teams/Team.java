@@ -20,6 +20,7 @@ public class Team {
    private String name;
    private int teamSize;
    private int resources;
+   private boolean firstTurn;
    
    public Team(String name, int size, int r) {
       units = new ArrayList<Unit>();
@@ -28,6 +29,7 @@ public class Team {
       teamSize = size;
       this.name = name;
       resources = r;
+      firstTurn = true;
    }
    
    public void createUnit(Tile t, UNIT_TYPE uType) {
@@ -94,6 +96,14 @@ public class Team {
    
    public void setFactories(ArrayList<Factory> factories) {
       this.factories = factories;
+   }
+
+   public boolean isFirstTurn() {
+      return firstTurn;
+   }
+
+   public void setFirstTurn(boolean firstTurn) {
+      this.firstTurn = firstTurn;
    }
    
 }

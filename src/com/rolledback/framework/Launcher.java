@@ -114,7 +114,7 @@ public class Launcher {
          frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top
                + frame.getInsets().bottom);
          newGame.setVisible(true);
-         newGame.switchTeams();
+         newGame.run();
          long end = System.currentTimeMillis();
          if(newGame.winner.equals(newGame.getWorld().getTeamOne()))
             winner[0]++;

@@ -37,8 +37,8 @@ public class ComputerTeamA extends ComputerTeam {
          
          // if unit can attack target, do it
          if(currUnit.getAttackSet().contains(new Coordinate(targetX, targetY))) {
-            game.gameLoop(currUnit.getX(), currUnit.getY());
-            game.gameLoop(targetX, targetY);
+            game.gameLogic(currUnit.getX(), currUnit.getY());
+            game.gameLogic(targetX, targetY);
          }
          // else iterate through moveSpots find, find valid spot closest to target
          else {
@@ -56,8 +56,10 @@ public class ComputerTeamA extends ComputerTeam {
             }
             // if you found a spot to move to move there
             if(moveHere != null) {
-               game.gameLoop(currUnit.getX(), currUnit.getY());
-               game.gameLoop(moveHere.getX(), moveHere.getY());
+               game.gameLogic(currUnit.getX(), currUnit.getY());
+               game.repaint();
+               game.gameLogic(moveHere.getX(), moveHere.getY());
+               game.repaint();
             }
          }
          // if you reached here without moving the unit never moved

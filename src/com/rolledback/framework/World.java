@@ -34,8 +34,8 @@ public class World {
       teamTwo = b;
       manager = m;
       buildMap();
-      buildArmy(teamOne, 0, w / 5);
-      buildArmy(teamTwo, w - (w / 5), w);
+      // buildArmy(teamOne, 0, w / 5);
+      // buildArmy(teamTwo, w - (w / 5), w);
    }
    
    public void printMap() {
@@ -424,7 +424,7 @@ public class World {
    }
    
    public void placeCities(int numCities, int min, int max) {
-      Logger.consolePrint("placing " +  numCities + " cities", "map");
+      Logger.consolePrint("placing " + numCities + " cities", "map");
       for(int x = 0; x < numCities; x++) {
          Random rand = new Random();
          int col = rand.nextInt(max - min) + min;
@@ -523,7 +523,7 @@ public class World {
    }
    
    public void buildArmy(Team team, int minCol, int maxCol) {
-      Logger.consolePrint("Building army for: " +  team.getName(), "map");
+      Logger.consolePrint("Building army for: " + team.getName(), "map");
       int col = minCol;
       for(int x = 0; x < team.getTeamSize(); x++) {
          int row = (int)(Math.random() * height);
@@ -542,7 +542,7 @@ public class World {
          if(col >= width)
             col--;
       }
-      Logger.consolePrint("Done building army for: " +  team.getName(), "map");
+      Logger.consolePrint("Done building army for: " + team.getName(), "map");
    }
    
    public void destroyUnit(Tile t) {

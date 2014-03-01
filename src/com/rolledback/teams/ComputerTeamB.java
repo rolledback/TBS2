@@ -51,9 +51,11 @@ public class ComputerTeamB extends ComputerTeam {
             while(moveSetIterator.hasNext()) {
                Coordinate currentSpot = moveSetIterator.next();
                if(currUnit.getCaptureSet().contains(currentSpot)) {
-                  game.gameLoop(currUnit.getX(), currUnit.getY());
+                  game.gameLogic(currUnit.getX(), currUnit.getY());
+                  game.repaint();
                   delay(animationDelay);
-                  game.gameLoop(currentSpot.getX(), currentSpot.getY());
+                  game.gameLogic(currentSpot.getX(), currentSpot.getY());
+                  game.repaint();
                   delay(animationDelay);
                   break;
                }
@@ -62,9 +64,9 @@ public class ComputerTeamB extends ComputerTeam {
          
          // if unit can attack target, do it
          if(!currUnit.hasMoved() && currUnit.getAttackSet().contains(new Coordinate(targetX, targetY))) {
-            game.gameLoop(currUnit.getX(), currUnit.getY());
+            game.gameLogic(currUnit.getX(), currUnit.getY());
             delay(animationDelay);
-            game.gameLoop(targetX, targetY);
+            game.gameLogic(targetX, targetY);
             delay(animationDelay);
          }
          // else iterate through all valid spots, find valid spot closest to target
@@ -84,9 +86,9 @@ public class ComputerTeamB extends ComputerTeam {
             }
             // if you found a spot to move to go there
             if(moveHere != null) {
-               game.gameLoop(currUnit.getX(), currUnit.getY());
+               game.gameLogic(currUnit.getX(), currUnit.getY());
                delay(animationDelay);
-               game.gameLoop(moveHere.getX(), moveHere.getY());
+               game.gameLogic(moveHere.getX(), moveHere.getY());
                delay(animationDelay);
             }
          }

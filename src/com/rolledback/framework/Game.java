@@ -16,8 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.ComputerTeam;
-import com.rolledback.teams.ComputerTeamA;
-import com.rolledback.teams.ComputerTeamB;
 import com.rolledback.teams.ComputerTeamC;
 import com.rolledback.teams.ComputerTeamD;
 import com.rolledback.teams.Team;
@@ -31,20 +29,19 @@ import com.rolledback.units.Unit.DIRECTION;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
-
+   
    public enum GAME_STATE {
-      NORMAL, DISPLAY_MOVE
+      NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
    }
-
+   
    private static final long serialVersionUID = 1L;
-   public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal,
-         offsetVertical, guiHeight, selectedX, selectedY;
+   public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, guiHeight, selectedX, selectedY;
    public Team teamOne, teamTwo;
-
+   
    Team currentTeam;
    public Team winner;
    private World world;
-
+   
    boolean unitSelected, ready;
    Tile selectedTile;
    Unit selectedUnit;
@@ -52,492 +49,429 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    Rectangle[][] grid;
    GAME_STATE state;
    GraphicsManager manager;
-
+   
    int UNIT_DENSITY = 5;
    int drawDetectorOne = 0;
    int drawDetectorTwo = 0;
    
    ReentrantLock logicLock;
-
+   
    public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
       gameHeight = y;
       manager = m;
       
       logicLock = new ReentrantLock();
-
-      teamSize = 1;//(gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamD("team one", teamSize, 0, this);
-      teamTwo = new ComputerTeamD("team two", teamSize, 0, this);
-      currentTeam = teamTwo;
-
-      if (teamOne.getClass().equals(ComputerTeamA.class)
-            || teamOne.getClass().equals(ComputerTeamB.class)
-            || teamOne.getClass().equals(ComputerTeamC.class)
-            || teamOne.getClass().equals(ComputerTeamD.class))
-         ((ComputerTeam) teamOne).setOpponent(teamTwo);
-      if (teamTwo.getClass().equals(ComputerTeamA.class)
-            || teamTwo.getClass().equals(ComputerTeamB.class)
-            || teamTwo.getClass().equals(ComputerTeamC.class)
-            || teamTwo.getClass().equals(ComputerTeamD.class))
-         ((ComputerTeam) teamTwo).setOpponent(teamOne);
+      
+      // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
+      teamOne = new Team("team one", 0, 150);
+      teamTwo = new Team("team two", 0, 150);
+      currentTeam = teamOne;
+      
+      if(teamOne instanceof ComputerTeam)
+         ((ComputerTeam)teamOne).setOpponent(teamTwo);
+      if(teamTwo instanceof ComputerTeam)
+         ((ComputerTeam)teamTwo).setOpponent(teamOne);
+      
       world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
       addMouseListener(this);
-      state = GAME_STATE.NORMAL;
-
+      state = GAME_STATE.UPDATE;
+      
       grid = new Rectangle[y][x];
-      for (int row = 0; row < gameHeight; row++)
-         for (int col = 0; col < gameWidth; col++)
-            grid[row][col] = new Rectangle((col * tileSize) + offsetHorizontal,
-                  (row * tileSize) + offsetVertical, tileSize, tileSize);
+      for(int row = 0; row < gameHeight; row++)
+         for(int col = 0; col < gameWidth; col++)
+            grid[row][col] = new Rectangle((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
       this.setBackground(Color.black);
-
+      
       guiHeight = gH;
-
+      
       selectedX = 0;
       selectedY = 0;
    }
-
+   
+   public void run() {
+      while(state != GAME_STATE.END_GAME) {
+         if(state != GAME_STATE.END_GAME && currentTeam instanceof ComputerTeam) {
+            ((ComputerTeam)currentTeam).executeTurn();
+            state = GAME_STATE.SWITCH_TEAMS;
+         }
+         if(state == GAME_STATE.UPDATE || state == GAME_STATE.DISPLAY_MOVE)
+            repaint();
+         if(state == GAME_STATE.SWITCH_TEAMS) {
+            System.out.println(teamOne.isFirstTurn());
+            System.out.println(teamTwo.isFirstTurn());
+            if(!teamOne.isFirstTurn() && teamOne.getUnits().size() == 0) {
+               winner = teamTwo;
+               System.out.println("1");
+               state = GAME_STATE.END_GAME;
+            }
+            else if(!teamTwo.isFirstTurn() && teamTwo.getUnits().size() == 0) {
+               winner = teamOne;
+               System.out.println("2");
+               state = GAME_STATE.END_GAME;
+            }
+            else {
+               if(currentTeam.isFirstTurn())
+                  currentTeam.setFirstTurn(false);
+               switchTeams();
+            }
+         }
+      }
+   }
+   
    public void paintComponent(Graphics g) {
       logicLock.lock();
       drawTiles(g);
-      // drawHeightMap(g);
       drawUnits(g);
       drawHealthBars(g);
-      if (state == GAME_STATE.DISPLAY_MOVE) {
+      if(state == GAME_STATE.DISPLAY_MOVE) {
          drawMoveSpots(g);
-         state = GAME_STATE.NORMAL;
       }
       g.setColor(Color.black);
-      g.drawOval(selectedX * tileSize + offsetHorizontal, selectedY * tileSize
-            + offsetVertical, tileSize, tileSize);
-      if (unitSelected && !selectedUnit.getOwner().equals(currentTeam)) {
+      g.drawOval(selectedX * tileSize + offsetHorizontal, selectedY * tileSize + offsetVertical, tileSize, tileSize);
+      if(unitSelected && !selectedUnit.getOwner().equals(currentTeam)) {
          selectedUnit = null;
          unitSelected = false;
       }
       // drawGui(g);
       logicLock.unlock();
    }
-
+   
    public void drawGui(Graphics g) {
       g.setColor(Color.GRAY);
       g.fillRect(0, this.getHeight() - guiHeight, this.getWidth(), guiHeight);
-
+      
       g.setColor(Color.DARK_GRAY);
       g.fillRect(0, this.getHeight() - guiHeight, this.getWidth(), 16);
       g.fillRect(0, this.getHeight() - 16, this.getWidth(), 16);
       g.fillRect(0, this.getHeight() - guiHeight, 16, guiHeight);
-      g.fillRect(this.getWidth() - 16, this.getHeight() - guiHeight, 16,
-            guiHeight);
-
+      g.fillRect(this.getWidth() - 16, this.getHeight() - guiHeight, 16, guiHeight);
+      
       currentTileGui(g);
    }
-
+   
    public void currentTileGui(Graphics g) {
       Color tileColor;
-      if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.FOREST)
+      if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.FOREST)
          tileColor = new Color(0, 128, 0);
-      else if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.PLAIN)
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.PLAIN)
          tileColor = new Color(126, 208, 102);
-      else if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.MOUNTAIN)
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.MOUNTAIN)
          tileColor = Color.LIGHT_GRAY;
-      else if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.RIVER)
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.RIVER)
          tileColor = new Color(41, 32, 132);
-      else if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.BRIDGE)
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.BRIDGE)
          tileColor = new Color(128, 128, 0);
-      else if (world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.CITY) {
-         if (((City) world.getTiles()[selectedY][selectedX]).getOwner() == null)
+      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.CITY) {
+         if(((City)world.getTiles()[selectedY][selectedX]).getOwner() == null)
             tileColor = Color.MAGENTA;
-         else if (((City) world.getTiles()[selectedY][selectedX]).getOwner()
-               .equals(teamOne))
+         else if(((City)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
             tileColor = Color.orange;
          else
             tileColor = Color.cyan;
-      } else {
-         if (((Factory) world.getTiles()[selectedY][selectedX]).getOwner()
-               .equals(teamOne))
+      }
+      else {
+         if(((Factory)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
             tileColor = Color.red;
          else
             tileColor = Color.blue;
       }
       g.setColor(tileColor);
       g.fillRect(32, this.getHeight() - guiHeight + 32, 128, 128);
-
+      
       g.setColor(Color.black);
       Font font = new Font("Arial", Font.BOLD, 12);
       g.setFont(font);
-      g.drawString(
-            "Current Tile: " + world.getTiles()[selectedY][selectedX].getType(),
-            102, this.getHeight() - guiHeight + 45);
-      g.drawString(
-            "Attack Bonus: "
-                  + world.getTiles()[selectedY][selectedX].getEffect().attackBonus,
-            102, this.getHeight() - guiHeight + 62);
-      g.drawString(
-            "Defense Bonus: "
-                  + world.getTiles()[selectedY][selectedX].getEffect().defenseBonus,
-            102, this.getHeight() - guiHeight + 79);
-      g.drawString(
-            "Move Bonus: "
-                  + world.getTiles()[selectedY][selectedX].getEffect().moveBonus,
-            102, this.getHeight() - guiHeight + 96);
+      g.drawString("Current Tile: " + world.getTiles()[selectedY][selectedX].getType(), 102, this.getHeight() - guiHeight + 45);
+      g.drawString("Attack Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().attackBonus, 102, this.getHeight() - guiHeight + 62);
+      g.drawString("Defense Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().defenseBonus, 102, this.getHeight() - guiHeight + 79);
+      g.drawString("Move Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().moveBonus, 102, this.getHeight() - guiHeight + 96);
       g.drawRect(32, this.getHeight() - guiHeight + 32, 128, 128);
-      for (int x = 0; x < 5; x++)
-         g.drawRect(24 + x, this.getHeight() - guiHeight + 24 + x,
-               300 - (2 * x), 80 - (2 * x));
+      for(int x = 0; x < 5; x++)
+         g.drawRect(24 + x, this.getHeight() - guiHeight + 24 + x, 300 - (2 * x), 80 - (2 * x));
    }
-
+   
    public void switchTeams() {
       Logger.consolePrint("switching teams", "game");
       unitSelected = false;
       selectedUnit = null;
       Iterator<Unit> i = currentTeam.getUnits().iterator();
-      while (i.hasNext()) {
+      while(i.hasNext()) {
          Unit temp = i.next();
          temp.setMoved(false);
          temp.setAttacked(false);
       }
-
-      if (teamOne.getUnits().size() == 1) {
+      
+      if(teamOne.getUnits().size() == 1) {
          drawDetectorOne++;
-         if (drawDetectorOne == 30) {
+         if(drawDetectorOne == 30) {
             teamOne.getUnits().clear();
-            Logger.consolePrint("draw detected", "game");
+            Logger.consolePrint("default win detected", "game");
          }
-      } else
+      }
+      else
          drawDetectorOne = 0;
-
-      if (teamTwo.getUnits().size() == 1) {
+      
+      if(teamTwo.getUnits().size() == 1) {
          drawDetectorTwo++;
-         if (drawDetectorTwo == 30) {
+         if(drawDetectorTwo == 30) {
             teamTwo.getUnits().clear();
-            Logger.consolePrint("draw detected", "game");
+            Logger.consolePrint("default win detected", "game");
          }
-      } else
+      }
+      else
          drawDetectorTwo = 0;
-
-      if (teamTwo.getUnits().size() == 0) {
-         winner = teamOne;
-         return;
-      }
-
-      if (teamOne.getUnits().size() == 0) {
-         winner = teamTwo;
-         return;
-      }
-
-      if (currentTeam.equals(teamOne))
+      
+      if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
-      Logger.consolePrint(currentTeam.toString(), "game");
-
-      for (City c : currentTeam.getCities())
+      
+      for(City c: currentTeam.getCities())
          c.produceResources();
-      for (Factory f : currentTeam.getFactories())
+      for(Factory f: currentTeam.getFactories())
          f.produceResources();
-
-      state = GAME_STATE.NORMAL;
-
-      if (currentTeam.getClass().equals(ComputerTeamC.class)
-            || currentTeam.getClass().equals(ComputerTeamA.class)
-            || currentTeam.getClass().equals(ComputerTeamB.class)
-            || currentTeam.getClass().equals(ComputerTeamD.class)) {
-         ((ComputerTeam) currentTeam).executeTurn();
-         switchTeams();
-      } else
-         update(this.getGraphics());
+      
+      state = GAME_STATE.UPDATE;
    }
-
+   
    public void drawTiles(Graphics g) {
-      for (int x = 0; x < gameWidth; x++)
-         for (int y = 0; y < gameHeight; y++) {
+      for(int x = 0; x < gameWidth; x++)
+         for(int y = 0; y < gameHeight; y++) {
             Tile currTile = world.getTiles()[y][x];
-            g.drawImage(currTile.getTexture(), tileSize * x, tileSize * y,
-                  tileSize, tileSize, this);
+            g.drawImage(currTile.getTexture(), tileSize * x, tileSize * y, tileSize, tileSize, this);
          }
    }
-
+   
    public void drawHeightMap(Graphics g) {
-      for (int x = 0; x < gameWidth; x++) {
-         for (int y = 0; y < gameHeight; y++) {
+      for(int x = 0; x < gameWidth; x++) {
+         for(int y = 0; y < gameHeight; y++) {
             Color tileColor;
-            if (world.getHeightMap()[y][x] == 0)
+            if(world.getHeightMap()[y][x] == 0)
                tileColor = Color.green;
-            else if (world.getHeightMap()[y][x] == 1)
+            else if(world.getHeightMap()[y][x] == 1)
                tileColor = Color.yellow;
-            else if (world.getHeightMap()[y][x] == 2)
+            else if(world.getHeightMap()[y][x] == 2)
                tileColor = Color.orange;
             else
                tileColor = Color.red;
             g.setColor(tileColor);
-            g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize)
-                  + offsetVertical, tileSize, tileSize);
+            g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
             g.setColor(Color.black);
-            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize)
-                  + offsetVertical, tileSize, tileSize);
+            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
          }
       }
    }
-
+   
    public void drawUnits(Graphics g) {
       Iterator<Unit> i = teamOne.getUnits().iterator();
       g.setColor(Color.black);
       Font font = new Font("Serif", Font.PLAIN, 22);
       g.setFont(font);
-      while (i.hasNext()) {
+      while(i.hasNext()) {
          Unit temp = i.next();
          UNIT_TYPE u = temp.getType();
-         if (u == UNIT_TYPE.INFANTRY)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[0], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.INFANTRY)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[0], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[4], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.TANK)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[2], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[4], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.TANK)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[2], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[6], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.TANK_DEST)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[3], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[6], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.TANK_DEST)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[3], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[7], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.RPG)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[1], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[7], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.RPG)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[1], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[5], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[5], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
       }
-
+      
       i = teamTwo.getUnits().iterator();
-      while (i.hasNext()) {
+      while(i.hasNext()) {
          Unit temp = i.next();
          UNIT_TYPE u = temp.getType();
-         if (u == UNIT_TYPE.INFANTRY)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[8], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.INFANTRY)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[8], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[12], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.TANK)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[10], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[12], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.TANK)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[10], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[14], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.TANK_DEST)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[11], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[14], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.TANK_DEST)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[11], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[15], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
-         if (u == UNIT_TYPE.RPG)
-            if (temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[9], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[15], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(u == UNIT_TYPE.RPG)
+            if(temp.getDir() == DIRECTION.LEFT)
+               g.drawImage(manager.unitImages[9], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[13], tileSize * temp.getX(),
-                     tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[13], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
       }
    }
-
+   
    public void drawHealthBars(Graphics g) {
-      int buffer = (int) ((double) tileSize * .10);
-      for (int y = 0; y < gameHeight; y++) {
-         for (int x = 0; x < gameWidth; x++) {
-            if (world.getTiles()[y][x].isOccupied()) {
+      int buffer = (int)((double)tileSize * .10);
+      for(int y = 0; y < gameHeight; y++) {
+         for(int x = 0; x < gameWidth; x++) {
+            if(world.getTiles()[y][x].isOccupied()) {
                int xCorner = (x * tileSize) + offsetHorizontal + buffer;
                int yCorner = (y * tileSize) + offsetVertical + buffer;
                g.setColor(Color.red);
                g.fillRect(xCorner, yCorner, tileSize - (2 * buffer), buffer);
                g.setColor(Color.green);
-               g.fillRect(
-                     xCorner,
-                     yCorner,
-                     (int) ((double) (tileSize - (2 * buffer)) * (double) ((double) world
-                           .getTiles()[y][x].getOccupiedBy().getHealth() / 100.0)),
-                     buffer);
+               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy()
+                     .getHealth() / 100.0)), buffer);
             }
          }
       }
    }
-
-   public void gameLoop(int xTile, int yTile) {
+   
+   public void gameLogic(int xTile, int yTile) {
       logicLock.lock();
       int x = xTile; // click data
       int y = yTile; // click data
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
-
-      if (unitSelected) {
-         if (!selectedUnit.hasMoved() && !selectedUnit.hasAttacked()
-               && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
+      
+      if(unitSelected) {
+         if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
-            Logger.consolePrint("selected unit attacking: " + targetUnit,
-                  "game");
+            Logger.consolePrint("selected unit attacking: " + targetUnit, "game");
             attackMove(x, y);
             selectedUnit.attack(targetUnit, false);
-            if (!targetUnit.isAlive()) {
+            if(!targetUnit.isAlive()) {
                world.destroyUnit(targetUnit);
                Logger.consolePrint("target destroyed", "game");
-            } else {
+               state = GAME_STATE.UPDATE;
+            }
+            else {
                targetUnit.attack(selectedUnit, true);
-               if (!selectedUnit.isAlive()) {
+               if(!selectedUnit.isAlive()) {
                   world.destroyUnit(selectedUnit);
                   Logger.consolePrint("unit destroyed", "game");
+                  state = GAME_STATE.UPDATE;
                }
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
-         if (!selectedUnit.hasMoved()
-               && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint("capturing city at: (" + selectedTile.getX()
-                  + ", " + selectedTile.getY() + ")", "game");
+         if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
+            Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
-            if (((CapturableTile) selectedTile).getOwner() == null
-                  || !((CapturableTile) selectedTile).getOwner().equals(
-                        currentTeam)) {
-               ((CapturableTile) selectedTile).capture(selectedUnit);
+            if(((CapturableTile)selectedTile).getOwner() == null || !((CapturableTile)selectedTile).getOwner().equals(currentTeam)) {
+               ((CapturableTile)selectedTile).capture(selectedUnit);
             }
          }
-         if (!selectedUnit.hasMoved()
-               && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint(
-                  "moving selected unit to: (" + selectedTile.getX() + ", "
-                        + selectedTile.getY() + ")", "game");
+         if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
+            Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
          unitSelected = false;
-         state = GAME_STATE.NORMAL;
+         state = GAME_STATE.UPDATE;
       }
-
-      else if (selectedTile.isOccupied()) {
+      
+      else if(selectedTile.isOccupied()) {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
-         if (selectedUnit.getOwner().equals(currentTeam)) {
+         if(selectedUnit.getOwner().equals(currentTeam)) {
             selectedUnit.calcMoveSpots();
-            if (!selectedUnit.hasMoved())
+            if(!selectedUnit.hasMoved())
                state = GAME_STATE.DISPLAY_MOVE;
          }
-      } else if (selectedTile.getType() == TILE_TYPE.FACTORY
-            && ((Factory) selectedTile).getOwner().equals(currentTeam)) {
+      }
+      else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
          Logger.consolePrint("factory selected", "game");
-         Object[] possibilities = ((Factory) selectedTile).dialogBoxList();
-         Object s = JOptionPane
-               .showInputDialog(this,
-                     "Choose unit to produce:\n" + "Current resource points: "
-                           + currentTeam.getResources(), "Factory",
-                     JOptionPane.PLAIN_MESSAGE, null, possibilities,
-                     possibilities[0]);
-         if (s != null) {
-            String unitType = ((String) s).split(",")[0];
-            if (unitType.equals("Tank"))
-               ((Factory) selectedTile).produceUnit(UNIT_TYPE.TANK);
-            else if (unitType.equals("Tank Destroyer"))
-               ((Factory) selectedTile).produceUnit(UNIT_TYPE.TANK_DEST);
-            else if (unitType.equals("Infantry"))
-               ((Factory) selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
-            else if (unitType.equals("RPG Team"))
-               ((Factory) selectedTile).produceUnit(UNIT_TYPE.RPG);
+         Object[] possibilities = ((Factory)selectedTile).dialogBoxList();
+         Object s = JOptionPane.showInputDialog(this, "Choose unit to produce:\n" + "Current resource points: " + currentTeam.getResources(),
+               "Factory", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+         if(s != null) {
+            String unitType = ((String)s).split(",")[0];
+            if(unitType.equals("Tank"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK);
+            else if(unitType.equals("Tank Destroyer"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK_DEST);
+            else if(unitType.equals("Infantry"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
+            else if(unitType.equals("RPG Team"))
+               ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
             Logger.consolePrint("producing " + unitType, "game");
          }
-         state = GAME_STATE.NORMAL;
+         state = GAME_STATE.UPDATE;
       }
-      if (!unitSelected) {
+      if(!unitSelected) {
          selectedUnit = null;
-         state = GAME_STATE.NORMAL;
+         state = GAME_STATE.UPDATE;
       }
-
-//      try {
-//         SwingUtilities.invokeAndWait(new Runnable() {
-//            public void run() {
-//               
-//            }
-//            
-//            public String fooBazz() { return "radha"; }
-//         });
-//      } 
-//      catch (Exception e) {
-//      }
       logicLock.unlock();
-      repaint();
    }
-
+   
    public void drawMoveSpots(Graphics g) {
       Color moveColor = new Color(0, 128, 128, 135);
       Color attackColor = new Color(255, 0, 0, 135);
       Color captureColor = new Color(255, 225, 0, 135);
       g.setColor(moveColor);
-
-      for (Coordinate c : selectedUnit.getMoveSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal,
-               (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-
+      
+      for(Coordinate c: selectedUnit.getMoveSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      
       g.setColor(attackColor);
-      for (Coordinate c : selectedUnit.getAttackSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal,
-               (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-
+      for(Coordinate c: selectedUnit.getAttackSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      
       g.setColor(captureColor);
-      for (Coordinate c : selectedUnit.getCaptureSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal,
-               (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-
+      for(Coordinate c: selectedUnit.getCaptureSet())
+         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      
    }
-
+   
    public void attackMove(int x, int y) {
-      if (Math.abs(selectedUnit.getX() - targetUnit.getX()) == 1
-            && targetUnit.getY() == selectedUnit.getY())
+      if(Math.abs(selectedUnit.getX() - targetUnit.getX()) == 1 && targetUnit.getY() == selectedUnit.getY())
          return;
-      if (Math.abs(selectedUnit.getY() - targetUnit.getY()) == 1
-            && targetUnit.getX() == selectedUnit.getX())
+      if(Math.abs(selectedUnit.getY() - targetUnit.getY()) == 1 && targetUnit.getX() == selectedUnit.getX())
          return;
-      else if (x - 1 >= 0
-            && selectedUnit.getMoveSet().contains(new Coordinate(x - 1, y))) {
+      else if(x - 1 >= 0 && selectedUnit.getMoveSet().contains(new Coordinate(x - 1, y))) {
          selectedUnit.move(world.getTiles()[y][x - 1]);
-      } else if (x + 1 < gameWidth
-            && selectedUnit.getMoveSet().contains(new Coordinate(x + 1, y))) {
+      }
+      else if(x + 1 < gameWidth && selectedUnit.getMoveSet().contains(new Coordinate(x + 1, y))) {
          selectedUnit.move(world.getTiles()[y][x + 1]);
-      } else if (y - 1 >= 0
-            && selectedUnit.getMoveSet().contains(new Coordinate(x, y - 1))) {
+      }
+      else if(y - 1 >= 0 && selectedUnit.getMoveSet().contains(new Coordinate(x, y - 1))) {
          selectedUnit.move(world.getTiles()[y - 1][x]);
-      } else if (y + 1 < gameHeight
-            && selectedUnit.getMoveSet().contains(new Coordinate(x, y + 1))) {
+      }
+      else if(y + 1 < gameHeight && selectedUnit.getMoveSet().contains(new Coordinate(x, y + 1))) {
          selectedUnit.move(world.getTiles()[y + 1][x]);
       }
    }
-
+   
    public void highLightTile(int x, int y, Color c) {
       Graphics g = this.getGraphics();
       g.setColor(c);
       g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
    }
-
+   
    public Tile selectTile(int x, int y) {
       Tile selectedTile = world.getTiles()[y][x];
       return selectedTile;
    }
-
+   
    public void gameDebugMini() {
       System.out.println("Unit selected: " + unitSelected);
       System.out.println(selectedUnit);
@@ -545,7 +479,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Team one: " + teamOne.toString());
       System.out.println("Team two: " + teamTwo.toString());
    }
-
+   
    public void gameDebugFull() {
       System.out.println("----------------------------------");
       System.out.println("Game Debug: Full");
@@ -553,8 +487,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Board width: " + gameWidth);
       System.out.println("Board height: " + gameHeight);
       System.out.println("Starting team sizes: " + teamSize);
-      System.out.println("Percentage of board occupied by units: "
-            + (double) (100 * (teamSize * 2) / (gameWidth * gameHeight)));
+      System.out.println("Percentage of board occupied by units: " + (double)(100 * (teamSize * 2) / (gameWidth * gameHeight)));
       System.out.println();
       world.printMap();
       System.out.println();
@@ -571,67 +504,67 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Team two resources: " + teamTwo.getResources());
       System.out.println("Team two army size: " + teamTwo.getUnits().size());
    }
-
+   
    public static void delay(int n) {
       long startDelay = System.currentTimeMillis();
       long endDelay = 0;
-      while (endDelay - startDelay < n)
+      while(endDelay - startDelay < n)
          endDelay = System.currentTimeMillis();
    }
-
+   
    @Override
    public void mouseClicked(MouseEvent arg0) {
-      System.out.println("Click.");
-      if (SwingUtilities.isLeftMouseButton(arg0)) {
+      if(SwingUtilities.isLeftMouseButton(arg0)) {
          int eventX = arg0.getX();
          int eventY = arg0.getY();
-         for (int row = 0; row < gameHeight; row++)
-            for (int col = 0; col < gameWidth; col++)
-               if (grid[row][col].contains(eventX, eventY)) {
-                  gameLoop(col, row);
+         for(int row = 0; row < gameHeight; row++)
+            for(int col = 0; col < gameWidth; col++)
+               if(grid[row][col].contains(eventX, eventY)) {
+                  gameLogic(col, row);
                   return;
                }
-      } else
-         switchTeams();
+      }
+      else
+         state = GAME_STATE.SWITCH_TEAMS;
    }
-
+   
    @Override
    public void mouseEntered(MouseEvent arg0) {
       // TODO Auto-generated method stub
-
+      
    }
-
+   
    @Override
    public void mouseExited(MouseEvent arg0) {
       // TODO Auto-generated method stub
-
+      
    }
-
+   
    @Override
    public void mousePressed(MouseEvent arg0) {
       // TODO Auto-generated method stub
-
+      
    }
-
+   
    @Override
    public void mouseReleased(MouseEvent arg0) {
       // TODO Auto-generated method stub
-
+      
    }
-
+   
    public World getWorld() {
       return world;
    }
-
+   
    public void setWorld(World world) {
       this.world = world;
    }
-
+   
    @Override
    public void actionPerformed(ActionEvent arg0) {
       // TODO Auto-generated method stub
       System.out.println(arg0.toString());
-
+      
    }
-
+   
 }

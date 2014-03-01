@@ -14,8 +14,8 @@ public class Logger {
    // Any of the CPU teams = ai
    // General error messages = error
    
-   private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("map", "launcher");   
+   private static boolean consolePrintingOn = false;
+   private static List<String> validTags = asList("map", "launcher", "ai");   
    
    public static String timeStamp() {
       Date date = new Date();

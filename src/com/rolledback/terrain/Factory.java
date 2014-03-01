@@ -13,7 +13,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class Factory extends CapturableTile {
    
    private HashMap<UNIT_TYPE, Integer> productionList;
-   private int resourceValue = 0;
+   private int resourceValue = 25;
    
    public Factory(World w, int x, int y, Team team, Image t) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F', team);
