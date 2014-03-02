@@ -8,7 +8,7 @@ import com.rolledback.units.Unit;
 
 public class City extends CapturableTile {
    
-   private int resourceValue = 50;
+   private int resourceValue = 100;
    
    public City(World w, int x, int y, Team o, Image t) {
       super(w, x, y, new TerrainEffect(0, 20, 0), 'c', o);

@@ -4,11 +4,9 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
-import com.rolledback.framework.Logger;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.CapturableTile;
-import com.rolledback.terrain.City;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 
@@ -26,9 +24,9 @@ public class Unit {
       LEFT, RIGHT
    }
    
-   protected HashSet<Coordinate> moveSet;
-   protected HashSet<Coordinate> attackSet;
-   protected HashSet<Coordinate> captureSet;
+   private HashSet<Coordinate> moveSet;
+   private HashSet<Coordinate> attackSet;
+   private HashSet<Coordinate> captureSet;
    protected int minAttack;
    protected int maxAttack;
    protected int infAttackBonus;
@@ -38,7 +36,7 @@ public class Unit {
    protected int moveRange;
    protected int x, y;
    private int health;
-   int maxHealth;
+   private int maxHealth;
    private boolean alive;
    private boolean moved;
    private boolean attacked;
@@ -86,7 +84,7 @@ public class Unit {
       moveSet.remove(new Coordinate(x, y));
    }
    
-   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {     
+   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
       Coordinate thisCoord = new Coordinate(x, y);
       Tile tiles[][] = world.getTiles();
       int height = world.getHeight();
@@ -318,5 +316,13 @@ public class Unit {
    
    public void setDir(DIRECTION dir) {
       this.dir = dir;
+   }
+   
+   public int getMaxHealth() {
+      return maxHealth;
+   }
+   
+   public void setMaxHealth(int maxHealth) {
+      this.maxHealth = maxHealth;
    }
 }

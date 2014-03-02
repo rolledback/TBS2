@@ -1,5 +1,10 @@
 package com.rolledback.framework;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -7,8 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.rolledback.terrain.CapturableTile;
-import com.rolledback.terrain.City;
+import com.rolledback.teams.ComputerTeamD;
 
 public class Launcher {
    
@@ -41,6 +45,7 @@ public class Launcher {
       if(tileSize == -1)
          tileSize = 64;
       int[] dimensions = autoCalcDimensions(tileSize);
+      Logger.consolePrint(Arrays.toString(dimensions), "launcher");
       init(dimensions[0], dimensions[1]);
    }
    
@@ -96,7 +101,7 @@ public class Launcher {
       }
       GraphicsManager manager = new GraphicsManager();
       int winner[] = { 0, 0 };
-      for(int i = 0; i < 2000; i++) {
+      for(int i = 0; i < 100000; i++) {
          frame.setTitle("TBS2 " + i + " " + Arrays.toString(winner));
          Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();
@@ -120,11 +125,10 @@ public class Launcher {
             winner[0]++;
          else
             winner[1]++;
-         //frame.setVisible(false);
+         // frame.setVisible(false);
          Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
-         try {newGame.logicLock.unlock(); System.out.println("it worked"); } catch(Exception e) {}
-         newGame = null;
          System.out.println(i);
+         newGame = null;
       }
       System.exit(-1);
    }

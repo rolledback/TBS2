@@ -14,8 +14,9 @@ public class Logger {
    // Any of the CPU teams = ai
    // General error messages = error
    
-   private static boolean consolePrintingOn = false;
-   private static List<String> validTags = asList("map", "launcher", "ai");   
+   private static boolean consolePrintingOn = true;
+   private static List<String> validTags = asList("map", "launcher");   
+   private static int tagLength = 3;
    
    public static String timeStamp() {
       Date date = new Date();
@@ -26,10 +27,10 @@ public class Logger {
    
    public static void consolePrint(String message, String tag) {
       if(consolePrintingOn && validTags.contains(tag.toLowerCase())) {
-         if(tag.length() > 3)
-            tag = tag.substring(0, 3);
-         if(tag.length() < 3) {
-            int spacesNeeded = 3 - tag.length();
+         if(tag.length() > tagLength)
+            tag = tag.substring(0, tagLength);
+         if(tag.length() < tagLength) {
+            int spacesNeeded = tagLength - tag.length();
             for(int x = 0; x < spacesNeeded; x++)
                tag += " ";
          }            

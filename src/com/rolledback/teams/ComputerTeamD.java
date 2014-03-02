@@ -1,5 +1,6 @@
 package com.rolledback.teams;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -7,10 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
-import com.rolledback.framework.Logger;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
@@ -18,9 +19,8 @@ import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
-   int bfsCalls = 0;
    final int animationDelay = 500;
-   
+
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
    }
@@ -44,17 +44,28 @@ public class ComputerTeamD extends ComputerTeam {
          }
       }
       
+//      Iterator<Factory> factoryIterator = factories.iterator();
+//      while(factoryIterator.hasNext()) {
+//         Factory currentFactory = factoryIterator.next();
+//         int x = 0;
+//         for(; x < currentFactory.getProductionList().size(); x++) {
+//            if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
+//               break;
+//         }
+//      }
+      game.logicLock.lock();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
-         int x = 0;
-         for(; x < currentFactory.getProductionList().size(); x++) {
-            if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
-               break;
+         Random rand = new Random();
+         int unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+         int attempts = 0;
+         while(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[unitToProduce]) && attempts < 2048) {
+            unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+            attempts++;
          }
-         if(x < currentFactory.getProductionList().size())
-            Logger.consolePrint("AI is making: " + (UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x], "ai");
       }
+      game.logicLock.unlock();
    }
    
    public Coordinate moveUnit(Unit u) {
@@ -79,12 +90,15 @@ public class ComputerTeamD extends ComputerTeam {
             closestEnemy = t;
          }
       }
-      if(closestEnemy != null)
+      if(closestEnemy != null) {
          for(Coordinate c: u.getMoveSet()) {
             int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestEnemy.getX(), closestEnemy.getY(), u);
             if(d != Integer.MAX_VALUE)
                moveDistances.put(c, d);
          }
+         moveDistances.put(new Coordinate(u.getX(), u.getY()),
+               distance(game.getWorld().getTiles(), u.getX(), u.getY(), closestEnemy.getX(), closestEnemy.getY(), u));
+      }
       
       if(u.getType() == UNIT_TYPE.INFANTRY) {
          int closestCaptureableDistance = Integer.MAX_VALUE;
@@ -101,6 +115,8 @@ public class ComputerTeamD extends ComputerTeam {
          
          if(closestCaptureableDistance < closestEnemyDistance) {
             moveDistances.clear();
+            moveDistances.put(new Coordinate(u.getX(), u.getY()),
+                  distance(game.getWorld().getTiles(), u.getX(), u.getY(), closestCapturable.getX(), closestCapturable.getY(), u));
             for(Coordinate c: u.getMoveSet()) {
                int d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestCapturable.getX(), closestCapturable.getY(), u);
                if(d != Integer.MAX_VALUE)
@@ -173,7 +189,6 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
-      bfsCalls++;
       if(!unit.canTraverse(world[targetY][targetX]))
          return Integer.MAX_VALUE;
       LinkedList<Tile> queue = new LinkedList<Tile>();

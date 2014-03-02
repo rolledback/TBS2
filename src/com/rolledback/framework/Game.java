@@ -54,7 +54,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    int drawDetectorOne = 0;
    int drawDetectorTwo = 0;
    
-   ReentrantLock logicLock;
+   public ReentrantLock logicLock;
    
    public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
       gameWidth = x;
@@ -62,10 +62,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       manager = m;
       
       logicLock = new ReentrantLock();
-      
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 0, 150);
-      teamTwo = new Team("team two", 0, 150);
+      teamOne = new Team("team one", 50, 125);
+      teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       
       if(teamOne instanceof ComputerTeam)
@@ -101,16 +100,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          if(state == GAME_STATE.UPDATE || state == GAME_STATE.DISPLAY_MOVE)
             repaint();
          if(state == GAME_STATE.SWITCH_TEAMS) {
-            System.out.println(teamOne.isFirstTurn());
-            System.out.println(teamTwo.isFirstTurn());
             if(!teamOne.isFirstTurn() && teamOne.getUnits().size() == 0) {
                winner = teamTwo;
-               System.out.println("1");
                state = GAME_STATE.END_GAME;
             }
             else if(!teamTwo.isFirstTurn() && teamTwo.getUnits().size() == 0) {
                winner = teamOne;
-               System.out.println("2");
                state = GAME_STATE.END_GAME;
             }
             else {
@@ -225,15 +220,16 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       else
          drawDetectorTwo = 0;
       
+      for(City c: currentTeam.getCities())
+         c.produceResources();
+      for(Factory f: currentTeam.getFactories())
+         f.produceResources();
+      
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
       
-      for(City c: currentTeam.getCities())
-         c.produceResources();
-      for(Factory f: currentTeam.getFactories())
-         f.produceResources();
       
       state = GAME_STATE.UPDATE;
    }
@@ -267,12 +263,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void drawUnits(Graphics g) {
-      Iterator<Unit> i = teamOne.getUnits().iterator();
       g.setColor(Color.black);
       Font font = new Font("Serif", Font.PLAIN, 22);
       g.setFont(font);
-      while(i.hasNext()) {
-         Unit temp = i.next();
+      for(Unit temp: teamOne.getUnits()) {
          UNIT_TYPE u = temp.getType();
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
@@ -296,9 +290,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.drawImage(manager.unitImages[5], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
       }
       
-      i = teamTwo.getUnits().iterator();
-      while(i.hasNext()) {
-         Unit temp = i.next();
+      for(Unit temp: teamTwo.getUnits()) {
          UNIT_TYPE u = temp.getType();
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)

@@ -23,7 +23,6 @@ public class ComputerTeamC extends ComputerTeam {
    
    final int animationDelay = 0;
    ArrayList<Coordinate> cityLocations;
-   public int[] unitsProduced = new int[4];
    
    public ComputerTeamC(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -82,7 +81,6 @@ public class ComputerTeamC extends ComputerTeam {
             unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
             attempts++;
          }
-         unitsProduced[unitToProduce]++;
       }
       
    }
