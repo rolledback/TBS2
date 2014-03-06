@@ -1,6 +1,5 @@
 package com.rolledback.teams;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
-   final int animationDelay = 250;
+   final int animationDelay = 0;
 
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -167,6 +166,24 @@ public class ComputerTeamD extends ComputerTeam {
          u.calcMoveSpots();
       }
       
+      int avgX = 0;
+      int avgY = 0;
+      for(Unit u: opponent.getUnits()) {
+      	avgX += u.getX();
+      	avgY += u.getY();
+      }
+      
+      final int trueAvgX; 
+      final int trueAvgY;
+      if(opponent.getUnits().size() > 0) {
+      	trueAvgX = avgX / opponent.getUnits().size();
+      	trueAvgY = avgY / opponent.getUnits().size();
+      }
+      else {
+      	trueAvgX = 0;
+      	trueAvgY = 0;
+      }
+      
       Collections.sort(units, new Comparator<Unit>() {
          public int compare(Unit u1, Unit u2) {
             if(u1.getCaptureSet().size() != u2.getCaptureSet().size()) {
@@ -175,9 +192,17 @@ public class ComputerTeamD extends ComputerTeam {
             if(u1.getAttackSet().size() != u2.getAttackSet().size()) {
                return u1.getAttackSet().size() - u2.getAttackSet().size();
             }
-            return u1.getMoveSet().size() - u2.getMoveSet().size();
+            if(distanceForumula(u1.getX(), u1.getY(), trueAvgX, trueAvgY) != distanceForumula(u2.getX(), u2.getY(), trueAvgX, trueAvgY)) {
+            	return distanceForumula(u1.getX(), u1.getY(), trueAvgX, trueAvgY) - distanceForumula(u2.getX(), u2.getY(), trueAvgX, trueAvgY);
+            }
+            else
+            	return u1.getMoveSet().size() - u2.getMoveSet().size();
          }
       });
+   }
+   
+   public int distanceForumula(int x1, int y1, int x2, int y2) {
+   	return ((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2));
    }
    
    public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {

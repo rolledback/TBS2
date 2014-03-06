@@ -36,11 +36,13 @@ public class FactoryOptionPane extends JDialog {
    private JButton techOkButton;
    private JButton techCancelButton;
    private JLabel techCurrRes;
+   private JComboBox<String> techList;
    
    private UNIT_TYPE returnedUnit;
    private TECH_NAME returnedTech;
    private boolean unitChoiceMade;
    private boolean techChoiceMade;
+   private JComboBox<String> unitList;
    
    private int numResources;
 
@@ -77,8 +79,8 @@ public class FactoryOptionPane extends JDialog {
       int y = (dim.height - h) / 2;
       
       // Move the window
-      this.setLocation(x, y);
-      
+      setLocation(x, y);
+      setSize(getWidth(), techOkButton.getHeight() + techList.getHeight() + techCurrRes.getHeight() + 100);
       setVisible(true);
    }
    
@@ -90,7 +92,7 @@ public class FactoryOptionPane extends JDialog {
          unitNames[counter] = entry.getKey().toString() + ", " + entry.getValue().toString();
          counter++;
       }
-      final JComboBox<String> unitList = new JComboBox<String>(unitNames);
+      unitList = new JComboBox<String>(unitNames);
       unitList.setSelectedIndex(0);
       returnedUnit = UNIT_TYPE.stringToType(unitNames[0].split(",")[0]);
       unitList.setSize(155, 25);
@@ -142,7 +144,7 @@ public class FactoryOptionPane extends JDialog {
          counter++;
       }
       
-      final JComboBox<String> techList = new JComboBox<String>(techNames);
+      techList = new JComboBox<String>(techNames);
       if(techNames.length > 0)
          returnedTech = TECH_NAME.stringToName(techNames[0].split(",")[0]);
       techList.setSize(155, 25);

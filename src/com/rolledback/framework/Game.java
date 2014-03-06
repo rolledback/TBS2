@@ -64,7 +64,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 50, 125);
+      teamOne = new ComputerTeamD("team one", 50, 125, this);
       teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       

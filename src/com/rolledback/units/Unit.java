@@ -99,6 +99,8 @@ public class Unit {
       for(Technology t: owner.getResearchedTechs()) {
          if(t.getUnitClass() == this.classification || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getMoveValue();
+         if(t.getTileType() == currentTile.getType())
+         	techBonus += t.getMoveValue();
       }
       int adHocRange = moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
       if(adHocRange <= 0)
@@ -183,6 +185,8 @@ public class Unit {
       for(Technology t: owner.getResearchedTechs()) {
          if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getAttackValue();
+         if(t.getTileType() == currentTile.getType())
+         	techBonus += t.getAttackValue();
       }
       int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus() + techBonus;
       int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus() + techBonus;
@@ -202,6 +206,8 @@ public class Unit {
       for(Technology t: owner.getResearchedTechs()) {
          if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getDefenseValue();
+         if(t.getTileType() == currentTile.getType())
+         	techBonus+= t.getDefenseValue();
       }
       int adHocDefense = defense + currentTile.getEffect().getDefenseBonus() + techBonus;
       if(adHocDefense <= 0)
