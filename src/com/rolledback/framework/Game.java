@@ -16,9 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.ComputerTeam;
-import com.rolledback.teams.ComputerTeamC;
 import com.rolledback.teams.ComputerTeamD;
 import com.rolledback.teams.Team;
+import com.rolledback.teams.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
@@ -41,6 +41,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    Team currentTeam;
    public Team winner;
    private World world;
+   
    
    boolean unitSelected, ready;
    Tile selectedTile;
@@ -67,10 +68,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       
-      if(teamOne instanceof ComputerTeam)
-         ((ComputerTeam)teamOne).setOpponent(teamTwo);
-      if(teamTwo instanceof ComputerTeam)
-         ((ComputerTeam)teamTwo).setOpponent(teamOne);
+      teamOne.setOpponent(teamTwo);
+      teamTwo.setOpponent(teamOne);
       
       world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager);
       tileSize = ts;
@@ -181,9 +180,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       Font font = new Font("Arial", Font.BOLD, 12);
       g.setFont(font);
       g.drawString("Current Tile: " + world.getTiles()[selectedY][selectedX].getType(), 102, this.getHeight() - guiHeight + 45);
-      g.drawString("Attack Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().attackBonus, 102, this.getHeight() - guiHeight + 62);
-      g.drawString("Defense Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().defenseBonus, 102, this.getHeight() - guiHeight + 79);
-      g.drawString("Move Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().moveBonus, 102, this.getHeight() - guiHeight + 96);
+      g.drawString("Attack Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getAttackBonus(), 102, this.getHeight() - guiHeight + 62);
+      g.drawString("Defense Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getDefenseBonus(), 102, this.getHeight() - guiHeight + 79);
+      g.drawString("Move Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getMoveBonus(), 102, this.getHeight() - guiHeight + 96);
       g.drawRect(32, this.getHeight() - guiHeight + 32, 128, 128);
       for(int x = 0; x < 5; x++)
          g.drawRect(24 + x, this.getHeight() - guiHeight + 24 + x, 300 - (2 * x), 80 - (2 * x));
@@ -391,20 +390,13 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
          Logger.consolePrint("factory selected", "game");
-         Object[] possibilities = ((Factory)selectedTile).dialogBoxList();
-         Object s = JOptionPane.showInputDialog(this, "Choose unit to produce:\n" + "Current resource points: " + currentTeam.getResources(),
-               "Factory", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
-         if(s != null) {
-            String unitType = ((String)s).split(",")[0];
-            if(unitType.equals("Tank"))
-               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK);
-            else if(unitType.equals("Tank Destroyer"))
-               ((Factory)selectedTile).produceUnit(UNIT_TYPE.TANK_DEST);
-            else if(unitType.equals("Infantry"))
-               ((Factory)selectedTile).produceUnit(UNIT_TYPE.INFANTRY);
-            else if(unitType.equals("RPG Team"))
-               ((Factory)selectedTile).produceUnit(UNIT_TYPE.RPG);
-            Logger.consolePrint("producing " + unitType, "game");
+         FactoryOptionPane factoryPane = new FactoryOptionPane(currentTeam);
+         if(factoryPane.isUnitChoiceMade()) {
+            ((Factory)selectedTile).produceUnit(factoryPane.getReturnedUnit());
+            Logger.consolePrint("producing " + factoryPane.getReturnedUnit(), "game");
+         }
+         else if(factoryPane.isTechChoiceMade()) {
+            Technology.researchTech(currentTeam, factoryPane.getReturnedTech());
          }
          state = GAME_STATE.UPDATE;
       }

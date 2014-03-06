@@ -7,7 +7,6 @@ import com.rolledback.units.Unit;
 public abstract class ComputerTeam extends Team {
    
    Game game;
-   protected Team opponent;
    Coordinate target;
    Unit targetUnit;
    
@@ -17,14 +16,6 @@ public abstract class ComputerTeam extends Team {
    }
    
    public abstract void executeTurn();
-
-   public Team getOpponent() {
-      return opponent;
-   }
-
-   public void setOpponent(Team opponent) {
-      this.opponent = opponent;
-   }
    
    public void delay(int n) {
       long startDelay = System.currentTimeMillis();

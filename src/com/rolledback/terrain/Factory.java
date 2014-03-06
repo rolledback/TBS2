@@ -3,6 +3,7 @@ package com.rolledback.terrain;
 import java.awt.Image;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.rolledback.framework.World;
@@ -12,25 +13,22 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Factory extends CapturableTile {
    
-   private HashMap<UNIT_TYPE, Integer> productionList;
+   private LinkedHashMap<UNIT_TYPE, Integer> productionList;
    private int resourceValue = 50;
    
    public Factory(World w, int x, int y, Team team, Image t) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F', team);
-      productionList = new HashMap<UNIT_TYPE, Integer>();
+      productionList = new LinkedHashMap<UNIT_TYPE, Integer>();
       type = TILE_TYPE.FACTORY;
       texture = t;
       initProductionList();
    }
    
    public void initProductionList() {
-      productionList.put(UNIT_TYPE.INFANTRY, 100);
-      productionList.put(UNIT_TYPE.RPG, 125);
-      productionList.put(UNIT_TYPE.TANK_DEST, 250);
-      productionList.put(UNIT_TYPE.TANK, 250);      
+      productionList = owner.getProductionList();  
    }
    
-   public HashMap<UNIT_TYPE, Integer> getProductionList() {
+   public LinkedHashMap<UNIT_TYPE, Integer> getProductionList() {
       return this.productionList;
    }
    

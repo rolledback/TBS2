@@ -241,7 +241,7 @@ public class ComputerTeamB extends ComputerTeam {
          if(currUnit.getAttackSet().contains(currentSpot)) {
             // increment HashMap value of any enemy unit you can attack
             Unit temp = game.getWorld().getTiles()[currentSpot.getY()][currentSpot.getX()].getOccupiedBy();
-            numInRange.put(temp, numInRange.get(temp) + currUnit.getMaxAttack() + currUnit.getCurrentTile().getEffect().attackBonus);
+            numInRange.put(temp, numInRange.get(temp) + currUnit.getMaxAttack() + currUnit.getCurrentTile().getEffect().getAttackBonus());
          }
       }
       
@@ -268,8 +268,8 @@ public class ComputerTeamB extends ComputerTeam {
          currentMax = 9999.9999;
          for(Map.Entry<Unit, Double> entry: numInRange.entrySet()) {
             if(maxEntry == null
-                  || ((Integer)(entry.getKey().getDefense() + entry.getKey().getCurrentTile().getEffect().defenseBonus)).compareTo((Integer)(maxEntry
-                        .getKey().getDefense() + maxEntry.getKey().getCurrentTile().getEffect().defenseBonus)) <= 0 && entry.getValue() > 0)
+                  || ((Integer)(entry.getKey().getDefense() + entry.getKey().getCurrentTile().getEffect().getDefenseBonus())).compareTo((Integer)(maxEntry
+                        .getKey().getDefense() + maxEntry.getKey().getCurrentTile().getEffect().getDefenseBonus())) <= 0 && entry.getValue() > 0)
                maxEntry = entry;
          }
       }

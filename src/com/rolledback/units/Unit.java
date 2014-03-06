@@ -17,7 +17,29 @@ public class Unit {
    }
    
    public enum UNIT_TYPE {
-      TANK, TANK_DEST, INFANTRY, RPG
+      ALL, TANK, TANK_DEST, INFANTRY, RPG;
+      
+      public String toString() {
+         if(this.equals(TANK))
+            return "Tank";
+         if(this.equals(TANK_DEST))
+            return "Tank Destroyer";
+         if(this.equals(INFANTRY))
+            return "Infantry";
+         else
+            return "RPG Team";
+      }
+      
+      public static UNIT_TYPE stringToType(String s) {
+         if(s.equals("Tank"))
+            return TANK;
+         if(s.equals("Tank Destroyer"))
+            return TANK_DEST;
+         if(s.equals("Infantry"))
+            return INFANTRY;
+         else
+            return RPG;
+      }
    }
    
    public enum DIRECTION {
@@ -72,7 +94,7 @@ public class Unit {
    
    public void calcMoveSpots() {
       World world = this.currentTile.getWorld();
-      int adHocRange = moveRange + currentTile.getEffect().moveBonus;
+      int adHocRange = moveRange + currentTile.getEffect().getMoveBonus();
       if(adHocRange <= 0)
          adHocRange = 1;
       currentTile.setOccupied(false);
@@ -151,8 +173,8 @@ public class Unit {
    
    public void attack(Unit target, boolean isRetaliation) {
       Random random = new Random();
-      int adHocMaxAttack = maxAttack + currentTile.getEffect().attackBonus;
-      int adHocMinAttack = minAttack + currentTile.getEffect().attackBonus;
+      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus();
+      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus();
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
       if(target.getClass().equals(UNIT_CLASS.INFANTRY))
          attackNum += infAttackBonus;
@@ -165,7 +187,7 @@ public class Unit {
    
    public void takeDamage(int amount) {
       Random random = new Random();
-      int adHocDefense = defense + currentTile.getEffect().defenseBonus;
+      int adHocDefense = defense + currentTile.getEffect().getDefenseBonus();
       if(adHocDefense <= 0)
          adHocDefense = 1;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);

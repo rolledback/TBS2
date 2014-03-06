@@ -19,7 +19,7 @@ import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
-   final int animationDelay = 500;
+   final int animationDelay = 250;
 
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);
@@ -52,18 +52,19 @@ public class ComputerTeamD extends ComputerTeam {
 //            if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
 //               break;
 //         }
-//      }
+//    
       game.logicLock.lock();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
          Random rand = new Random();
-         int unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+         int unitToProduce = rand.nextInt(productionList.size());
          int attempts = 0;
-         while(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[unitToProduce]) && attempts < 2048) {
-            unitToProduce = rand.nextInt(currentFactory.getProductionList().size());
+         do {
+            unitToProduce = rand.nextInt(productionList.size());
             attempts++;
          }
+         while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts > 32);
       }
       game.logicLock.unlock();
    }
