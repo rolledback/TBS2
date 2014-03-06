@@ -6,6 +6,7 @@ import java.util.Random;
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
+import com.rolledback.teams.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
@@ -13,7 +14,7 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 public class Unit {
    
    public enum UNIT_CLASS {
-      VEHICLE, INFANTRY, NONE
+      ALL, VEHICLE, INFANTRY
    }
    
    public enum UNIT_TYPE {
@@ -85,7 +86,7 @@ public class Unit {
       alive = true;
       moved = false;
       currentTile = t;
-      classification = UNIT_CLASS.NONE;
+      classification = null;
       owner = o;
       moveSet = new HashSet<Coordinate>();
       attackSet = new HashSet<Coordinate>();
@@ -94,7 +95,12 @@ public class Unit {
    
    public void calcMoveSpots() {
       World world = this.currentTile.getWorld();
-      int adHocRange = moveRange + currentTile.getEffect().getMoveBonus();
+      int techBonus = 0;
+      for(Technology t: owner.getResearchedTechs()) {
+         if(t.getUnitClass() == this.classification || t.getUnitClass() == UNIT_CLASS.ALL)
+            techBonus += t.getMoveValue();
+      }
+      int adHocRange = moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
       if(adHocRange <= 0)
          adHocRange = 1;
       currentTile.setOccupied(false);
@@ -173,8 +179,13 @@ public class Unit {
    
    public void attack(Unit target, boolean isRetaliation) {
       Random random = new Random();
-      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus();
-      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus();
+      int techBonus = 0;
+      for(Technology t: owner.getResearchedTechs()) {
+         if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
+            techBonus += t.getAttackValue();
+      }
+      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus() + techBonus;
+      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus() + techBonus;
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
       if(target.getClass().equals(UNIT_CLASS.INFANTRY))
          attackNum += infAttackBonus;
@@ -187,7 +198,12 @@ public class Unit {
    
    public void takeDamage(int amount) {
       Random random = new Random();
-      int adHocDefense = defense + currentTile.getEffect().getDefenseBonus();
+      int techBonus = 0;
+      for(Technology t: owner.getResearchedTechs()) {
+         if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
+            techBonus += t.getDefenseValue();
+      }
+      int adHocDefense = defense + currentTile.getEffect().getDefenseBonus() + techBonus;
       if(adHocDefense <= 0)
          adHocDefense = 1;
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);

@@ -43,16 +43,7 @@ public class ComputerTeamD extends ComputerTeam {
                i--;
          }
       }
-      
-//      Iterator<Factory> factoryIterator = factories.iterator();
-//      while(factoryIterator.hasNext()) {
-//         Factory currentFactory = factoryIterator.next();
-//         int x = 0;
-//         for(; x < currentFactory.getProductionList().size(); x++) {
-//            if(currentFactory.produceUnit((UNIT_TYPE)currentFactory.getProductionList().keySet().toArray()[x]))
-//               break;
-//         }
-//    
+       
       game.logicLock.lock();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
@@ -64,7 +55,7 @@ public class ComputerTeamD extends ComputerTeam {
             unitToProduce = rand.nextInt(productionList.size());
             attempts++;
          }
-         while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts > 32);
+         while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts < 32);
       }
       game.logicLock.unlock();
    }

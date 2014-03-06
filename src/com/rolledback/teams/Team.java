@@ -20,13 +20,14 @@ public class Team {
 	protected ArrayList<City> cities;
 	protected ArrayList<Factory> factories;
 	protected ArrayList<Technology> researchedTechs;
+	protected LinkedHashMap<UNIT_TYPE, Integer> productionList;
+   protected LinkedHashMap<TECH_NAME, Integer> techTree;   
 	protected Team opponent;
+	
 	private String name;
 	private int teamSize;
 	private int resources;
 	private boolean firstTurn;
-	protected LinkedHashMap<UNIT_TYPE, Integer> productionList;
-	private static LinkedHashMap<TECH_NAME, Integer> techTree;
 
 	public Team(String name, int size, int r) {
 		units = new ArrayList<Unit>();
@@ -51,9 +52,13 @@ public class Team {
 
 	public void initTechTree() {
 		techTree = new LinkedHashMap<TECH_NAME, Integer>();
-		techTree.put(TECH_NAME.ART, 0);
-		techTree.put(TECH_NAME.MILI, 0);
-		techTree.put(TECH_NAME.CON, 0);
+		techTree.put(TECH_NAME.ART, 1500);
+		techTree.put(TECH_NAME.FORT, 1250);		
+		techTree.put(TECH_NAME.CON, 1000);
+		techTree.put(TECH_NAME.MILI, 750);
+		techTree.put(TECH_NAME.APCR, 500);
+		techTree.put(TECH_NAME.GPS, 250);
+		
 	}
 
 	public void createUnit(Tile t, UNIT_TYPE uType) {

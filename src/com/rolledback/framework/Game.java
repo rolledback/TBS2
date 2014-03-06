@@ -227,8 +227,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
-         currentTeam = teamOne;
-      
+         currentTeam = teamOne;      
       
       state = GAME_STATE.UPDATE;
    }
@@ -265,7 +264,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       g.setColor(Color.black);
       Font font = new Font("Serif", Font.PLAIN, 22);
       g.setFont(font);
-      for(Unit temp: teamOne.getUnits()) {
+      for(Unit temp: teamOne.getUnits()) {         
          UNIT_TYPE u = temp.getType();
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
@@ -287,6 +286,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.drawImage(manager.unitImages[1], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
                g.drawImage(manager.unitImages[5], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(temp.hasAttacked() || temp.hasMoved() && teamOne.equals(currentTeam)) {
+            g.setColor(new Color(192, 192, 192, 135));
+            g.fillRect(tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize);
+         }
       }
       
       for(Unit temp: teamTwo.getUnits()) {
@@ -311,6 +314,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.drawImage(manager.unitImages[9], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
             else
                g.drawImage(manager.unitImages[13], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+         if(temp.hasAttacked() || temp.hasMoved() && teamTwo.equals(currentTeam)) {
+            g.setColor(new Color(192, 192, 192, 135));
+            g.fillRect(tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize);
+         }
       }
    }
    
