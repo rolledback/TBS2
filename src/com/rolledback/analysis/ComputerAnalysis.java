@@ -21,9 +21,12 @@ public class ComputerAnalysis {
       File coordinateDump = new File("dump.txt");
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
+      int width = 208;
+      int height = 108;
+      int size = 8;
       
-      for(int x = 0; x < 26; x++)
-         for(int y = 0; y < 14; y++)
+      for(int x = 0; x < width; x++)
+         for(int y = 0; y < height; y++)
             coordHash.put(new Coordinate(x, y), 0.0);
       
       try {
@@ -46,9 +49,9 @@ public class ComputerAnalysis {
       JFrame frame = new JFrame("Display");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
-      frame.setSize((26 * 64) + frame.getInsets().right + frame.getInsets().left, (14 * 64) + frame.getInsets().top + frame.getInsets().bottom);
+      frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top + frame.getInsets().bottom);
       AnalysisDisplay display = new AnalysisDisplay(coordHash, maxValue);
-      display.setSize(26 * 64, 14 * 64);
+      display.setSize(width * size, height * size);
       frame.add(display);
       display.setVisible(true);
    }
@@ -69,6 +72,7 @@ class AnalysisDisplay extends JPanel {
    
    LinkedHashMap<Coordinate, Double> values;
    int maxValue;
+   int size = 8;
    
    private static final long serialVersionUID = 1L;
    Color[] gradient = {
@@ -94,7 +98,7 @@ class AnalysisDisplay extends JPanel {
       for(Map.Entry<Coordinate, Double> entry: values.entrySet()) {
          int value = (int)(entry.getValue() / maxValue * 10);
          g.setColor(gradient[value]);
-         g.fillRect(entry.getKey().getX() * 64, entry.getKey().getY() * 64, 64, 64);
+         g.fillRect(entry.getKey().getX() * size, entry.getKey().getY() * size, size, size);
       }
    }
    

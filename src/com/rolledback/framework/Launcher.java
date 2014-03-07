@@ -1,18 +1,14 @@
 package com.rolledback.framework;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import com.rolledback.teams.ComputerTeamD;
 
 public class Launcher {
    
@@ -128,6 +124,15 @@ public class Launcher {
          // frame.setVisible(false);
          Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
          System.out.println(i);
+         try {
+				PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
+				for(Coordinate c: newGame.history)
+					out.println(c.getX() + " " + c.getY());
+				out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
          newGame = null;
       }
       System.exit(-1);

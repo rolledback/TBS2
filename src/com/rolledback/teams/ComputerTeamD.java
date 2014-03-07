@@ -247,6 +247,5 @@ public class ComputerTeamD extends ComputerTeam {
       }
       world[unit.getY()][unit.getX()].setOccupied(true);
       return Integer.MAX_VALUE;
-   }
-   
+   }   
 }

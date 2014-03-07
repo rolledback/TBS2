@@ -8,10 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -33,6 +33,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
    }
+   
+   ArrayList<Coordinate> history = new ArrayList<Coordinate>();
    
    private static final long serialVersionUID = 1L;
    public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, guiHeight, selectedX, selectedY;
@@ -345,6 +347,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
+      
+      history.add(new Coordinate(x, y));
       
       if(unitSelected) {
          if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
