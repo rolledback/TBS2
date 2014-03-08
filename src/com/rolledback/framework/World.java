@@ -34,8 +34,6 @@ public class World {
       teamTwo = b;
       manager = m;
       buildMap();
-//      buildArmy(teamOne, 0, w / 5);
-//      buildArmy(teamTwo, w - (w / 5), w);
    }
    
    public void printMap() {

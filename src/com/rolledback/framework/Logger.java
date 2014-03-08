@@ -16,7 +16,7 @@ public class Logger {
    
    private static boolean consolePrintingOn = true;
    private static List<String> validTags = asList("map", "launcher");   
-   private static int tagLength = 3;
+   private static int tagLength = 2;
    
    public static String timeStamp() {
       Date date = new Date();

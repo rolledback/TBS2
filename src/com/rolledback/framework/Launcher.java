@@ -97,7 +97,7 @@ public class Launcher {
       }
       GraphicsManager manager = new GraphicsManager();
       int winner[] = { 0, 0 };
-      for(int i = 0; i < 100000; i++) {
+      for(int i = 0; i < 10000; i++) {
          frame.setTitle("TBS2 " + i + " " + Arrays.toString(winner));
          Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();

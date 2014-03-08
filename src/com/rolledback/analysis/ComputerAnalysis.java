@@ -22,7 +22,7 @@ public class ComputerAnalysis {
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
       int width = 208;
-      int height = 108;
+      int height = 112;
       int size = 8;
       
       for(int x = 0; x < width; x++)
@@ -44,12 +44,13 @@ public class ComputerAnalysis {
       }
       catch(FileNotFoundException e) {
          e.toString();
-      }       
+      }
       
       JFrame frame = new JFrame("Display");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
-      frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top + frame.getInsets().bottom);
+      frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top
+            + frame.getInsets().bottom);
       AnalysisDisplay display = new AnalysisDisplay(coordHash, maxValue);
       display.setSize(width * size, height * size);
       frame.add(display);
@@ -76,17 +77,32 @@ class AnalysisDisplay extends JPanel {
    
    private static final long serialVersionUID = 1L;
    Color[] gradient = {
-         new Color(0, 69, 229),
-         new Color(0, 161, 231),
-         new Color(1, 234, 213),
-         new Color(1, 237, 122),
-         new Color(2, 240, 30),
-         new Color(69, 234, 2),
-         new Color(167, 246, 3),
-         new Color(249, 242, 3),
-         new Color(252, 137, 4),
-         new Color(252, 83, 8),
-         new Color(255, 0, 0) };
+         new Color(0, 0, 255),
+         new Color(0, 40, 255),
+         new Color(0, 81, 255),
+         new Color(0, 122, 255),
+         new Color(0, 163, 255),
+         new Color(0, 204, 255),
+         new Color(0, 244, 255),
+         new Color(0, 255, 254),
+         new Color(0, 255, 183),
+         new Color(0, 255, 142),
+         new Color(0, 255, 101),
+         new Color(0, 255, 61),
+         new Color(0, 255, 20),
+         new Color(20, 255, 0),
+         new Color(61, 255, 0),
+         new Color(101, 255, 0),
+         new Color(142, 255, 0),
+         new Color(183, 255, 0),
+         new Color(224, 255, 0),
+         new Color(255, 244, 0),
+         new Color(255, 203, 0),
+         new Color(255, 163, 0),
+         new Color(255, 122, 0),
+         new Color(255, 81, 0),
+         new Color(255, 40, 0),
+         new Color(255, 0, 0), };
    
    public AnalysisDisplay(LinkedHashMap<Coordinate, Double> v, int mV) {
       values = v;
@@ -96,7 +112,7 @@ class AnalysisDisplay extends JPanel {
    
    public void paintComponent(Graphics g) {
       for(Map.Entry<Coordinate, Double> entry: values.entrySet()) {
-         int value = (int)(entry.getValue() / maxValue * 10);
+         int value = (int)(entry.getValue() / maxValue * 25);
          g.setColor(gradient[value]);
          g.fillRect(entry.getKey().getX() * size, entry.getKey().getY() * size, size, size);
       }
