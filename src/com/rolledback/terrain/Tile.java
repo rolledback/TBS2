@@ -34,6 +34,12 @@ public class Tile {
       texture = null;
    }
    
+   public Tile(int x, int y, Image i) {
+      this.x = x;
+      this.y = y;
+      texture = i;
+   }
+   
    public void setOccupiedBy(Unit u) {
       occupiedBy = u;
    }
@@ -112,6 +118,5 @@ public class Tile {
 
    public void setWorld(World world) {
       this.world = world;
-   }
-   
+   }   
 }

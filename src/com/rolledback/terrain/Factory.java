@@ -21,11 +21,12 @@ public class Factory extends CapturableTile {
       productionList = new LinkedHashMap<UNIT_TYPE, Integer>();
       type = TILE_TYPE.FACTORY;
       texture = t;
-      initProductionList();
+      if(team != null)
+         initProductionList();
    }
    
    public void initProductionList() {
-      productionList = owner.getProductionList();  
+      productionList = owner.getProductionList();
    }
    
    public LinkedHashMap<UNIT_TYPE, Integer> getProductionList() {
@@ -49,7 +50,7 @@ public class Factory extends CapturableTile {
          numEntry++;
       }
       Arrays.sort(list);
-      return list;      
+      return list;
    }
    
    public boolean produceUnit(UNIT_TYPE type) {
@@ -67,7 +68,7 @@ public class Factory extends CapturableTile {
    public void produceResources() {
       owner.setResources(owner.getResources() + resourceValue);
    }
-
+   
    @Override
    public void capture(Unit unit) {
       if(owner != null)
@@ -75,10 +76,10 @@ public class Factory extends CapturableTile {
       owner = unit.getOwner();
       unit.getOwner().getFactories().add(this);
       if(owner.equals(getWorld().getTeamOne()))
-         texture = getWorld().getManager().tileTextures[12];
+         texture = getWorld().getManager().tileTextures.get("factoryRed.png");
       else
-         texture = getWorld().getManager().tileTextures[13];
-      
+         texture = getWorld().getManager().tileTextures.get("factoryBlue.png");
+      initProductionList();
    }
    
 }

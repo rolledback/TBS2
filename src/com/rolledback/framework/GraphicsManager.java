@@ -2,15 +2,17 @@ package com.rolledback.framework;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+
 import javax.imageio.ImageIO;
 
 public class GraphicsManager {
    
-   public Image[] tileTextures;
    public Image[] unitImages;
+   public LinkedHashMap<String, Image> tileTextures;
    
    public GraphicsManager() {
-      tileTextures = new Image[30];
+      tileTextures = new LinkedHashMap<String, Image>();
       initTileImages();
       
       unitImages = new Image[32];
@@ -18,41 +20,39 @@ public class GraphicsManager {
    }
    
    public String toString() {
-      return tileTextures.length + " " + unitImages.length;
+      return tileTextures.size() + " " + unitImages.length;
    }
    
    public void initTileImages() {
       Logger.consolePrint("loading tile textures", "manager");
       try {
-         tileTextures[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png"));
-         tileTextures[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("forest.png"));
-         tileTextures[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("mountain.png"));
-         tileTextures[3] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge.png"));
-         tileTextures[4] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river.png"));
-         tileTextures[5] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner.png"));
-         tileTextures[6] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd.png"));
-         tileTextures[8] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityRed.png"));
-         tileTextures[9] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityBlue.png"));
-         tileTextures[15] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityGrey.png"));
-         tileTextures[12] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryRed.png"));
-         tileTextures[13] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryBlue.png"));
-         tileTextures[17] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryGrey.png"));
+         tileTextures.put("grass.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png")));
+         tileTextures.put("forest.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("forest.png")));
+         tileTextures.put("mountain.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("mountain.png")));
          
-         tileTextures[18] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_horizontal.png"));
-         tileTextures[19] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_vertical.png"));
+         tileTextures.put("cityRed.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityRed.png")));
+         tileTextures.put("cityBlue.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityBlue.png")));
+         tileTextures.put("cityGrey.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("cityGrey.png")));
          
-         tileTextures[20] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_up.png"));
-         tileTextures[21] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_right.png"));
-         tileTextures[22] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_down.png"));
-         tileTextures[23] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_left.png"));
+         tileTextures.put("factoryRed.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryRed.png")));
+         tileTextures.put("factoryBlue.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryBlue.png")));
+         tileTextures.put("factoryGrey.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("factoryGrey.png")));
          
-         tileTextures[24] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_one.png"));
-         tileTextures[25] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_two.png"));
-         tileTextures[26] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_three.png"));
-         tileTextures[27] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_four.png"));
+         tileTextures.put("river_horizontal.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_horizontal.png")));
+         tileTextures.put("river_vertical.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_vertical.png")));
          
-         tileTextures[28] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_horizontal.png"));
-         tileTextures[29] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_vertical.png"));
+         tileTextures.put("riverEnd_up.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_up.png")));
+         tileTextures.put("riverEnd_right.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_right.png")));
+         tileTextures.put("riverEnd_down.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_down.png")));
+         tileTextures.put("riverEnd_left.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverEnd_left.png")));
+         
+         tileTextures.put("riverCorner_one.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_one.png")));
+         tileTextures.put("riverCorner_two.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_two.png")));
+         tileTextures.put("riverCorner_three.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_three.png")));
+         tileTextures.put("riverCorner_four.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_four.png")));
+         
+         tileTextures.put("bridge_horizontal.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_horizontal.png")));
+         tileTextures.put("bridge_vertical.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_vertical.png")));
       }
       catch(IOException e) {
          Logger.consolePrint("ERROR loading image. " + e.toString(), "manager");

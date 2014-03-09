@@ -44,7 +44,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    public Team winner;
    private World world;
    
-   
    boolean unitSelected, ready;
    Tile selectedTile;
    Unit selectedUnit;
@@ -229,7 +228,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       if(currentTeam.equals(teamOne))
          currentTeam = teamTwo;
       else
-         currentTeam = teamOne;      
+         currentTeam = teamOne;
       
       state = GAME_STATE.UPDATE;
    }
@@ -266,7 +265,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       g.setColor(Color.black);
       Font font = new Font("Serif", Font.PLAIN, 22);
       g.setFont(font);
-      for(Unit temp: teamOne.getUnits()) {         
+      for(Unit temp: teamOne.getUnits()) {
          UNIT_TYPE u = temp.getType();
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)

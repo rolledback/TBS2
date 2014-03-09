@@ -4,6 +4,8 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.rolledback.mapping.Cartographer;
+import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
 import com.rolledback.terrain.City;
@@ -24,6 +26,7 @@ public class World {
    private int heightMap[][];
    private int width, height;
    private GraphicsManager manager;
+   private byte[] map;
    
    public World(int w, int h, Team a, Team b, GraphicsManager m) {
       width = w;
@@ -33,7 +36,10 @@ public class World {
       teamOne = a;
       teamTwo = b;
       manager = m;
-      buildMap();
+      // buildMap();
+      map = new byte[4 + (width * height)];
+      // Cartographer.createMapFile(tiles, manager);
+      Cartographer.readMapFile(tiles, this, manager);
    }
    
    public void printMap() {
@@ -128,15 +134,15 @@ public class World {
             double type = Math.random();
             if(type <= .75) {
                numPlains++;
-               tiles[row][col] = new Plain(this, col, row, manager.tileTextures[0]);
+               tiles[row][col] = new Plain(this, col, row, manager.tileTextures.get("grass.png"));
             }
             else if(type > .75 && type <= .95) {
                numForests++;
-               tiles[row][col] = new Forest(this, col, row, manager.tileTextures[1]);
+               tiles[row][col] = new Forest(this, col, row, manager.tileTextures.get("forest.png"));
             }
             else {
                numMountains++;
-               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures[2]);
+               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures.get("mountain.png"));
             }
          }
       numPlains /= (double)(width * height);
@@ -306,21 +312,21 @@ public class World {
          Tile currTile = tiles[path.get(spot).getY()][path.get(spot).getX()];
          Image spotImage = currTile.getTexture();
          if(currTile.getY() > 0 && currTile.getY() < height - 1 && currTile.getX() > 0 && currTile.getX() < width - 1) {
-            if(spotImage.equals(manager.tileTextures[18])) {
+            if(spotImage.equals(manager.tileTextures.get("river_horizontal.png"))) {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
                   tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
-                        manager.tileTextures[29]);
+                        manager.tileTextures.get("bridge_vertical.png"));
                   numBridges++;
                }
             }
-            else if(spotImage.equals(manager.tileTextures[19])) {
+            else if(spotImage.equals(manager.tileTextures.get("river_vertical.png"))) {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
                   tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
-                        manager.tileTextures[28]);
+                        manager.tileTextures.get("bridge_horizontal.png"));
                   numBridges++;
                }
             }
@@ -346,16 +352,16 @@ public class World {
       
       if(currX == nextX) {
          if(currY < nextY)
-            tiles[currY][currX].setTexture(manager.tileTextures[22]);
+            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_down.png"));
          else
-            tiles[currY][currX].setTexture(manager.tileTextures[20]);
+            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_up.png"));
          ;
       }
       else {
          if(currX < nextX)
-            tiles[currY][currX].setTexture(manager.tileTextures[21]);
+            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_right.png"));
          else
-            tiles[currY][currX].setTexture(manager.tileTextures[23]);
+            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_left.png"));
       }
       
       for(int x = 1; x < riverPath.size() - 1; x++) {
@@ -368,56 +374,56 @@ public class World {
          
          if(prevX == currX && currX == nextX)
             if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
-               tiles[currY][currX].setTexture(manager.tileTextures[19]);
+               tiles[currY][currX].setTexture(manager.tileTextures.get("river_vertical.png"));
             else
-               tiles[currY][currX].setTexture(manager.tileTextures[28]);
+               tiles[currY][currX].setTexture(manager.tileTextures.get("bridge_horizontal.png"));
          else if(prevY == currY && currY == nextY)
             if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
-               tiles[currY][currX].setTexture(manager.tileTextures[18]);
+               tiles[currY][currX].setTexture(manager.tileTextures.get("river_horizontal.png"));
             else
-               tiles[currY][currX].setTexture(manager.tileTextures[29]);
+               tiles[currY][currX].setTexture(manager.tileTextures.get("bridge_vertical.png"));
          else if(prevX < nextX) {
             if(prevY < nextY) {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures[25]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_two.png"));
                if(prevY == currY)
-                  tiles[currY][currX].setTexture(manager.tileTextures[26]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_three.png"));
             }
             else {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures[27]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_four.png"));
                else
-                  tiles[currY][currX].setTexture(manager.tileTextures[24]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_one.png"));
             }
             
          }
          else if(prevX > nextX) {
             if(prevY > nextY) {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures[26]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_three.png"));
                if(prevY == currY)
-                  tiles[currY][currX].setTexture(manager.tileTextures[25]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_two.png"));
             }
             else {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures[24]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_one.png"));
                else
-                  tiles[currY][currX].setTexture(manager.tileTextures[27]);
+                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_four.png"));
             }
          }
       }
       
       if(nextX == currX) {
          if(nextY < currY)
-            tiles[nextY][nextX].setTexture(manager.tileTextures[22]);
+            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_down.png"));
          else
-            tiles[nextY][nextX].setTexture(manager.tileTextures[20]);
+            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_up.png"));
       }
       else {
          if(nextX < currX)
-            tiles[nextY][nextX].setTexture(manager.tileTextures[21]);
+            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_right.png"));
          else
-            tiles[nextY][nextX].setTexture(manager.tileTextures[23]);
+            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_left.png"));
       }
    }
    
@@ -431,7 +437,7 @@ public class World {
             col = rand.nextInt(max - min) + min;
             row = rand.nextInt(height - 1) + 1;
          }
-         tiles[row][col] = new City(this, col, row, null, manager.tileTextures[15]);
+         tiles[row][col] = new City(this, col, row, null, manager.tileTextures.get("cityGrey.png"));
       }
       
    }
@@ -445,9 +451,9 @@ public class World {
             row = (int)(Math.random() * height);
          }
          if(team.equals(teamOne))
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[12]);
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures.get("factoryRed.png"));
          else
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures[13]);
+            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures.get("factoryBlue.png"));
          team.getFactories().add((Factory)tiles[row][col]);
       }
    }
@@ -478,13 +484,13 @@ public class World {
             west = col - 1 < 0 || tiles[row][col - 1].getType() == TILE_TYPE.MOUNTAIN;
             if(north && south && east && west)
                if(!(row - 1 < 0))
-                  tiles[row - 1][col] = new Plain(this, col, row - 1, manager.tileTextures[0]);
+                  tiles[row - 1][col] = new Plain(this, col, row - 1, manager.tileTextures.get("grass.png"));
                else if(!(row + 1 >= height))
-                  tiles[row + 1][col] = new Plain(this, col, row + 1, manager.tileTextures[0]);
+                  tiles[row + 1][col] = new Plain(this, col, row + 1, manager.tileTextures.get("grass.png"));
                else if(!(col + 1 >= width))
-                  tiles[row][col + 1] = new Plain(this, col + 1, row, manager.tileTextures[0]);
+                  tiles[row][col + 1] = new Plain(this, col + 1, row, manager.tileTextures.get("grass.png"));
                else
-                  tiles[row][col - 1] = new Plain(this, col - 1, row, manager.tileTextures[0]);
+                  tiles[row][col - 1] = new Plain(this, col - 1, row, manager.tileTextures.get("grass.png"));
          }
       }
    }
@@ -497,20 +503,20 @@ public class World {
          for(int col = 0; col < tiles[row].length; col++) {
             char currentTile = tiles[row][col].getMapChar();
             switch(currentTile) {
-            case ('p'):
-               terrainKeys[row] += 0;
+               case ('p'):
+                  terrainKeys[row] += 0;
                break;
-            case ('f'):
-               terrainKeys[row] += 1;
+               case ('f'):
+                  terrainKeys[row] += 1;
                break;
-            case ('m'):
-               terrainKeys[row] += 2;
+               case ('m'):
+                  terrainKeys[row] += 2;
                break;
-            case ('F'):
-               terrainKeys[row] += 3;
+               case ('F'):
+                  terrainKeys[row] += 3;
                break;
-            default:
-               terrainKeys[row] += 0;
+               default:
+                  terrainKeys[row] += 0;
                break;
             }
          }

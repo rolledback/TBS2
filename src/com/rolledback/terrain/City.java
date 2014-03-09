@@ -15,7 +15,7 @@ public class City extends CapturableTile {
       type = TILE_TYPE.CITY;
       texture = t;
    }
-
+   
    public void produceResources() {
       owner.setResources(owner.getResources() + resourceValue);
    }
@@ -26,9 +26,9 @@ public class City extends CapturableTile {
       owner = unit.getOwner();
       unit.getOwner().getCities().add(this);
       if(owner.equals(getWorld().getTeamOne()))
-         texture = getWorld().getManager().tileTextures[8];
+         texture = getWorld().getManager().tileTextures.get("cityRed.png");
       else
-         texture = getWorld().getManager().tileTextures[9];
+         texture = getWorld().getManager().tileTextures.get("cityBlue.png");
    }
    
 }

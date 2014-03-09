@@ -15,7 +15,7 @@ public class Launcher {
    static Game newGame;
    
    public static void main(String args[]) {
-      Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "Random" };
+      Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random" };
       int tileSize = -1;
       if(tileSize == -1) {
          Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:\n(default 64x64)", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
@@ -32,6 +32,10 @@ public class Launcher {
                tileSize = 16;
             else if(size.equals("8x8"))
                tileSize = 8;
+            else if(size.equals("4x4"))
+               tileSize = 4;
+            else if(size.equals("2x2"))
+               tileSize = 2;
             else if(size.equals("Random")) {
                int[] sizes = { 8, 16, 32, 64, 128 };
                tileSize = sizes[new Random().nextInt(sizes.length)];
@@ -84,7 +88,6 @@ public class Launcher {
       while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight - guiHeight) && tileSize >= 1) {
          tileSize /= 2;
       }
-      
       if(tileSize < 1) {
          System.out.println("Bad dimensions.");
          System.out.println("Final width attempted: " + (gameWidth * 16) + " w/screen width: " + screenWidth);
@@ -125,14 +128,15 @@ public class Launcher {
          Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
          System.out.println(i);
          try {
-				PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
-				for(Coordinate c: newGame.history)
-					out.println(c.getX() + " " + c.getY());
-				out.close();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
+            for(Coordinate c: newGame.history)
+               out.println(c.getX() + " " + c.getY());
+            out.close();
+         }
+         catch(FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
          newGame = null;
       }
       System.exit(-1);
