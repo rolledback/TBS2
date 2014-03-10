@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import com.rolledback.framework.GraphicsManager;
+import com.rolledback.framework.Logger;
 import com.rolledback.framework.World;
 import com.rolledback.terrain.Bridge;
 import com.rolledback.terrain.City;
@@ -22,56 +23,75 @@ public class Cartographer {
    public static boolean readMapFile(String fileName, Tile[][] tiles, World w, GraphicsManager manager) {
       BufferedInputStream mapReader;
       try {
+         Logger.consolePrint("Opening: " + fileName, "cartographer");
          mapReader = new BufferedInputStream(new FileInputStream(fileName));
-         byte[] map = new byte[5 + (tiles.length * tiles[0].length)];
+         byte[] map = new byte[6 + (tiles.length * tiles[0].length)];
          mapReader.read(map);
          mapReader.close();
-         
-         if(map[0] != 0x6d)
+         Logger.consolePrint("Checking for magic number.", "cartographer");
+         if(map[0] != 0x6d) {
+            Logger.consolePrint("Number not found. Invalid file.", "cartographer");
             return false;
-         
-         int width = map[1] ^ (map[2] << 8);
-         int height = map[3] ^ (map[4] << 8);
-         
-         if(height != tiles.length)
+         }
+         Logger.consolePrint("File checks out.", "cartographer");
+         int width = map[2] ^ (map[3] << 8);
+         int height = map[4] ^ (map[5] << 8);
+         Logger.consolePrint("File gives dim of: (" + width + ", " + height + ")", "cartographer");
+         if(height != tiles.length || width != tiles[0].length) {
+            Logger.consolePrint("File size does not match current editor.", "cartographer");
             return false;
-         if(width != tiles[0].length)
-            return true;
-         
+         }
+         Logger.consolePrint("Reading tile info...", "cartographer");
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++)
-               tiles[row][col] = byteToTile(w, manager, (byte)map[5 + (row * width) + col], col, row);
+               tiles[row][col] = byteToTile(w, manager, (byte)map[6 + (row * width) + col], col, row);
       }
       catch(Exception e) {
+         Logger.consolePrint("Error opening file: " + e.toString(), "cartographer");
          return false;
       }
+      Logger.consolePrint("Map has been loaded.", "cartographer");
       return true;
    }
    
-   public static boolean createMapFile(String fileName, Tile[][] tiles, GraphicsManager manager) {
+   public static boolean createMapFile(String fileName, Tile[][] tiles, int tileSize, GraphicsManager manager) {
+      Logger.consolePrint("Creating file: " + fileName, "cartographer");
       int height = tiles.length;
       int width = tiles[0].length;
       
-      byte[] map = new byte[5 + (tiles.length * tiles[0].length)];
-      map[0] = 0x6d;
-      map[1] = (byte)(width & 0xff);
-      map[2] = (byte)((width >> 8) & 0xff);
+      byte[] map = new byte[6 + (tiles.length * tiles[0].length)];
       
-      map[3] = (byte)(height & 0xff);
-      map[4] = (byte)((height >> 8) & 0xff);
+      map[0] = 0x6d;
+      
+      map[1] = (byte)tileSize;
+      
+      map[2] = (byte)(width & 0xff);
+      map[3] = (byte)((width >> 8) & 0xff);
+      
+      map[4] = (byte)(height & 0xff);
+      map[5] = (byte)((height >> 8) & 0xff);
+      
       for(int row = 0; row < height; row++)
          for(int col = 0; col < width; col++)
-            map[5 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
+            map[6 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
+      
+      
+      Logger.consolePrint("Initial data converted to byte format.", "cartographer");
+      
       BufferedOutputStream mapWriter;
       try {
-         System.out.println(fileName);
+         
+         Logger.consolePrint("Writing bytes to file.", "cartographer");
          mapWriter = new BufferedOutputStream(new FileOutputStream(fileName));
          mapWriter.write(map);
          mapWriter.close();
       }
-      catch(Exception e) {
+      catch(Exception e) {         
+         Logger.consolePrint("Error creating file: " + e.toString(), "cartographer");
          return false;
       }
+      
+      Logger.consolePrint("Map file has been created.", "cartographer");
       return true;
    }
    

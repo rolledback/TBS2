@@ -69,7 +69,7 @@ public class EscMenu extends JDialog implements ActionListener {
             File file = fc.getSelectedFile();
             openFile = true;
             saveFile = false;
-            fileName = file.getName();
+            fileName = file.getPath();
             this.dispose();
          }
       }

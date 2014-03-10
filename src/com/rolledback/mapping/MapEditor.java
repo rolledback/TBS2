@@ -46,7 +46,7 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random" };
       int tileSize = -1;
       if(tileSize == -1) {
-         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:\n(default 64x64)", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
+         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
                possibilities, possibilities[0]);
          if(s != null) {
             String size = (String)s;
@@ -59,7 +59,7 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
          }
       }
       if(tileSize == -1)
-         tileSize = 64;
+         System.exit(-1);
       int[] dimensions = Launcher.autoCalcDimensions(tileSize);
       init(dimensions[0], dimensions[1], tileSize);
    }
@@ -206,7 +206,7 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
                JOptionPane.showMessageDialog(new JFrame(), "Error opening map file.", "Error", JOptionPane.ERROR_MESSAGE);
          }
          if(menu.isSaveFile()) {
-            boolean success = Cartographer.createMapFile(menu.getFileName(), tiles, manager);
+            boolean success = Cartographer.createMapFile(menu.getFileName(), tiles, tileSize, manager);
             if(success)
                repaint();
             else

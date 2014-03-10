@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.rolledback.mapping.Cartographer;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
 import com.rolledback.terrain.City;
@@ -24,9 +25,10 @@ public class World {
    private int heightMap[][];
    private int width, height;
    private GraphicsManager manager;
+   private int tileSize;
    private byte[] map;
    
-   public World(int w, int h, Team a, Team b, GraphicsManager m) {
+   public World(int w, int h, Team a, Team b, GraphicsManager m, int t, String fileToLoad) {
       width = w;
       height = h;
       tiles = new Tile[h][w];
@@ -34,10 +36,11 @@ public class World {
       teamOne = a;
       teamTwo = b;
       manager = m;
-      buildMap();
-      // map = new byte[4 + (width * height)];
-      // Cartographer.createMapFile(tiles, manager);
-      // Cartographer.readMapFile(tiles, this, manager);
+      tileSize = t;
+      if(fileToLoad.equals(""))
+         buildMap();
+      else
+         Cartographer.readMapFile(fileToLoad, tiles, this, manager);
    }
    
    public World() {
@@ -189,7 +192,7 @@ public class World {
       int numGenerated = 0;
       int numAttempted = 0;
       int riverFraction = 3;
-      int minRivers = (numRivers < riverFraction) ? 1 : numRivers / riverFraction;
+      int minRivers = (numRivers < riverFraction) ? 1 : (int)(numRivers / riverFraction);
       Logger.consolePrint("max river length = " + maxLength, "map");
       Logger.consolePrint("min river length = " + minLength, "map");
       Logger.consolePrint("num rivers wanted = " + numRivers, "map");
@@ -198,14 +201,14 @@ public class World {
          Logger.consolePrint("generation attempt " + numAttempted + "...", "map");
          int genAttempts = 0;
          ArrayList<Coordinate> river = new ArrayList<Coordinate>();
-         while(river.size() < 2 && genAttempts < 256) {
+         while(river.size() < 2 && genAttempts < 1024) {
             river = generateRiver(maxLength);
             genAttempts++;
             if(river.size() < 2 || river.size() < minLength)
                river.clear();
          }
          numAttempted++;
-         if(genAttempts < 64) {
+         if(genAttempts < 1024) {
             for(Coordinate c: river)
                tiles[c.getY()][c.getX()] = new River(this, c.getX(), c.getY(), null);
             setRiverTileDirections(river);
@@ -215,7 +218,7 @@ public class World {
          }
          else
             Logger.consolePrint("failure", "map");
-         if(x == numRivers - 1 && numGenerated < minRivers) {
+         if(x == numRivers- 1 && numGenerated < minRivers) {
             minLength = Math.max(minLength - (int)((double)minLength * .1), 4);
             Logger.consolePrint("redefining min length to " + minLength, "map");
             x = 0;

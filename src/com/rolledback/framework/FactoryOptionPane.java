@@ -79,7 +79,7 @@ public class FactoryOptionPane extends JDialog {
       
       // Move the window
       setLocation(x, y);
-      setSize(getWidth(), techOkButton.getHeight() + techList.getHeight() + techCurrRes.getHeight() + 100);
+      pack();
       setVisible(true);
    }
    

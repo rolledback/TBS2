@@ -58,21 +58,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public ReentrantLock logicLock;
    
-   public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m) {
+   public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m, String fileToLoad) {
       gameWidth = x;
       gameHeight = y;
       manager = m;
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamD("team one", 50, 125, this);
+      teamOne = new Team("team one", 50, 125);
       teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       
       teamOne.setOpponent(teamTwo);
       teamTwo.setOpponent(teamOne);
       
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager);
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager, ts, fileToLoad);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
@@ -245,7 +245,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       for(int x = 0; x < gameWidth; x++) {
          for(int y = 0; y < gameHeight; y++) {
             Color tileColor;
-            if(world.getHeightMap()[y][x] == 0)
+            if(world.getTiles()[y][x].getType() == TILE_TYPE.RIVER || world.getTiles()[y][x].getType() == TILE_TYPE.BRIDGE)
+               tileColor = Color.blue;
+            else if(world.getHeightMap()[y][x] == 0)
                tileColor = Color.green;
             else if(world.getHeightMap()[y][x] == 1)
                tileColor = Color.yellow;
@@ -255,8 +257,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                tileColor = Color.red;
             g.setColor(tileColor);
             g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
-            g.setColor(Color.black);
-            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
+//            g.setColor(Color.black);
+//            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
          }
       }
    }

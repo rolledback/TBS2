@@ -13,10 +13,11 @@ public class Logger {
    // GraphicsManager.java = manager
    // Any of the CPU teams = ai
    // General error messages = error
+   // Cartographer.java = cartographer
    
    private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("map", "launcher");   
-   private static int tagLength = 2;
+   private static List<String> validTags = asList("map", "launcher", "cartographer");   
+   private static int tagLength = 5;
    
    public static String timeStamp() {
       Date date = new Date();
@@ -32,7 +33,7 @@ public class Logger {
          if(tag.length() < tagLength) {
             int spacesNeeded = tagLength - tag.length();
             for(int x = 0; x < spacesNeeded; x++)
-               tag += " ";
+               tag += "-";
          }            
          System.out.println("[" + tag.toUpperCase() + "] > " + timeStamp() + " " + message);
       }
