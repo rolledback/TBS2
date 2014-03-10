@@ -121,6 +121,8 @@ public class Unit {
       int width = world.getWidth();
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
+      else if(!canTraverse(tiles[y][x]))
+         return;
       else if(range <= 0) {
          if(tiles[y][x].isOccupied() && !owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             attackSet.add(thisCoord);

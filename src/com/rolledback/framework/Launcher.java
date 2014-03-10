@@ -22,31 +22,19 @@ public class Launcher {
                possibilities, possibilities[0]);
          if(s != null) {
             String size = (String)s;
-            if(size.equals("128x128"))
-               tileSize = 128;
-            else if(size.equals("64x64"))
-               tileSize = 64;
-            else if(size.equals("32x32"))
-               tileSize = 32;
-            else if(size.equals("16x16"))
-               tileSize = 16;
-            else if(size.equals("8x8"))
-               tileSize = 8;
-            else if(size.equals("4x4"))
-               tileSize = 4;
-            else if(size.equals("2x2"))
-               tileSize = 2;
-            else if(size.equals("Random")) {
+            if(size.equals("Random")) {
                int[] sizes = { 8, 16, 32, 64, 128 };
                tileSize = sizes[new Random().nextInt(sizes.length)];
             }
+            else
+               tileSize = Integer.parseInt(size.split("x")[0]);
          }
       }
       if(tileSize == -1)
          tileSize = 64;
       int[] dimensions = autoCalcDimensions(tileSize);
       Logger.consolePrint(Arrays.toString(dimensions), "launcher");
-      init(dimensions[0], dimensions[1]);
+      init(dimensions[0], dimensions[1], tileSize);
    }
    
    public static int[] autoCalcDimensions(int size) {
@@ -66,15 +54,18 @@ public class Launcher {
       return d;
    }
    
-   public static void init(int x, int y) {
-      JFrame frame = new JFrame("TBS2");
+   public static void init(int x, int y, int size) { 
+      int tileSize = size;
       
+      // get the size of the screen
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
+      // reduce the dimensions by 10%
       screenHeight -= (int)((double)screenHeight / 10);
       screenWidth -= (int)((double)screenWidth / 10);
       
+      // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
          screenWidth--;
       while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
@@ -84,23 +75,10 @@ public class Launcher {
       int gameHeight = y;
       int guiHeight = 0;
       
-      int tileSize = 128;
-      while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight - guiHeight) && tileSize >= 1) {
-         tileSize /= 2;
-      }
-      if(tileSize < 1) {
-         System.out.println("Bad dimensions.");
-         System.out.println("Final width attempted: " + (gameWidth * 16) + " w/screen width: " + screenWidth);
-         if(gameWidth * 16 > screenWidth)
-            System.out.println("Make game less wide.");
-         System.out.println("Final height attempted: " + (gameHeight * 16) + " w/screen height: " + screenHeight);
-         if(gameHeight * 16 > screenHeight)
-            System.out.println("Make game less tall.");
-         System.exit(-1);
-      }
       GraphicsManager manager = new GraphicsManager();
       int winner[] = { 0, 0 };
       for(int i = 0; i < 10000; i++) {
+         JFrame frame = new JFrame("TBS2");
          frame.setTitle("TBS2 " + i + " " + Arrays.toString(winner));
          Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();

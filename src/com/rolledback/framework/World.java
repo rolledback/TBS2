@@ -4,8 +4,6 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.rolledback.mapping.Cartographer;
-import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
 import com.rolledback.terrain.City;
@@ -36,10 +34,15 @@ public class World {
       teamOne = a;
       teamTwo = b;
       manager = m;
-      // buildMap();
-      map = new byte[4 + (width * height)];
+      buildMap();
+      // map = new byte[4 + (width * height)];
       // Cartographer.createMapFile(tiles, manager);
-      Cartographer.readMapFile(tiles, this, manager);
+      // Cartographer.readMapFile(tiles, this, manager);
+   }
+   
+   public World() {
+      teamOne = new Team("", 0, 0);
+      teamTwo = new Team("", 0, 0);
    }
    
    public void printMap() {

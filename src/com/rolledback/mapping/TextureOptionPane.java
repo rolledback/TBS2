@@ -22,13 +22,14 @@ public class TextureOptionPane extends JDialog {
    
    public TextureOptionPane(GraphicsManager manger, String[] tileNames) {
       setTitle("Texture Picker");
+      currTexture = "grass.png";
       this.tileNames = tileNames;
       JPanel topPanel = new JPanel();
       topPanel.setLayout(new BorderLayout());
       createPicker(topPanel, tileNames);
       getContentPane().add(topPanel);
-      setSize(120, 75);
-      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      setSize(200, 75);
+      setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
    }
    
    public void createPicker(JPanel panel, String[] names) {

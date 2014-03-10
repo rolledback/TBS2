@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Arrays;
 
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.World;
@@ -19,6 +18,62 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 
 public class Cartographer {
+   
+   public static boolean readMapFile(String fileName, Tile[][] tiles, World w, GraphicsManager manager) {
+      BufferedInputStream mapReader;
+      try {
+         mapReader = new BufferedInputStream(new FileInputStream(fileName));
+         byte[] map = new byte[5 + (tiles.length * tiles[0].length)];
+         mapReader.read(map);
+         mapReader.close();
+         
+         if(map[0] != 0x6d)
+            return false;
+         
+         int width = map[1] ^ (map[2] << 8);
+         int height = map[3] ^ (map[4] << 8);
+         
+         if(height != tiles.length)
+            return false;
+         if(width != tiles[0].length)
+            return true;
+         
+         for(int row = 0; row < height; row++)
+            for(int col = 0; col < width; col++)
+               tiles[row][col] = byteToTile(w, manager, (byte)map[5 + (row * width) + col], col, row);
+      }
+      catch(Exception e) {
+         return false;
+      }
+      return true;
+   }
+   
+   public static boolean createMapFile(String fileName, Tile[][] tiles, GraphicsManager manager) {
+      int height = tiles.length;
+      int width = tiles[0].length;
+      
+      byte[] map = new byte[5 + (tiles.length * tiles[0].length)];
+      map[0] = 0x6d;
+      map[1] = (byte)(width & 0xff);
+      map[2] = (byte)((width >> 8) & 0xff);
+      
+      map[3] = (byte)(height & 0xff);
+      map[4] = (byte)((height >> 8) & 0xff);
+      for(int row = 0; row < height; row++)
+         for(int col = 0; col < width; col++)
+            map[5 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
+      BufferedOutputStream mapWriter;
+      try {
+         System.out.println(fileName);
+         mapWriter = new BufferedOutputStream(new FileOutputStream(fileName));
+         mapWriter.write(map);
+         mapWriter.close();
+      }
+      catch(Exception e) {
+         return false;
+      }
+      return true;
+   }
    
    public static byte tileToByte(GraphicsManager manager, Tile tile) {
       if(tile.getType() == TILE_TYPE.BRIDGE) {
@@ -75,30 +130,6 @@ public class Cartographer {
             return (byte)28;
       }
       return 0b1111111;
-   }
-   
-   public static void createMapFile(Tile[][] tiles, GraphicsManager manager) {
-      int height = tiles.length;
-      int width = tiles[0].length;
-      
-      byte[] map = new byte[4 + (tiles.length * tiles[0].length)];
-      map[0] = (byte)(width & 0xff);
-      map[1] = (byte)((width >> 8) & 0xff);
-      
-      map[2] = (byte)(height & 0xff);
-      map[3] = (byte)((height >> 8) & 0xff);
-      for(int row = 0; row < height; row++)
-         for(int col = 0; col < width; col++)
-            map[4 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
-      BufferedOutputStream mapWriter;
-      try {
-         mapWriter = new BufferedOutputStream(new FileOutputStream("temp.map"));
-         mapWriter.write(map);
-         mapWriter.close();
-      }
-      catch(Exception e) {
-         System.out.println(e);
-      }
    }
    
    public static Tile byteToTile(World w, GraphicsManager manager, byte value, int col, int row) {
@@ -171,24 +202,5 @@ public class Cartographer {
             return w.getTeamTwo().getFactories().get(w.getTeamTwo().getFactories().size() - 1);
       }
       return null;
-   }
-   
-   public static void readMapFile(Tile[][] tiles, World w, GraphicsManager manager) {
-      BufferedInputStream mapReader;
-      try {
-         mapReader = new BufferedInputStream(new FileInputStream("temp.map"));
-         byte[] map = new byte[4 + (tiles.length * tiles[0].length)];
-         mapReader.read(map);
-         mapReader.close();
-         
-         int width = map[0] ^ (map[1] << 8);
-         int height = map[2] ^ (map[3] << 8);
-         for(int row = 0; row < height; row++)
-            for(int col = 0; col < width; col++)
-               tiles[row][col] = byteToTile(w, manager, (byte)map[4 + (row * width) + col], col, row);
-      }
-      catch(Exception e) {
-         System.out.println(e);
-      }
    }
 }

@@ -3,15 +3,20 @@ package com.rolledback.mapping;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Random;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.Launcher;
+import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
 import com.rolledback.terrain.City;
@@ -22,51 +27,61 @@ import com.rolledback.terrain.Plain;
 import com.rolledback.terrain.River;
 import com.rolledback.terrain.Tile;
 
-public class MapEditor extends JPanel implements MouseListener {
+public class MapEditor extends JPanel implements MouseListener, KeyListener {
    
    private static final long serialVersionUID = 1L;
-   public static JFrame window;
+   private static JFrame window;
+   private int width;
+   private int height;
+   private int tileSize;
+   private Tile[][] tiles;
+   private Image currentTexture;
+   private GraphicsManager manager;
+   private Rectangle[][] grid;
+   private TextureOptionPane texturePicker;
+   private Team dummyTeam;
+   private EscMenu menu;
    
    public static void main(String args[]) {
-      int tileSize = 128;
-
+      Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random" };
+      int tileSize = -1;
+      if(tileSize == -1) {
+         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:\n(default 64x64)", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
+               possibilities, possibilities[0]);
+         if(s != null) {
+            String size = (String)s;
+            if(size.equals("Random")) {
+               int[] sizes = { 8, 16, 32, 64, 128 };
+               tileSize = sizes[new Random().nextInt(sizes.length)];
+            }
+            else
+               tileSize = Integer.parseInt(size.split("x")[0]);
+         }
+      }
+      if(tileSize == -1)
+         tileSize = 64;
       int[] dimensions = Launcher.autoCalcDimensions(tileSize);
-      init(dimensions[0], dimensions[1]);
+      init(dimensions[0], dimensions[1], tileSize);
    }
    
-   public static void init(int x, int y) {
-      window = new JFrame("Map Editor");
+   public static void init(int x, int y, int size) {
+      int tileSize = size;
       
+      // get the size of the screen
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
+      // reduce the dimensions by 10%
       screenHeight -= (int)((double)screenHeight / 10);
       screenWidth -= (int)((double)screenWidth / 10);
       
+      // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
          screenWidth--;
       while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
          screenHeight--;
       
-      int gameWidth = x;
-      int gameHeight = y;
-      int guiHeight = 0;
-      
-      int tileSize = 128;
-      while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight - guiHeight) && tileSize >= 1) {
-         tileSize /= 2;
-      }
-      if(tileSize < 1) {
-         System.out.println("Bad dimensions.");
-         System.out.println("Final width attempted: " + (gameWidth * 16) + " w/screen width: " + screenWidth);
-         if(gameWidth * 16 > screenWidth)
-            System.out.println("Make game less wide.");
-         System.out.println("Final height attempted: " + (gameHeight * 16) + " w/screen height: " + screenHeight);
-         if(gameHeight * 16 > screenHeight)
-            System.out.println("Make game less tall.");
-         System.exit(-1);
-      }
-
+      window = new JFrame("Map Editor");
       MapEditor editor = new MapEditor(x, y, tileSize);
       editor.setDoubleBuffered(true);
       editor.setSize(screenWidth, screenHeight);
@@ -80,17 +95,9 @@ public class MapEditor extends JPanel implements MouseListener {
       window.setLocation(75, 75);
    }
    
-   public int width;
-   public int height;
-   public int tileSize;
-   public Tile[][] tiles;
-   public Image currentTexture;
-   public GraphicsManager manager;
-   public Rectangle[][] grid;
-   public TextureOptionPane texturePicker;
-   public Team dummyTeam;
-   
    public MapEditor(int x, int y, int t) {
+      setFocusable(true);
+      menu = new EscMenu();
       dummyTeam = new Team("dummy", 0, 0);
       width = x;
       height = y;
@@ -104,7 +111,7 @@ public class MapEditor extends JPanel implements MouseListener {
       
       String[] availTextures = new String[0];
       availTextures = manager.tileTextures.keySet().toArray(availTextures);
-           
+      
       texturePicker = new TextureOptionPane(manager, availTextures);
       texturePicker.setVisible(true);
       
@@ -117,10 +124,10 @@ public class MapEditor extends JPanel implements MouseListener {
          }
       }
       addMouseListener(this);
+      addKeyListener(this);
    }
    
    public void paintComponent(Graphics g) {
-      System.out.println("repaint");
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
             Tile currTile = tiles[row][col];
@@ -139,7 +146,6 @@ public class MapEditor extends JPanel implements MouseListener {
             for(int col = 0; col < width; col++) {
                if(grid[row][col].contains(eventX, eventY)) {
                   currentTexture = manager.tileTextures.get(texturePicker.currTexture);
-                  System.out.println(texturePicker.currTexture.toLowerCase());
                   if(texturePicker.currTexture.toLowerCase().contains("city"))
                      tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
                   else if(texturePicker.currTexture.toLowerCase().contains("factory"))
@@ -156,38 +162,61 @@ public class MapEditor extends JPanel implements MouseListener {
                      tiles[row][col] = new Forest(null, col, row, currentTexture);
                   repaint();
                }
-               System.out.println(tiles[row][col]);
             }
       }
       else {
-         System.out.println("Saving map");
-         Cartographer.createMapFile(tiles, manager);
+         if(!texturePicker.isVisible())
+            texturePicker.setVisible(true);
       }
       return;
    }
    
    @Override
    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-      
    }
    
    @Override
    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-      
    }
    
    @Override
    public void mousePressed(MouseEvent e) {
-      // TODO Auto-generated method stub
-      
    }
    
    @Override
    public void mouseReleased(MouseEvent e) {
-      // TODO Auto-generated method stub
-      
+   }
+   
+   @Override
+   public void keyPressed(KeyEvent e) {
+   }
+   
+   @Override
+   public void keyReleased(KeyEvent e) {
+      if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+         if(!menu.isVisible())
+            menu.setVisible(true);
+         else
+            menu.setVisible(false);
+         if(menu.isOpenFile()) {
+            boolean success = Cartographer.readMapFile(menu.getFileName(), tiles, new World(), manager);
+            if(success)
+               repaint();
+            else
+               JOptionPane.showMessageDialog(new JFrame(), "Error opening map file.", "Error", JOptionPane.ERROR_MESSAGE);
+         }
+         if(menu.isSaveFile()) {
+            boolean success = Cartographer.createMapFile(menu.getFileName(), tiles, manager);
+            if(success)
+               repaint();
+            else
+               JOptionPane.showMessageDialog(new JFrame(), "Error saving file.", "Error", JOptionPane.ERROR_MESSAGE);
+         }
+      }
+   }
+   
+   @Override
+   public void keyTyped(KeyEvent e) {
    }
    
 }
