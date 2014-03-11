@@ -21,6 +21,7 @@ TBS2 includes a map maker program, and the ability to play your own custom maps.
 - r: generate a random map (including rivers/factories/cities)
 - t: genearate a random map (only terrain)
 - f: fill the map with the currently selected texture
+- g: turn grid on/off
 - right click: display the texture picker window (incase you closed it)
 
 The default save location for maps when the program is not a jar is the src folder "maps". Once the game is compiled into a jar, the game will look for maps in a folder in the jar's directory also called maps. This folder can either be created and populated, or you can copy the original maps folder out of the workspace to the jars directory. An installer script is currently in the works that will automate this process. An exploration of the graphics directory reveals the existence of many images that do not appear anywhere in the game. At this time none of those images are supported by the game or the editor, although they may be supported in the future.
