@@ -37,7 +37,7 @@ public class EscMenu extends JDialog implements ActionListener {
       openButton.addActionListener(this);
       
       // Create the save button
-      saveButton = new JButton("Save a File...");
+      saveButton = new JButton("Save File...");
       saveButton.addActionListener(this);
       
       // Add the buttons to the top panel

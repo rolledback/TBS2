@@ -51,6 +51,13 @@ public class GraphicsManager {
          tileTextures.put("riverCorner_three.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_three.png")));
          tileTextures.put("riverCorner_four.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("riverCorner_four.png")));
          
+         tileTextures.put("river_intersection.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_intersection.png")));
+         
+         tileTextures.put("river_tSection_one.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_tSection_one.png")));
+         tileTextures.put("river_tSection_two.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_tSection_two.png")));
+         tileTextures.put("river_tSection_three.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_tSection_three.png")));
+         tileTextures.put("river_tSection_four.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("river_tSection_four.png")));
+         
          tileTextures.put("bridge_horizontal.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_horizontal.png")));
          tileTextures.put("bridge_vertical.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("bridge_vertical.png")));
       }

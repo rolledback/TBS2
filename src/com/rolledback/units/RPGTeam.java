@@ -2,11 +2,9 @@ package com.rolledback.units;
 
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
-import com.rolledback.units.Unit.UNIT_CLASS;
-import com.rolledback.units.Unit.UNIT_TYPE;
 
-public class RPGTeam extends Unit{
- 
+public class RPGTeam extends Unit {
+   
    public RPGTeam(int x, int y, Tile t, Team o) {
       super(x, y, t, o);
       classification = UNIT_CLASS.INFANTRY;

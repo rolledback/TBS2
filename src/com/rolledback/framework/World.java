@@ -25,8 +25,6 @@ public class World {
    private int heightMap[][];
    private int width, height;
    private GraphicsManager manager;
-   private int tileSize;
-   private byte[] map;
    
    public World(int w, int h, Team a, Team b, GraphicsManager m, int t, String fileToLoad) {
       width = w;
@@ -36,11 +34,10 @@ public class World {
       teamOne = a;
       teamTwo = b;
       manager = m;
-      tileSize = t;
       if(fileToLoad.equals(""))
          buildMap();
       else
-         Cartographer.readMapFile(fileToLoad, tiles, this, manager);
+         tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this, manager)[1];         
    }
    
    public World() {
@@ -231,7 +228,7 @@ public class World {
          }
          else
             Logger.consolePrint("failure", "map");
-         if(x == numRivers- 1 && numGenerated < minRivers) {
+         if(x == numRivers - 1 && numGenerated < minRivers) {
             minLength = Math.max(minLength - (int)((double)minLength * .1), 4);
             Logger.consolePrint("redefining min length to " + minLength, "map");
             x = 0;
@@ -287,17 +284,17 @@ public class World {
       while(next == null && attempts < 16) {
          double dir = Math.random();
          try {
-            if(dir < .30 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1, pathSoFar) <= 1
-                  && !pathSoFar.contains(new Coordinate(col, row + 1)) && tiles[row + 1][col].getType() != TILE_TYPE.RIVER)
+            if(dir < .30 && heightMap[row + 1][col] <= height && numRiverNextTo(col, row + 1, pathSoFar) <= 1 && !pathSoFar.contains(new Coordinate(col, row + 1))
+                  && tiles[row + 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col, row + 1);
-            else if(dir >= .95 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1, pathSoFar) <= 1
-                  && !pathSoFar.contains(new Coordinate(col, row - 1)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+            else if(dir >= .95 && heightMap[row - 1][col] <= height && numRiverNextTo(col, row - 1, pathSoFar) <= 1 && !pathSoFar.contains(new Coordinate(col, row - 1))
+                  && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col, row - 1);
-            else if(dir >= .60 && dir < .90 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row, pathSoFar) <= 1
-                  && !pathSoFar.contains(new Coordinate(col + 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+            else if(dir >= .60 && dir < .90 && heightMap[row][col + 1] <= height && numRiverNextTo(col + 1, row, pathSoFar) <= 1 && !pathSoFar.contains(new Coordinate(col + 1, row))
+                  && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col + 1, row);
-            else if(dir >= .30 && dir < .60 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row, pathSoFar) <= 1
-                  && !pathSoFar.contains(new Coordinate(col - 1, row)) && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
+            else if(dir >= .30 && dir < .60 && heightMap[row][col - 1] <= height && numRiverNextTo(col - 1, row, pathSoFar) <= 1 && !pathSoFar.contains(new Coordinate(col - 1, row))
+                  && tiles[row - 1][col].getType() != TILE_TYPE.RIVER)
                next = new Coordinate(col - 1, row);
             if(next == null)
                attempts++;
@@ -335,8 +332,7 @@ public class World {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
-                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
-                        manager.tileTextures.get("bridge_vertical.png"));
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), manager.tileTextures.get("bridge_vertical.png"));
                   numBridges++;
                }
             }
@@ -344,8 +340,7 @@ public class World {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
-                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(),
-                        manager.tileTextures.get("bridge_horizontal.png"));
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), manager.tileTextures.get("bridge_horizontal.png"));
                   numBridges++;
                }
             }
@@ -465,8 +460,7 @@ public class World {
       Logger.consolePrint("placing factories for " + team.getName(), "map");
       for(int col = min; col < max; col += 2) {
          int row = (int)(Math.random() * height);
-         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN
-               || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
          }
          if(team.equals(teamOne))
@@ -550,8 +544,8 @@ public class World {
       int col = minCol;
       for(int x = 0; x < team.getTeamSize(); x++) {
          int row = (int)(Math.random() * height);
-         while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.RIVER
-               || tiles[row][col].getType() == TILE_TYPE.FACTORY || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+         while(tiles[row][col].isOccupied() || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.FACTORY
+               || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
          }
          if(x == team.getTeamSize() - 1)

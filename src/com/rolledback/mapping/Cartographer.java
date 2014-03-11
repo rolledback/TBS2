@@ -2,6 +2,7 @@ package com.rolledback.mapping;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
@@ -20,27 +21,27 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 
 public class Cartographer {
    
-   public static boolean readMapFile(String fileName, Tile[][] tiles, World w, GraphicsManager manager) {
+   public static Object[] readMapFile(String fileName, Tile[][] tiles, World w, GraphicsManager manager) {
       BufferedInputStream mapReader;
       try {
          Logger.consolePrint("Opening: " + fileName, "cartographer");
          mapReader = new BufferedInputStream(new FileInputStream(fileName));
-         byte[] map = new byte[6 + (tiles.length * tiles[0].length)];
+         byte[] map = new byte[(int)new File(fileName).length()];
          mapReader.read(map);
          mapReader.close();
          Logger.consolePrint("Checking for magic number.", "cartographer");
          if(map[0] != 0x6d) {
             Logger.consolePrint("Number not found. Invalid file.", "cartographer");
-            return false;
+            Object[] ret = new Object[1];
+            ret[0] = false;
+            return ret;
          }
-         Logger.consolePrint("File checks out.", "cartographer");
+         Logger.consolePrint("File checks out. Length of: " + map.length, "cartographer");
          int width = map[2] ^ (map[3] << 8);
          int height = map[4] ^ (map[5] << 8);
          Logger.consolePrint("File gives dim of: (" + width + ", " + height + ")", "cartographer");
-         if(height != tiles.length || width != tiles[0].length) {
-            Logger.consolePrint("File size does not match current editor.", "cartographer");
-            return false;
-         }
+         tiles = new Tile[height][width];
+         
          Logger.consolePrint("Reading tile info...", "cartographer");
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++)
@@ -48,10 +49,15 @@ public class Cartographer {
       }
       catch(Exception e) {
          Logger.consolePrint("Error opening file: " + e.toString(), "cartographer");
-         return false;
+         Object[] ret = new Object[1];
+         ret[0] = false;
+         return ret;
       }
       Logger.consolePrint("Map has been loaded.", "cartographer");
-      return true;
+      Object[] ret = new Object[2];
+      ret[0] = true;
+      ret[1] = tiles;
+      return ret;
    }
    
    public static boolean createMapFile(String fileName, Tile[][] tiles, int tileSize, GraphicsManager manager) {
@@ -75,7 +81,6 @@ public class Cartographer {
          for(int col = 0; col < width; col++)
             map[6 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
       
-      
       Logger.consolePrint("Initial data converted to byte format.", "cartographer");
       
       BufferedOutputStream mapWriter;
@@ -86,7 +91,7 @@ public class Cartographer {
          mapWriter.write(map);
          mapWriter.close();
       }
-      catch(Exception e) {         
+      catch(Exception e) {
          Logger.consolePrint("Error creating file: " + e.toString(), "cartographer");
          return false;
       }
@@ -121,8 +126,19 @@ public class Cartographer {
             return (byte)115;
          if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_three.png")))
             return (byte)131;
-         else
+         if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_four.png")))
             return (byte)147;
+         if(tile.getTexture().equals(manager.tileTextures.get("river_intersection.png")))
+            return (byte)163;
+         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_one.png")))
+            return (byte)179;
+         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_two.png")))
+            return (byte)195;
+         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_three.png")))
+            return (byte)211;
+         else
+            return (byte)227;
+         
       }
       if(tile.getType() == TILE_TYPE.PLAIN) {
          return (byte)0;
@@ -192,6 +208,21 @@ public class Cartographer {
             
          case (byte)147:
             return new River(w, col, row, manager.tileTextures.get("riverCorner_four.png"));
+            
+         case (byte)163:
+            return new River(w, col, row, manager.tileTextures.get("river_intersection.png"));
+            
+         case (byte)179:
+            return new River(w, col, row, manager.tileTextures.get("river_tSection_one.png"));
+            
+         case (byte)195:
+            return new River(w, col, row, manager.tileTextures.get("river_tSection_two.png"));
+            
+         case (byte)211:
+            return new River(w, col, row, manager.tileTextures.get("river_tSection_three.png"));
+            
+         case (byte)227:
+            return new River(w, col, row, manager.tileTextures.get("river_tSection_four.png"));
             
          case (byte)4:
             return new Bridge(w, col, row, manager.tileTextures.get("bridge_horizontal.png"));

@@ -2,7 +2,6 @@ package com.rolledback.mapping;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -40,7 +39,7 @@ public class TextureOptionPane extends JDialog {
       setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
    }
    
-   public void createPicker(String[] names) {   
+   public void createPicker(String[] names) {
       layout = new BorderLayout();
       layout.setVgap(1);
       topPanel.setLayout(layout);
@@ -59,11 +58,11 @@ public class TextureOptionPane extends JDialog {
       topPanel.add(textureList, BorderLayout.PAGE_START);
       topPanel.add(picLabel, BorderLayout.PAGE_END);
    }
-
+   
    public String getCurrTexture() {
       return currTexture;
    }
-
+   
    public void setCurrTexture(String currTexture) {
       this.currTexture = currTexture;
    }

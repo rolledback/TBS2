@@ -237,7 +237,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       for(int x = 0; x < gameWidth; x++)
          for(int y = 0; y < gameHeight; y++) {
             Tile currTile = world.getTiles()[y][x];
-            g.drawImage(currTile.getTexture(), tileSize * x, tileSize * y, tileSize, tileSize, this);
+            g.drawImage(currTile.getTexture(), tileSize * x + offsetHorizontal, tileSize * y + offsetVertical, tileSize, tileSize, this);
          }
    }
    
@@ -257,8 +257,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                tileColor = Color.red;
             g.setColor(tileColor);
             g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
-//            g.setColor(Color.black);
-//            g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
+            // g.setColor(Color.black);
+            // g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical,
+            // tileSize, tileSize);
          }
       }
    }
@@ -269,57 +270,61 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       g.setFont(font);
       for(Unit temp: teamOne.getUnits()) {
          UNIT_TYPE u = temp.getType();
+         int xCorner = tileSize * temp.getX() + offsetHorizontal;
+         int yCorner = tileSize * temp.getY() + offsetVertical;
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[0], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[0], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[4], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[4], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[2], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[2], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[6], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[6], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[3], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[3], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[7], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[7], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[1], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[1], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[5], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[5], xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasAttacked() || temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
-            g.fillRect(tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize);
+            g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
       }
       
       for(Unit temp: teamTwo.getUnits()) {
          UNIT_TYPE u = temp.getType();
+         int xCorner = tileSize * temp.getX() + offsetHorizontal;
+         int yCorner = tileSize * temp.getY() + offsetVertical;
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[8], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[8], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[12], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[12], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[10], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[10], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[14], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[14], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[11], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[11], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[15], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[15], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[9], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[9], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[13], tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize, this);
+               g.drawImage(manager.unitImages[13], xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasAttacked() || temp.hasMoved() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
-            g.fillRect(tileSize * temp.getX(), tileSize * temp.getY(), tileSize, tileSize);
+            g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
       }
    }
@@ -334,8 +339,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.setColor(Color.red);
                g.fillRect(xCorner, yCorner, tileSize - (2 * buffer), buffer);
                g.setColor(Color.green);
-               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy()
-                     .getHealth() / 100.0)), buffer);
+               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy().getHealth() / 100.0)), buffer);
             }
          }
       }
@@ -510,18 +514,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    @Override
    public void mouseClicked(MouseEvent arg0) {
-      if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int eventX = arg0.getX();
-         int eventY = arg0.getY();
-         for(int row = 0; row < gameHeight; row++)
-            for(int col = 0; col < gameWidth; col++)
-               if(grid[row][col].contains(eventX, eventY)) {
-                  gameLogic(col, row);
-                  return;
-               }
-      }
-      else
-         state = GAME_STATE.SWITCH_TEAMS;
    }
    
    @Override
@@ -538,8 +530,18 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    @Override
    public void mousePressed(MouseEvent arg0) {
-      // TODO Auto-generated method stub
-      
+      if(SwingUtilities.isLeftMouseButton(arg0)) {
+         int eventX = arg0.getX();
+         int eventY = arg0.getY();
+         for(int row = 0; row < gameHeight; row++)
+            for(int col = 0; col < gameWidth; col++)
+               if(grid[row][col].contains(eventX, eventY)) {
+                  gameLogic(col, row);
+                  return;
+               }
+      }
+      else
+         state = GAME_STATE.SWITCH_TEAMS;
    }
    
    @Override

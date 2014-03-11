@@ -2,7 +2,6 @@ package com.rolledback.terrain;
 
 import java.awt.Image;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
