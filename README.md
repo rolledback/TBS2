@@ -46,7 +46,10 @@ If you wish to create your own map editor, you must use the following file forma
   - 10000011 = riverCorner_three
   - 10010011 = riverCorner_four
   - 10100011 = river_intersection
-  - 10110011 = river_tSection
+  - 10110011 = river_tSection_one
+  - 11000011 = river_tSection_two
+  - 11010011 = river_tSection_three
+  - 11100011 = river_tSection_four
   - 00000100 = bridge_horizontal
   - 00010100 = bridge_vertical 
   - 00000101 = cityGrey
