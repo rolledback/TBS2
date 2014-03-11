@@ -12,7 +12,7 @@ Basic Game Info:
 The AI:
 =======
 
-The AI of the game can found in com.rolledback.packages. To battle against the AI simply set one of the teams in Game.java to the basic Team object, and then the other team to one of the various ComputerTeam classes. AIs can also fight against each other. To accomplish this simply have both teams be one of the ComputerTeam classes. AIs also doesn't have to be used at all. Lastly, to control the speed of an AIs animation, change the animationDelay variable in the file of the AI whose speed you wish to change.
+To battle against the AI simply set one of the teams in Game.java to the basic Team object, and then the other team to one of the various ComputerTeam classes. AIs can also fight against each other. To accomplish this simply have both teams be one of the ComputerTeam classes. AIs also doesn't have to be used at all. Lastly, to control the speed of an AIs animation, change the animationDelay variable in the file of the AI whose speed you wish to change.
 
 Map Maker/Custom Maps:
 ======================
