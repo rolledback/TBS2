@@ -1,13 +1,17 @@
 package com.rolledback.mapping;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.rolledback.framework.GraphicsManager;
@@ -15,33 +19,53 @@ import com.rolledback.framework.GraphicsManager;
 public class TextureOptionPane extends JDialog {
    
    private static final long serialVersionUID = 1L;
-   public JComboBox<String> textureList;
-   public Image currentImage;
-   public String[] tileNames;
-   public String currTexture;
+   private JComboBox<String> textureList;
+   private String[] tileNames;
+   private String currTexture;
+   private JLabel picLabel;
+   private GraphicsManager manager;
+   private JPanel topPanel;
+   private BorderLayout layout;
    
-   public TextureOptionPane(GraphicsManager manger, String[] tileNames) {
+   public TextureOptionPane(GraphicsManager m, String[] tileNames) {
+      manager = m;
       setTitle("Texture Picker");
       currTexture = "grass.png";
       this.tileNames = tileNames;
-      JPanel topPanel = new JPanel();
-      topPanel.setLayout(new BorderLayout());
-      createPicker(topPanel, tileNames);
+      topPanel = new JPanel();
+      createPicker(tileNames);
       getContentPane().add(topPanel);
-      setSize(200, 75);
+      pack();
+      setResizable(false);
       setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
    }
    
-   public void createPicker(JPanel panel, String[] names) {
+   public void createPicker(String[] names) {   
+      layout = new BorderLayout();
+      layout.setVgap(1);
+      topPanel.setLayout(layout);
+      
+      picLabel = new JLabel("", new ImageIcon(manager.tileTextures.get(currTexture)), JLabel.CENTER);
+      picLabel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
       final String[] textureNames = names;
       textureList = new JComboBox<String>(textureNames);
       textureList.setSelectedIndex(0);
       textureList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
             currTexture = tileNames[textureList.getSelectedIndex()];
+            picLabel.setIcon(new ImageIcon(manager.tileTextures.get(currTexture)));
          }
       });
-      panel.add(textureList);
+      topPanel.add(textureList, BorderLayout.PAGE_START);
+      topPanel.add(picLabel, BorderLayout.PAGE_END);
+   }
+
+   public String getCurrTexture() {
+      return currTexture;
+   }
+
+   public void setCurrTexture(String currTexture) {
+      this.currTexture = currTexture;
    }
    
 }

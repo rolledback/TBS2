@@ -148,28 +148,30 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++) {
                if(grid[row][col].contains(eventX, eventY)) {
-                  currentTexture = manager.tileTextures.get(texturePicker.currTexture);
-                  if(texturePicker.currTexture.toLowerCase().contains("city"))
+                  currentTexture = manager.tileTextures.get(texturePicker.getCurrTexture());
+                  if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
                      tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("factory"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
                      tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("river"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
                      tiles[row][col] = new River(null, col, row, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("mountain"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
                      tiles[row][col] = new Mountain(null, col, row, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("grass"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
                      tiles[row][col] = new Plain(null, col, row, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("bridge"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
                      tiles[row][col] = new Bridge(null, col, row, currentTexture);
-                  else if(texturePicker.currTexture.toLowerCase().contains("forest"))
+                  else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
                      tiles[row][col] = new Forest(null, col, row, currentTexture);
                   repaint();
                }
             }
       }
       else {
-         if(!texturePicker.isVisible())
+         if(!texturePicker.isVisible()) {
             texturePicker.setVisible(true);
+            texturePicker.setLocation(arg0.getX(), arg0.getY());
+         }
       }
       return;
    }
@@ -193,8 +195,9 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
    @Override
    public void keyPressed(KeyEvent e) {
       if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-         if(!menu.isVisible())
+         if(!menu.isVisible()) {
             menu.setVisible(true);
+         }
          else
             menu.setVisible(false);
          if(menu.isOpenFile()) {
@@ -227,22 +230,22 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
          repaint();
       }
       if(e.getKeyChar() == 'f') {
-         currentTexture = manager.tileTextures.get(texturePicker.currTexture);
+         currentTexture = manager.tileTextures.get(texturePicker.getCurrTexture());
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++)
-               if(texturePicker.currTexture.toLowerCase().contains("city"))
+               if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
                   tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("factory"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
                   tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("river"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
                   tiles[row][col] = new River(null, col, row, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("mountain"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
                   tiles[row][col] = new Mountain(null, col, row, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("grass"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
                   tiles[row][col] = new Plain(null, col, row, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("bridge"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
                   tiles[row][col] = new Bridge(null, col, row, currentTexture);
-               else if(texturePicker.currTexture.toLowerCase().contains("forest"))
+               else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
                   tiles[row][col] = new Forest(null, col, row, currentTexture);
          repaint();
       }

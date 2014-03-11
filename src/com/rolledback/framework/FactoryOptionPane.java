@@ -99,7 +99,6 @@ public class FactoryOptionPane extends JDialog {
       unitList = new JComboBox<String>(unitNames);
       unitList.setSelectedIndex(0);
       returnedUnit = UNIT_TYPE.stringToType(unitNames[0].split(",")[0]);
-      unitList.setSize(155, 25);
       unitList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
             returnedUnit = UNIT_TYPE.stringToType(unitNames[unitList.getSelectedIndex()].split(",")[0]);
@@ -153,7 +152,6 @@ public class FactoryOptionPane extends JDialog {
       techList = new JComboBox<String>(techNames);
       if(techNames.length > 0)
          returnedTech = TECH_NAME.stringToName(techNames[0].split(",")[0]);
-      techList.setSize(155, 25);
       techList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
             returnedTech = TECH_NAME.stringToName(techNames[techList.getSelectedIndex()].split(",")[0]);
