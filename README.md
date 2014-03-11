@@ -55,5 +55,6 @@ If you wish to create your own map editor, you must use the following file forma
 
 License Information
 ====================
-This project is licensed under the Creative Commons Attribution-NonCommercial License. For details on what this means, please see the link below.
+This project is licensed under the Creative Commons Attribution-NonCommercial License. For details on what this means, please see the links below.
 - https://creativecommons.org/licenses/by-nc/4.0/
+- https://creativecommons.org/licenses/by-nc/4.0/legalcode
