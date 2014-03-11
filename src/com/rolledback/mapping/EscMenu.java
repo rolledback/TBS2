@@ -2,6 +2,7 @@ package com.rolledback.mapping;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,10 +22,12 @@ public class EscMenu extends JDialog implements ActionListener {
    private String fileName;
    private boolean openFile;
    private boolean saveFile;
+   private GridLayout layout;
    
    public EscMenu() {
       setName("Menu");
-      JPanel topPanel = new JPanel(new BorderLayout());
+      layout = new GridLayout(0, 1, 5, 5);
+      JPanel topPanel = new JPanel(layout);
       
       // Create a file chooser
       fc = new JFileChooser();

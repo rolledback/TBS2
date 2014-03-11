@@ -65,7 +65,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 50, 125);
+      teamOne = new ComputerTeamD("team one", 50, 125, this);
       teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       
@@ -399,7 +399,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                state = GAME_STATE.DISPLAY_MOVE;
          }
       }
-      else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
+      else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner() != null && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
          Logger.consolePrint("factory selected", "game");
          FactoryOptionPane factoryPane = new FactoryOptionPane(currentTeam);

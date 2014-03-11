@@ -3,10 +3,7 @@ package com.rolledback.framework;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -130,11 +127,11 @@ public class Launcher {
       
       GraphicsManager manager = new GraphicsManager();
       JFrame frame;
-//      int winner[] = { 0, 0 };
-//      for(int i = 0; i < 100; i++) {
+      int winner[] = { 0, 0 };
+      for(int i = 0; i < 1; i++) {
          Logger.consolePrint("Constructing frame.", "launcher");
          frame = new JFrame("TBS2");
-//         Logger.consolePrint("Game " + i, "launcher");
+         Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();
          int offsetHorizontal = screenWidth - (gameWidth * tileSize);
          int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
@@ -154,11 +151,11 @@ public class Launcher {
          Logger.consolePrint("Running game.", "launcher");
          newGame.run();
          long end = System.currentTimeMillis();
-//         if(newGame.winner.equals(newGame.getWorld().getTeamOne()))
-//            winner[0]++;
-//         else
-//            winner[1]++;
-//         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
+         if(newGame.winner.equals(newGame.getWorld().getTeamOne()))
+            winner[0]++;
+         else
+            winner[1]++;
+         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
 //         try {
 //            PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
 //            for(Coordinate c: newGame.history)
@@ -169,13 +166,13 @@ public class Launcher {
 //            // TODO Auto-generated catch block
 //            e.printStackTrace();
 //         }
-         Logger.consolePrint("Click history saved.", "launcher");
+//         Logger.consolePrint("Click history saved.", "launcher");
          newGame = null;
          frame.dispose();
          frame = null;
          Logger.consolePrint("Next game.", "launcher");
-//      }
-//      System.exit(-1);
+      }
+      System.exit(-1);
    }
    
 }

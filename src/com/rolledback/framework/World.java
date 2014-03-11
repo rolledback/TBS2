@@ -48,6 +48,19 @@ public class World {
       teamTwo = new Team("", 0, 0);
    }
    
+   public World(GraphicsManager m, int w, int h, boolean rivers) {
+      manager = m;
+      if(rivers) {
+         width = w;
+         height = h;
+      }
+      tiles = new Tile[h][w];
+      heightMap = new int[h][w];
+      teamOne = new Team("", 0, 0);
+      teamTwo = new Team("", 0, 0);
+      buildMap();
+   }
+   
    public void printMap() {
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {

@@ -121,8 +121,6 @@ public class Unit {
       int width = world.getWidth();
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
-      else if(!canTraverse(tiles[y][x]))
-         return;
       else if(range <= 0) {
          if(tiles[y][x].isOccupied() && !owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             attackSet.add(thisCoord);
@@ -132,6 +130,8 @@ public class Unit {
          if(!owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             attackSet.add(thisCoord);
       }
+      else if(!canTraverse(tiles[y][x]))
+         return;
       else if(canCapture(tiles[y][x]))
          captureSet.add(thisCoord);
       else if(tiles[y][x].getType() == TILE_TYPE.CITY)

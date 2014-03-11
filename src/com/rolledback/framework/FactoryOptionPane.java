@@ -2,6 +2,7 @@ package com.rolledback.framework;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.Technology.TECH_NAME;
@@ -26,11 +28,13 @@ public class FactoryOptionPane extends JDialog {
    private static final long serialVersionUID = 1L;
    private JTabbedPane tabbedPane;
    
+   private GridLayout unitLayout;
    private JPanel unitPanel;
    private JButton unitOkButton;
    private JButton unitCancelButton;
    private JLabel unitCurrRes;
    
+   private GridLayout techLayout;
    private JPanel techPanel;
    private JButton techOkButton;
    private JButton techCancelButton;
@@ -84,7 +88,8 @@ public class FactoryOptionPane extends JDialog {
    }
    
    public void createUnitPage(LinkedHashMap<UNIT_TYPE, Integer> productionList) {
-      unitPanel = new JPanel();
+      unitLayout = new GridLayout(0, 1, 5, 5);
+      unitPanel = new JPanel(unitLayout);
       final String[] unitNames = new String[productionList.size()];
       int counter = 0;
       for(Map.Entry<UNIT_TYPE, Integer> entry: productionList.entrySet()) {
@@ -126,6 +131,7 @@ public class FactoryOptionPane extends JDialog {
       });
       
       unitCurrRes = new JLabel("Resources: " + numResources);
+      unitCurrRes.setHorizontalAlignment(SwingConstants.CENTER);
       
       unitPanel.add(unitCurrRes);
       unitPanel.add(unitList);
@@ -134,7 +140,8 @@ public class FactoryOptionPane extends JDialog {
    }
    
    public void createTechPage(LinkedHashMap<TECH_NAME, Integer> techTree) {
-      techPanel = new JPanel();
+      techLayout = new GridLayout(0, 1, 5, 5);
+      techPanel = new JPanel(techLayout);
       final String[] techNames;
       techNames = new String[techTree.size()];
       int counter = 0;
@@ -180,6 +187,7 @@ public class FactoryOptionPane extends JDialog {
       });
       
       techCurrRes = new JLabel("Resources: " + numResources);
+      techCurrRes.setHorizontalAlignment(SwingConstants.CENTER);
       
       techPanel.add(techCurrRes);
       techPanel.add(techList);

@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.Launcher;
+import com.rolledback.framework.Logger;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
@@ -41,13 +42,14 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
    private TextureOptionPane texturePicker;
    private Team dummyTeam;
    private EscMenu menu;
+   private boolean gridVisible;
    
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random" };
       int tileSize = -1;
       if(tileSize == -1) {
-         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:", "Tile Size", JOptionPane.PLAIN_MESSAGE, null,
-               possibilities, possibilities[0]);
+         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:", "Tile Size", JOptionPane.PLAIN_MESSAGE, null, possibilities,
+               possibilities[0]);
          if(s != null) {
             String size = (String)s;
             if(size.equals("Random")) {
@@ -132,7 +134,8 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
          for(int col = 0; col < width; col++) {
             Tile currTile = tiles[row][col];
             g.drawImage(currTile.getTexture(), tileSize * col, tileSize * row, tileSize, tileSize, this);
-            g.drawRect(tileSize * col, tileSize * row, tileSize, tileSize);
+            if(gridVisible)
+               g.drawRect(tileSize * col, tileSize * row, tileSize, tileSize);
          }
       }
    }
@@ -189,10 +192,6 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
    
    @Override
    public void keyPressed(KeyEvent e) {
-   }
-   
-   @Override
-   public void keyReleased(KeyEvent e) {
       if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
          if(!menu.isVisible())
             menu.setVisible(true);
@@ -213,6 +212,45 @@ public class MapEditor extends JPanel implements MouseListener, KeyListener {
                JOptionPane.showMessageDialog(new JFrame(), "Error saving file.", "Error", JOptionPane.ERROR_MESSAGE);
          }
       }
+      if(e.getKeyChar() == 'r') {
+         World temp = new World(manager, width, height, true);
+         tiles = temp.getTiles();
+         repaint();
+      }
+      if(e.getKeyChar() == 't') {
+         World temp = new World(manager, width, height, false);
+         tiles = temp.getTiles();
+         repaint();
+      }
+      if(e.getKeyChar() == 'g') {
+         gridVisible = !gridVisible;
+         repaint();
+      }
+      if(e.getKeyChar() == 'f') {
+         currentTexture = manager.tileTextures.get(texturePicker.currTexture);
+         for(int row = 0; row < height; row++)
+            for(int col = 0; col < width; col++)
+               if(texturePicker.currTexture.toLowerCase().contains("city"))
+                  tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("factory"))
+                  tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("river"))
+                  tiles[row][col] = new River(null, col, row, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("mountain"))
+                  tiles[row][col] = new Mountain(null, col, row, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("grass"))
+                  tiles[row][col] = new Plain(null, col, row, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("bridge"))
+                  tiles[row][col] = new Bridge(null, col, row, currentTexture);
+               else if(texturePicker.currTexture.toLowerCase().contains("forest"))
+                  tiles[row][col] = new Forest(null, col, row, currentTexture);
+         repaint();
+      }
+
+   }
+   
+   @Override
+   public void keyReleased(KeyEvent e) {
    }
    
    @Override

@@ -21,9 +21,9 @@ public class ComputerAnalysis {
       File coordinateDump = new File("dump.txt");
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
-      int width = 13;
-      int height = 7;
-      int size = 128;
+      int width = 26;
+      int height = 14;
+      int size = 64;
       
       for(int x = 0; x < width; x++)
          for(int y = 0; y < height; y++)
@@ -73,7 +73,7 @@ class AnalysisDisplay extends JPanel {
    
    LinkedHashMap<Coordinate, Double> values;
    int maxValue;
-   int size = 128;
+   int size = 64;
    
    private static final long serialVersionUID = 1L;
    Color[] gradient = {
