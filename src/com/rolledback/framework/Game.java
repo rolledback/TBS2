@@ -3,6 +3,7 @@ package com.rolledback.framework;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,7 +51,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    Unit targetUnit;
    Rectangle[][] grid;
    GAME_STATE state;
-   GraphicsManager manager;
+   Image[][] background;
    
    int UNIT_DENSITY = 5;
    int drawDetectorOne = 0;
@@ -58,10 +59,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public ReentrantLock logicLock;
    
-   public Game(int x, int y, int ts, int oH, int oV, int gH, GraphicsManager m, String fileToLoad) {
+   public Game(int x, int y, int ts, int oH, int oV, int gH, String fileToLoad) {
       gameWidth = x;
       gameHeight = y;
-      manager = m;
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
@@ -72,7 +72,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       teamOne.setOpponent(teamTwo);
       teamTwo.setOpponent(teamOne);
       
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo, manager, ts, fileToLoad);
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo, ts, fileToLoad);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
@@ -119,6 +119,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void paintComponent(Graphics g) {
       logicLock.lock();
+      drawBackground(g);
       drawTiles(g);
       drawUnits(g);
       drawHealthBars(g);
@@ -126,13 +127,41 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          drawMoveSpots(g);
       }
       g.setColor(Color.black);
-      g.drawOval(selectedX * tileSize + offsetHorizontal, selectedY * tileSize + offsetVertical, tileSize, tileSize);
+      g.drawOval(selectedX * tileSize + offsetHorizontal, selectedY * tileSize + offsetVertical, tileSize - 2, tileSize - 2);
       if(unitSelected && !selectedUnit.getOwner().equals(currentTeam)) {
          selectedUnit = null;
          unitSelected = false;
       }
       // drawGui(g);
       logicLock.unlock();
+   }
+   
+   public void drawBackground(Graphics g) {
+      int horizOffset = (world.getTiles()[0].length % 2 == 0) ? 0 : tileSize / 2;
+      int vertiOffset = (world.getTiles().length % 2 == 0) ? 0 : tileSize / 2;
+      for(int r = 0; r < background.length; r++)
+         for(int c = 0; c < background[0].length; c++) {
+            g.setColor(new Color(185, 185, 250, 175));
+            g.setColor(new Color(120, 100, 165, 175));
+            g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
+            g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
+         }
+   }
+   
+   public void createBackground() {
+      int w = (this.getWidth() + tileSize) / tileSize;
+      int h = (this.getHeight() + tileSize) / tileSize;
+      background = new Image[h][w];
+      for(int r = 0; r < h; r++)
+         for(int c = 0; c < w; c++) {
+            double i = Math.random();
+            if(i < .75)
+               background[r][c] = GraphicsManager.getTileTextures().get("grass.png");
+            else if(i < .95)
+               background[r][c] = GraphicsManager.getTileTextures().get("forest.png");
+            else
+               background[r][c] = GraphicsManager.getTileTextures().get("mountain.png");
+         }
    }
    
    public void drawGui(Graphics g) {
@@ -274,24 +303,24 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          int yCorner = tileSize * temp.getY() + offsetVertical;
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[0], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[0], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[4], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[4], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[2], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[2], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[6], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[6], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[3], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[3], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[7], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[7], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[1], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[1], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[5], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[5], xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasAttacked() || temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
@@ -304,24 +333,24 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          int yCorner = tileSize * temp.getY() + offsetVertical;
          if(u == UNIT_TYPE.INFANTRY)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[8], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[8], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[12], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[12], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[10], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[10], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[14], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[14], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.TANK_DEST)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[11], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[11], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[15], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[15], xCorner, yCorner, tileSize, tileSize, this);
          if(u == UNIT_TYPE.RPG)
             if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(manager.unitImages[9], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[9], xCorner, yCorner, tileSize, tileSize, this);
             else
-               g.drawImage(manager.unitImages[13], xCorner, yCorner, tileSize, tileSize, this);
+               g.drawImage(GraphicsManager.getUnitImages()[13], xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasAttacked() || temp.hasMoved() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);

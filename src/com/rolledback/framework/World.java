@@ -24,20 +24,18 @@ public class World {
    private Tile tiles[][];
    private int heightMap[][];
    private int width, height;
-   private GraphicsManager manager;
    
-   public World(int w, int h, Team a, Team b, GraphicsManager m, int t, String fileToLoad) {
+   public World(int w, int h, Team a, Team b, int t, String fileToLoad) {
       width = w;
       height = h;
       tiles = new Tile[h][w];
       heightMap = new int[h][w];
       teamOne = a;
       teamTwo = b;
-      manager = m;
       if(fileToLoad.equals(""))
          buildMap();
       else
-         tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this, manager)[1];         
+         tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this)[1];
    }
    
    public World() {
@@ -45,8 +43,7 @@ public class World {
       teamTwo = new Team("", 0, 0);
    }
    
-   public World(GraphicsManager m, int w, int h, boolean rivers) {
-      manager = m;
+   public World(int w, int h, boolean rivers) {
       if(rivers) {
          width = w;
          height = h;
@@ -150,15 +147,15 @@ public class World {
             double type = Math.random();
             if(type <= .75) {
                numPlains++;
-               tiles[row][col] = new Plain(this, col, row, manager.tileTextures.get("grass.png"));
+               tiles[row][col] = new Plain(this, col, row);
             }
             else if(type > .75 && type <= .95) {
                numForests++;
-               tiles[row][col] = new Forest(this, col, row, manager.tileTextures.get("forest.png"));
+               tiles[row][col] = new Forest(this, col, row);
             }
             else {
                numMountains++;
-               tiles[row][col] = new Mountain(this, col, row, manager.tileTextures.get("mountain.png"));
+               tiles[row][col] = new Mountain(this, col, row);
             }
          }
       numPlains /= (double)(width * height);
@@ -328,19 +325,19 @@ public class World {
          Tile currTile = tiles[path.get(spot).getY()][path.get(spot).getX()];
          Image spotImage = currTile.getTexture();
          if(currTile.getY() > 0 && currTile.getY() < height - 1 && currTile.getX() > 0 && currTile.getX() < width - 1) {
-            if(spotImage.equals(manager.tileTextures.get("river_horizontal.png"))) {
+            if(spotImage.equals(GraphicsManager.getTileTextures().get("river_horizontal.png"))) {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
-                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), manager.tileTextures.get("bridge_vertical.png"));
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), GraphicsManager.getTileTextures().get("bridge_vertical.png"));
                   numBridges++;
                }
             }
-            else if(spotImage.equals(manager.tileTextures.get("river_vertical.png"))) {
+            else if(spotImage.equals(GraphicsManager.getTileTextures().get("river_vertical.png"))) {
                Tile nextTile = tiles[path.get(spot + 1).getY()][path.get(spot + 1).getX()];
                Tile prevTile = tiles[path.get(spot - 1).getY()][path.get(spot - 1).getX()];
                if(nextTile.getType() != TILE_TYPE.BRIDGE && prevTile.getType() != TILE_TYPE.BRIDGE) {
-                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), manager.tileTextures.get("bridge_horizontal.png"));
+                  tiles[path.get(spot).getY()][path.get(spot).getX()] = new Bridge(this, path.get(spot).getX(), path.get(spot).getY(), GraphicsManager.getTileTextures().get("bridge_horizontal.png"));
                   numBridges++;
                }
             }
@@ -366,16 +363,16 @@ public class World {
       
       if(currX == nextX) {
          if(currY < nextY)
-            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_down.png"));
+            tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_down.png"));
          else
-            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_up.png"));
+            tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_up.png"));
          ;
       }
       else {
          if(currX < nextX)
-            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_right.png"));
+            tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_right.png"));
          else
-            tiles[currY][currX].setTexture(manager.tileTextures.get("riverEnd_left.png"));
+            tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_left.png"));
       }
       
       for(int x = 1; x < riverPath.size() - 1; x++) {
@@ -388,56 +385,56 @@ public class World {
          
          if(prevX == currX && currX == nextX)
             if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
-               tiles[currY][currX].setTexture(manager.tileTextures.get("river_vertical.png"));
+               tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("river_vertical.png"));
             else
-               tiles[currY][currX].setTexture(manager.tileTextures.get("bridge_horizontal.png"));
+               tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("bridge_horizontal.png"));
          else if(prevY == currY && currY == nextY)
             if(tiles[currY][currX].getType() == TILE_TYPE.RIVER)
-               tiles[currY][currX].setTexture(manager.tileTextures.get("river_horizontal.png"));
+               tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("river_horizontal.png"));
             else
-               tiles[currY][currX].setTexture(manager.tileTextures.get("bridge_vertical.png"));
+               tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("bridge_vertical.png"));
          else if(prevX < nextX) {
             if(prevY < nextY) {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_two.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_two.png"));
                if(prevY == currY)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_three.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_three.png"));
             }
             else {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_four.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_four.png"));
                else
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_one.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_one.png"));
             }
             
          }
          else if(prevX > nextX) {
             if(prevY > nextY) {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_three.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_three.png"));
                if(prevY == currY)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_two.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_two.png"));
             }
             else {
                if(prevX == currX)
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_one.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_one.png"));
                else
-                  tiles[currY][currX].setTexture(manager.tileTextures.get("riverCorner_four.png"));
+                  tiles[currY][currX].setTexture(GraphicsManager.getTileTextures().get("riverCorner_four.png"));
             }
          }
       }
       
       if(nextX == currX) {
          if(nextY < currY)
-            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_down.png"));
+            tiles[nextY][nextX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_down.png"));
          else
-            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_up.png"));
+            tiles[nextY][nextX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_up.png"));
       }
       else {
          if(nextX < currX)
-            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_right.png"));
+            tiles[nextY][nextX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_right.png"));
          else
-            tiles[nextY][nextX].setTexture(manager.tileTextures.get("riverEnd_left.png"));
+            tiles[nextY][nextX].setTexture(GraphicsManager.getTileTextures().get("riverEnd_left.png"));
       }
    }
    
@@ -451,7 +448,7 @@ public class World {
             col = rand.nextInt(max - min) + min;
             row = rand.nextInt(height - 1) + 1;
          }
-         tiles[row][col] = new City(this, col, row, null, manager.tileTextures.get("cityGrey.png"));
+         tiles[row][col] = new City(this, col, row, null, GraphicsManager.getTileTextures().get("cityGrey.png"));
       }
       
    }
@@ -464,9 +461,9 @@ public class World {
             row = (int)(Math.random() * height);
          }
          if(team.equals(teamOne))
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures.get("factoryRed.png"));
+            tiles[row][col] = new Factory(this, col, row, team, GraphicsManager.getTileTextures().get("factoryRed.png"));
          else
-            tiles[row][col] = new Factory(this, col, row, team, manager.tileTextures.get("factoryBlue.png"));
+            tiles[row][col] = new Factory(this, col, row, team, GraphicsManager.getTileTextures().get("factoryBlue.png"));
          team.getFactories().add((Factory)tiles[row][col]);
       }
    }
@@ -497,13 +494,13 @@ public class World {
             west = col - 1 < 0 || tiles[row][col - 1].getType() == TILE_TYPE.MOUNTAIN;
             if(north && south && east && west)
                if(!(row - 1 < 0))
-                  tiles[row - 1][col] = new Plain(this, col, row - 1, manager.tileTextures.get("grass.png"));
+                  tiles[row - 1][col] = new Plain(this, col, row - 1);
                else if(!(row + 1 >= height))
-                  tiles[row + 1][col] = new Plain(this, col, row + 1, manager.tileTextures.get("grass.png"));
+                  tiles[row + 1][col] = new Plain(this, col, row + 1);
                else if(!(col + 1 >= width))
-                  tiles[row][col + 1] = new Plain(this, col + 1, row, manager.tileTextures.get("grass.png"));
+                  tiles[row][col + 1] = new Plain(this, col + 1, row);
                else
-                  tiles[row][col - 1] = new Plain(this, col - 1, row, manager.tileTextures.get("grass.png"));
+                  tiles[row][col - 1] = new Plain(this, col - 1, row);
          }
       }
    }
@@ -595,14 +592,6 @@ public class World {
    
    public void setHeightMap(int heightMap[][]) {
       this.heightMap = heightMap;
-   }
-   
-   public GraphicsManager getManager() {
-      return manager;
-   }
-   
-   public void setManager(GraphicsManager manager) {
-      this.manager = manager;
    }
    
    public Team getTeamTwo() {

@@ -2,6 +2,7 @@ package com.rolledback.terrain;
 
 import java.awt.Image;
 
+import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.units.Unit;
@@ -26,9 +27,9 @@ public class City extends CapturableTile {
       owner = unit.getOwner();
       unit.getOwner().getCities().add(this);
       if(owner.equals(getWorld().getTeamOne()))
-         texture = getWorld().getManager().tileTextures.get("cityRed.png");
+         texture = GraphicsManager.getTileTextures().get("cityRed.png");
       else
-         texture = getWorld().getManager().tileTextures.get("cityBlue.png");
+         texture = GraphicsManager.getTileTextures().get("cityBlue.png");
    }
    
 }

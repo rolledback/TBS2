@@ -22,12 +22,10 @@ public class TextureOptionPane extends JDialog {
    private String[] tileNames;
    private String currTexture;
    private JLabel picLabel;
-   private GraphicsManager manager;
    private JPanel topPanel;
    private BorderLayout layout;
    
-   public TextureOptionPane(GraphicsManager m, String[] tileNames) {
-      manager = m;
+   public TextureOptionPane(String[] tileNames) {
       setTitle("Texture Picker");
       currTexture = "grass.png";
       this.tileNames = tileNames;
@@ -44,7 +42,7 @@ public class TextureOptionPane extends JDialog {
       layout.setVgap(1);
       topPanel.setLayout(layout);
       
-      picLabel = new JLabel("", new ImageIcon(manager.tileTextures.get(currTexture)), JLabel.CENTER);
+      picLabel = new JLabel("", new ImageIcon(GraphicsManager.getTileTextures().get(currTexture)), JLabel.CENTER);
       picLabel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
       final String[] textureNames = names;
       textureList = new JComboBox<String>(textureNames);
@@ -52,7 +50,7 @@ public class TextureOptionPane extends JDialog {
       textureList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
             currTexture = tileNames[textureList.getSelectedIndex()];
-            picLabel.setIcon(new ImageIcon(manager.tileTextures.get(currTexture)));
+            picLabel.setIcon(new ImageIcon(GraphicsManager.getTileTextures().get(currTexture)));
          }
       });
       topPanel.add(textureList, BorderLayout.PAGE_START);

@@ -21,7 +21,7 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 
 public class Cartographer {
    
-   public static Object[] readMapFile(String fileName, Tile[][] tiles, World w, GraphicsManager manager) {
+   public static Object[] readMapFile(String fileName, Tile[][] tiles, World w) {
       BufferedInputStream mapReader;
       try {
          Logger.consolePrint("Opening: " + fileName, "cartographer");
@@ -45,7 +45,7 @@ public class Cartographer {
          Logger.consolePrint("Reading tile info...", "cartographer");
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++)
-               tiles[row][col] = byteToTile(w, manager, (byte)map[6 + (row * width) + col], col, row);
+               tiles[row][col] = byteToTile(w, (byte)map[6 + (row * width) + col], col, row);
       }
       catch(Exception e) {
          Logger.consolePrint("Error opening file: " + e.toString(), "cartographer");
@@ -54,13 +54,15 @@ public class Cartographer {
          return ret;
       }
       Logger.consolePrint("Map has been loaded.", "cartographer");
-      Object[] ret = new Object[2];
+      Object[] ret = new Object[4];
       ret[0] = true;
       ret[1] = tiles;
+      ret[2] = tiles.length;
+      ret[3] = tiles[0].length;
       return ret;
    }
    
-   public static boolean createMapFile(String fileName, Tile[][] tiles, int tileSize, GraphicsManager manager) {
+   public static boolean createMapFile(String fileName, Tile[][] tiles, int tileSize) {
       Logger.consolePrint("Creating file: " + fileName, "cartographer");
       int height = tiles.length;
       int width = tiles[0].length;
@@ -79,7 +81,7 @@ public class Cartographer {
       
       for(int row = 0; row < height; row++)
          for(int col = 0; col < width; col++)
-            map[6 + (row * width) + col] = tileToByte(manager, tiles[row][col]);
+            map[6 + (row * width) + col] = tileToByte(tiles[row][col]);
       
       Logger.consolePrint("Initial data converted to byte format.", "cartographer");
       
@@ -100,41 +102,41 @@ public class Cartographer {
       return true;
    }
    
-   public static byte tileToByte(GraphicsManager manager, Tile tile) {
+   public static byte tileToByte(Tile tile) {
       if(tile.getType() == TILE_TYPE.BRIDGE) {
-         if(tile.getTexture().equals(manager.tileTextures.get("bridge_horizontal.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("bridge_horizontal.png")))
             return (byte)4;
          else
             return (byte)20;
       }
       if(tile.getType() == TILE_TYPE.RIVER) {
-         if(tile.getTexture().equals(manager.tileTextures.get("river_horizontal.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_horizontal.png")))
             return (byte)3;
-         if(tile.getTexture().equals(manager.tileTextures.get("river_vertical.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_vertical.png")))
             return (byte)19;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverEnd_up.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverEnd_up.png")))
             return (byte)35;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverEnd_right.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverEnd_right.png")))
             return (byte)51;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverEnd_down.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverEnd_down.png")))
             return (byte)67;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverEnd_left.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverEnd_left.png")))
             return (byte)83;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_one.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverCorner_one.png")))
             return (byte)99;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_two.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverCorner_two.png")))
             return (byte)115;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_three.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverCorner_three.png")))
             return (byte)131;
-         if(tile.getTexture().equals(manager.tileTextures.get("riverCorner_four.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("riverCorner_four.png")))
             return (byte)147;
-         if(tile.getTexture().equals(manager.tileTextures.get("river_intersection.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_intersection.png")))
             return (byte)163;
-         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_one.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_tSection_one.png")))
             return (byte)179;
-         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_two.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_tSection_two.png")))
             return (byte)195;
-         if(tile.getTexture().equals(manager.tileTextures.get("river_tSection_three.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("river_tSection_three.png")))
             return (byte)211;
          else
             return (byte)227;
@@ -150,17 +152,17 @@ public class Cartographer {
          return (byte)2;
       }
       if(tile.getType() == TILE_TYPE.CITY) {
-         if(tile.getTexture().equals(manager.tileTextures.get("cityGrey.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("cityGrey.png")))
             return (byte)5;
-         if(tile.getTexture().equals(manager.tileTextures.get("cityRed.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("cityRed.png")))
             return (byte)21;
          else
             return (byte)37;
       }
       if(tile.getType() == TILE_TYPE.FACTORY) {
-         if(tile.getTexture().equals(manager.tileTextures.get("factoryGrey.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("factoryGrey.png")))
             return (byte)6;
-         if(tile.getTexture().equals(manager.tileTextures.get("factoryRed.png")))
+         if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("factoryRed.png")))
             return (byte)22;
          else
             return (byte)28;
@@ -168,88 +170,88 @@ public class Cartographer {
       return 0b1111111;
    }
    
-   public static Tile byteToTile(World w, GraphicsManager manager, byte value, int col, int row) {
+   public static Tile byteToTile(World w, byte value, int col, int row) {
       switch(value) {
          case (byte)0:
-            return new Plain(w, col, row, manager.tileTextures.get("grass.png"));
+            return new Plain(w, col, row);
             
          case (byte)1:
-            return new Forest(w, col, row, manager.tileTextures.get("forest.png"));
+            return new Forest(w, col, row);
             
          case (byte)2:
-            return new Mountain(w, col, row, manager.tileTextures.get("mountain.png"));
+            return new Mountain(w, col, row);
             
          case (byte)3:
-            return new River(w, col, row, manager.tileTextures.get("river_horizontal.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_horizontal.png"));
             
          case (byte)19:
-            return new River(w, col, row, manager.tileTextures.get("river_vertical.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_vertical.png"));
             
          case (byte)35:
-            return new River(w, col, row, manager.tileTextures.get("riverEnd_up.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverEnd_up.png"));
             
          case (byte)51:
-            return new River(w, col, row, manager.tileTextures.get("riverEnd_right.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverEnd_right.png"));
             
          case (byte)67:
-            return new River(w, col, row, manager.tileTextures.get("riverEnd_down.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverEnd_down.png"));
             
          case (byte)83:
-            return new River(w, col, row, manager.tileTextures.get("riverEnd_left.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverEnd_left.png"));
             
          case (byte)99:
-            return new River(w, col, row, manager.tileTextures.get("riverCorner_one.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverCorner_one.png"));
             
          case (byte)115:
-            return new River(w, col, row, manager.tileTextures.get("riverCorner_two.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverCorner_two.png"));
             
          case (byte)131:
-            return new River(w, col, row, manager.tileTextures.get("riverCorner_three.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverCorner_three.png"));
             
          case (byte)147:
-            return new River(w, col, row, manager.tileTextures.get("riverCorner_four.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("riverCorner_four.png"));
             
          case (byte)163:
-            return new River(w, col, row, manager.tileTextures.get("river_intersection.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_intersection.png"));
             
          case (byte)179:
-            return new River(w, col, row, manager.tileTextures.get("river_tSection_one.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_tSection_one.png"));
             
          case (byte)195:
-            return new River(w, col, row, manager.tileTextures.get("river_tSection_two.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_tSection_two.png"));
             
          case (byte)211:
-            return new River(w, col, row, manager.tileTextures.get("river_tSection_three.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_tSection_three.png"));
             
          case (byte)227:
-            return new River(w, col, row, manager.tileTextures.get("river_tSection_four.png"));
+            return new River(w, col, row, GraphicsManager.getTileTextures().get("river_tSection_four.png"));
             
          case (byte)4:
-            return new Bridge(w, col, row, manager.tileTextures.get("bridge_horizontal.png"));
+            return new Bridge(w, col, row, GraphicsManager.getTileTextures().get("bridge_horizontal.png"));
             
          case (byte)20:
-            return new Bridge(w, col, row, manager.tileTextures.get("bridge_vertical.png"));
+            return new Bridge(w, col, row, GraphicsManager.getTileTextures().get("bridge_vertical.png"));
             
          case (byte)5:
-            return new City(w, col, row, null, manager.tileTextures.get("cityGrey.png"));
+            return new City(w, col, row, null, GraphicsManager.getTileTextures().get("cityGrey.png"));
             
          case (byte)21:
-            w.getTeamOne().getCities().add(new City(w, col, row, w.getTeamOne(), manager.tileTextures.get("cityRed.png")));
+            w.getTeamOne().getCities().add(new City(w, col, row, w.getTeamOne(), GraphicsManager.getTileTextures().get("cityRed.png")));
             return w.getTeamOne().getCities().get(w.getTeamOne().getCities().size() - 1);
             
          case (byte)37:
-            w.getTeamTwo().getCities().add(new City(w, col, row, w.getTeamTwo(), manager.tileTextures.get("cityBlue.png")));
+            w.getTeamTwo().getCities().add(new City(w, col, row, w.getTeamTwo(), GraphicsManager.getTileTextures().get("cityBlue.png")));
             return w.getTeamTwo().getCities().get(w.getTeamTwo().getCities().size() - 1);
             
          case (byte)6:
-            return new Factory(w, col, row, null, manager.tileTextures.get("factoryGrey.png"));
+            return new Factory(w, col, row, null, GraphicsManager.getTileTextures().get("factoryGrey.png"));
             
          case (byte)22:
-            w.getTeamOne().getFactories().add(new Factory(w, col, row, w.getTeamOne(), manager.tileTextures.get("factoryRed.png")));
+            w.getTeamOne().getFactories().add(new Factory(w, col, row, w.getTeamOne(), GraphicsManager.getTileTextures().get("factoryRed.png")));
             return w.getTeamOne().getFactories().get(w.getTeamOne().getFactories().size() - 1);
             
          case (byte)28:
-            w.getTeamTwo().getFactories().add(new Factory(w, col, row, w.getTeamTwo(), manager.tileTextures.get("factoryBlue.png")));
+            w.getTeamTwo().getFactories().add(new Factory(w, col, row, w.getTeamTwo(), GraphicsManager.getTileTextures().get("factoryBlue.png")));
             return w.getTeamTwo().getFactories().get(w.getTeamTwo().getFactories().size() - 1);
       }
       return null;

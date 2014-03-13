@@ -17,7 +17,9 @@ import javax.swing.JTextField;
 
 public class Launcher {
    
-   static Game newGame;
+   static private Game newGame;
+   static private int winFractionHeight = 7;
+   static private int winFractionWidth = 7;
    
    public static void main(String args[]) {
       Logger.consolePrint("Getting map files.", "launcher");
@@ -66,18 +68,23 @@ public class Launcher {
             else if(size.equals("Custom Grid Size")) {
                JTextField xField = new JTextField(5);
                JTextField yField = new JTextField(5);
-               
-               JPanel myPanel = new JPanel();
-               myPanel.add(new JLabel("x:"));
-               myPanel.add(xField);
-               myPanel.add(Box.createHorizontalStrut(15));
-               myPanel.add(new JLabel("y:"));
-               myPanel.add(yField);
-               
-               int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter X and Y Values", JOptionPane.OK_CANCEL_OPTION);
-               if(result == JOptionPane.OK_OPTION) {
-                  x = Integer.parseInt(xField.getText());
-                  y = Integer.parseInt(yField.getText());
+               int result = JOptionPane.DEFAULT_OPTION;
+               try {
+                  JPanel myPanel = new JPanel();
+                  myPanel.add(new JLabel("x:"));
+                  myPanel.add(xField);
+                  myPanel.add(Box.createHorizontalStrut(15));
+                  myPanel.add(new JLabel("y:"));
+                  myPanel.add(yField);
+                  result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter X and Y Values", JOptionPane.OK_CANCEL_OPTION);
+                  if(result == JOptionPane.OK_OPTION) {
+                     x = Integer.parseInt(xField.getText());
+                     y = Integer.parseInt(yField.getText());
+                  }
+               }
+               catch(Exception e) {
+                  JOptionPane.showMessageDialog(new JFrame(), "Invalid answer. Now closing.", "Error", JOptionPane.ERROR_MESSAGE);
+                  System.exit(0);
                }
             }
             else if(size.contains(":")) {
@@ -141,8 +148,8 @@ public class Launcher {
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
-      screenHeight -= (int)((double)screenHeight / 10);
-      screenWidth -= (int)((double)screenWidth / 10);
+      screenHeight -= (int)((double)screenHeight / winFractionHeight);
+      screenWidth -= (int)((double)screenWidth / winFractionWidth);
       
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
          screenWidth--;
@@ -161,8 +168,8 @@ public class Launcher {
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
       // reduce the dimensions by 10%
-      screenHeight -= (int)((double)screenHeight / 10);
-      screenWidth -= (int)((double)screenWidth / 10);
+      screenHeight -= (int)((double)screenHeight / winFractionHeight);
+      screenWidth -= (int)((double)screenWidth / winFractionWidth);
       
       // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
@@ -182,7 +189,6 @@ public class Launcher {
       int offsetHorizontal = screenWidth - (gameWidth * tileSize);
       int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
       
-      GraphicsManager manager = new GraphicsManager();
       JFrame frame;
       int winner[] = { 0, 0 };
       for(int i = 0; i < 1; i++) {
@@ -191,10 +197,11 @@ public class Launcher {
          Logger.consolePrint("Game " + i, "launcher");
          long start = System.currentTimeMillis();
          Logger.consolePrint("Constructing game.", "launcher");
-         newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight, manager, fileName);
+         newGame = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, guiHeight, fileName);
          newGame.setDoubleBuffered(true);
          newGame.setIgnoreRepaint(true);
          newGame.setSize(screenWidth, screenHeight);
+         newGame.createBackground();
          frame.getContentPane().add(newGame);
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
          frame.setResizable(false);

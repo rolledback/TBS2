@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.units.Unit;
@@ -75,9 +76,9 @@ public class Factory extends CapturableTile {
       owner = unit.getOwner();
       unit.getOwner().getFactories().add(this);
       if(owner.equals(getWorld().getTeamOne()))
-         texture = getWorld().getManager().tileTextures.get("factoryRed.png");
+         texture = GraphicsManager.getTileTextures().get("factoryRed.png");
       else
-         texture = getWorld().getManager().tileTextures.get("factoryBlue.png");
+         texture = GraphicsManager.getTileTextures().get("factoryBlue.png");
       initProductionList();
    }
    

@@ -8,22 +8,11 @@ import javax.imageio.ImageIO;
 
 public class GraphicsManager {
    
-   public Image[] unitImages;
-   public LinkedHashMap<String, Image> tileTextures;
+   private static Image[] unitImages;
+   private static LinkedHashMap<String, Image> tileTextures;
    
-   public GraphicsManager() {
-      tileTextures = new LinkedHashMap<String, Image>();
-      initTileImages();
-      
-      unitImages = new Image[32];
-      initUnitImages();
-   }
-   
-   public String toString() {
-      return tileTextures.size() + " " + unitImages.length;
-   }
-   
-   public void initTileImages() {
+   static {
+      tileTextures = new LinkedHashMap<String, Image>(); 
       Logger.consolePrint("loading tile textures", "manager");
       try {
          tileTextures.put("grass.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png")));
@@ -67,7 +56,8 @@ public class GraphicsManager {
       }
    }
    
-   public void initUnitImages() {
+   static {
+      unitImages = new Image[16];
       try {
          Logger.consolePrint("loading unit images", "manager");
          unitImages[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryRed_left.png"));
@@ -95,5 +85,13 @@ public class GraphicsManager {
          e.printStackTrace();
       }
    }
+   
+   public static Image[] getUnitImages() {
+      return unitImages;
+   }
+   
+   public static LinkedHashMap<String, Image> getTileTextures() {
+      return tileTextures;
+   }   
    
 }

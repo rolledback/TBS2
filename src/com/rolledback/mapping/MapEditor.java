@@ -1,5 +1,6 @@
 package com.rolledback.mapping;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -8,7 +9,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.Box;
@@ -34,14 +34,12 @@ import com.rolledback.terrain.Tile;
 
 public class MapEditor extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
    
-   private static final long serialVersionUID = 1L;
    private static JFrame window;
    private int width;
    private int height;
    private int tileSize;
    private Tile[][] tiles;
    private Image currentTexture;
-   private GraphicsManager manager;
    private Rectangle[][] grid;
    private TextureOptionPane texturePicker;
    private Team dummyTeam;
@@ -49,6 +47,11 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    private boolean gridVisible;
    private int offsetHorizontal;
    private int offsetVertical;
+   private Image[][] background;
+   
+   private static final long serialVersionUID = 1L;
+   private static int winFractionHeight = 7;
+   private static int winFractionWidth = 7;
    
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random", "Custom" };
@@ -57,6 +60,9 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       int y = -1;
       if(tileSize == -1) {
          Object s = JOptionPane.showInputDialog(new JPanel(), "Choose tile size:", "Tile Size", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+         if(s == null)
+            System.exit(0);
+         
          if(s != null) {
             String size = (String)s;
             if(size.equals("Random")) {
@@ -75,9 +81,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                myPanel.add(yField);
                
                int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter X and Y Values", JOptionPane.OK_CANCEL_OPTION);
+               System.out.println(result);
                if(result == JOptionPane.OK_OPTION) {
                   x = Integer.parseInt(xField.getText());
                   y = Integer.parseInt(yField.getText());
+               }
+               else {
+                  System.exit(0);
                }
             }
             else
@@ -101,8 +111,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
       // reduce the dimensions by 10%
-      screenHeight -= (int)((double)screenHeight / 10);
-      screenWidth -= (int)((double)screenWidth / 10);
+      screenHeight -= (int)((double)screenHeight / winFractionHeight);
+      screenWidth -= (int)((double)screenWidth / winFractionWidth);
       
       // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
@@ -126,6 +136,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       MapEditor editor = new MapEditor(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2);
       editor.setDoubleBuffered(true);
       editor.setSize(screenWidth, screenHeight);
+      editor.createBackground();
       window.getContentPane().add(editor);
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       window.setResizable(false);
@@ -144,24 +155,23 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       tileSize = t;
       offsetHorizontal = oH;
       offsetVertical = oV;
-      manager = new GraphicsManager();
-      manager.initTileImages();
-      currentTexture = manager.tileTextures.get("grass.png");
+      currentTexture = GraphicsManager.getTileTextures().get("grass.png");
+      
       setVisible(true);
       
       setDoubleBuffered(true);
       
       String[] availTextures = new String[0];
-      availTextures = manager.tileTextures.keySet().toArray(availTextures);
+      availTextures = GraphicsManager.getTileTextures().keySet().toArray(availTextures);
       
-      texturePicker = new TextureOptionPane(manager, availTextures);
+      texturePicker = new TextureOptionPane(availTextures);
       texturePicker.setVisible(true);
       
       grid = new Rectangle[height][width];
       tiles = new Tile[height][width];
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
-            tiles[row][col] = new Plain(null, col, row, currentTexture);
+            tiles[row][col] = new Plain(null, col, row);
             grid[row][col] = new Rectangle(col * tileSize + offsetHorizontal, row * tileSize + offsetVertical, tileSize, tileSize);
          }
       }
@@ -171,14 +181,45 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    }
    
    public void paintComponent(Graphics g) {
+      drawBackground(g);
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
             Tile currTile = tiles[row][col];
             g.drawImage(currTile.getTexture(), tileSize * col + offsetHorizontal, tileSize * row + offsetVertical, tileSize, tileSize, this);
-            if(gridVisible)
+            if(gridVisible) {
+               g.setColor(Color.black);
                g.drawRect(tileSize * col + offsetHorizontal, tileSize * row + offsetVertical, tileSize, tileSize);
+            }
          }
       }
+   }
+   
+   public void drawBackground(Graphics g) {
+      int horizOffset = (tiles[0].length % 2 == 0) ? 0 : tileSize / 2;
+      int vertiOffset = (tiles.length % 2 == 0) ? 0 : tileSize / 2;
+      for(int r = 0; r < background.length; r++)
+         for(int c = 0; c < background[0].length; c++) {
+            g.setColor(new Color(185, 185, 250, 175));
+            // g.setColor(new Color(120, 100, 165, 175));
+            g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
+            g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
+         }
+   }
+   
+   public void createBackground() {
+      int w = (this.getWidth() + tileSize) / tileSize;
+      int h = (this.getHeight() + tileSize) / tileSize;
+      background = new Image[h][w];
+      for(int r = 0; r < h; r++)
+         for(int c = 0; c < w; c++) {
+            double i = Math.random();
+            if(i < .6)
+               background[r][c] = GraphicsManager.getTileTextures().get("grass.png");
+            else if(i < .9)
+               background[r][c] = GraphicsManager.getTileTextures().get("forest.png");
+            else
+               background[r][c] = GraphicsManager.getTileTextures().get("mountain.png");
+         }
    }
    
    @Override
@@ -201,7 +242,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++) {
                if(grid[row][col].contains(eventX, eventY)) {
-                  currentTexture = manager.tileTextures.get(texturePicker.getCurrTexture());
+                  currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
                   if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
                      tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
@@ -209,13 +250,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
                      tiles[row][col] = new River(null, col, row, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
-                     tiles[row][col] = new Mountain(null, col, row, currentTexture);
+                     tiles[row][col] = new Mountain(null, col, row);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
-                     tiles[row][col] = new Plain(null, col, row, currentTexture);
+                     tiles[row][col] = new Plain(null, col, row);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
                      tiles[row][col] = new Bridge(null, col, row, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
-                     tiles[row][col] = new Forest(null, col, row, currentTexture);
+                     tiles[row][col] = new Forest(null, col, row);
                   repaint();
                }
             }
@@ -242,17 +283,19 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          else
             menu.setVisible(false);
          if(menu.isOpenFile()) {
-            Object[] results = Cartographer.readMapFile(menu.getFileName(), tiles, new World(), manager);
+            Object[] results = Cartographer.readMapFile(menu.getFileName(), tiles, new World());
             boolean success = (boolean)results[0];
             if(success) {
-               int[] dimensions = Launcher.getDimensions(menu.getFileName());
                tiles = (Tile[][])results[1];
-               System.out.println(Arrays.toString(dimensions));
-               width = dimensions[0];
-               height = dimensions[1];
-               tileSize = Launcher.getTileSize(menu.getFileName());
-               offsetHorizontal = this.getWidth() - (width * tileSize);
-               offsetVertical = this.getHeight() - 0 - (height * tileSize);
+               width = (int)results[3];
+               height = (int)results[2];
+               
+               tileSize = 128;
+               while((width * tileSize > this.getWidth() || height * tileSize > this.getHeight()) && tileSize >= 1)
+                  tileSize /= 2;
+               
+               offsetHorizontal = (this.getWidth() - (width * tileSize)) / 2;
+               offsetVertical = (this.getHeight() - (height * tileSize)) / 2;
                
                grid = new Rectangle[height][width];
                for(int row = 0; row < height; row++)
@@ -265,7 +308,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                JOptionPane.showMessageDialog(new JFrame(), "Error opening map file.", "Error", JOptionPane.ERROR_MESSAGE);
          }
          else if(menu.isSaveFile()) {
-            boolean success = Cartographer.createMapFile(menu.getFileName(), tiles, tileSize, manager);
+            boolean success = Cartographer.createMapFile(menu.getFileName(), tiles, tileSize);
             if(success)
                repaint();
             else
@@ -273,12 +316,12 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          }
       }
       if(e.getKeyChar() == 'r') {
-         World temp = new World(manager, width, height, true);
+         World temp = new World(width, height, true);
          tiles = temp.getTiles();
          repaint();
       }
       if(e.getKeyChar() == 't') {
-         World temp = new World(manager, width, height, false);
+         World temp = new World(width, height, false);
          tiles = temp.getTiles();
          repaint();
       }
@@ -287,7 +330,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          repaint();
       }
       if(e.getKeyChar() == 'f') {
-         currentTexture = manager.tileTextures.get(texturePicker.getCurrTexture());
+         currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++)
                if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
@@ -297,13 +340,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
                   tiles[row][col] = new River(null, col, row, currentTexture);
                else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
-                  tiles[row][col] = new Mountain(null, col, row, currentTexture);
+                  tiles[row][col] = new Mountain(null, col, row);
                else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
-                  tiles[row][col] = new Plain(null, col, row, currentTexture);
+                  tiles[row][col] = new Plain(null, col, row);
                else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
                   tiles[row][col] = new Bridge(null, col, row, currentTexture);
                else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
-                  tiles[row][col] = new Forest(null, col, row, currentTexture);
+                  tiles[row][col] = new Forest(null, col, row);
          repaint();
       }
       
@@ -325,7 +368,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          for(int row = 0; row < height; row++)
             for(int col = 0; col < width; col++) {
                if(grid[row][col].contains(eventX, eventY)) {
-                  currentTexture = manager.tileTextures.get(texturePicker.getCurrTexture());
+                  currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
                   if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
                      tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
@@ -333,13 +376,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
                      tiles[row][col] = new River(null, col, row, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
-                     tiles[row][col] = new Mountain(null, col, row, currentTexture);
+                     tiles[row][col] = new Mountain(null, col, row);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
-                     tiles[row][col] = new Plain(null, col, row, currentTexture);
+                     tiles[row][col] = new Plain(null, col, row);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
                      tiles[row][col] = new Bridge(null, col, row, currentTexture);
                   else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
-                     tiles[row][col] = new Forest(null, col, row, currentTexture);
+                     tiles[row][col] = new Forest(null, col, row);
                   repaint();
                }
             }
