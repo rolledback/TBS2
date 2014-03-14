@@ -12,7 +12,7 @@ public class Infantry extends Unit {
       maxAttack = 15;
       infAttackBonus = 5;
       vehAttackBonus = -5;
-      defense = 4;
+      defense = 10;
       moveRange = 2;
       type = UNIT_TYPE.INFANTRY;
    }

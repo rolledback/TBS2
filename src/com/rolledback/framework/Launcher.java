@@ -56,7 +56,7 @@ public class Launcher {
       int[] dimensions = new int[0];
       String fileToLoad = "";
       if(tileSize == -1) {
-         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose map:", "Tile Size", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose map:", "Launcher", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
          if(s != null) {
             String size = (String)s;
             Logger.consolePrint(size, "launcher");
@@ -126,22 +126,6 @@ public class Launcher {
       ret[0] = width;
       ret[1] = height;
       return ret;
-   }
-   
-   public static int getTileSize(String name) {
-      BufferedInputStream mapReader;
-      byte[] map = new byte[5];
-      try {
-         mapReader = new BufferedInputStream(new FileInputStream(name));
-         mapReader.read(map);
-         mapReader.close();
-      }
-      catch(IOException e) {
-         return -1;
-      }
-      if(map[0] != 0x6d)
-         return -1;
-      return Math.abs(map[1]);
    }
    
    public static int[] autoCalcDimensions(int size) {
@@ -216,7 +200,7 @@ public class Launcher {
             winner[0]++;
          else
             winner[1]++;
-         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start), "launcher");
+         Logger.consolePrint(Arrays.toString(winner) + " " + (end - start) + " " + newGame.numTurns, "launcher");
          // try {
          // PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
          // for(Coordinate c: newGame.history)

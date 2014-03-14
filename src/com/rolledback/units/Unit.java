@@ -81,8 +81,8 @@ public class Unit {
       this.x = x;
       this.y = y;
       setDir(DIRECTION.RIGHT);
-      health = 100;
-      maxHealth = 100;
+      health = 50;
+      maxHealth = 50;
       alive = true;
       moved = false;
       currentTile = t;
@@ -100,7 +100,7 @@ public class Unit {
          if(t.getUnitClass() == this.classification || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getMoveValue();
          if(t.getTileType() == currentTile.getType())
-         	techBonus += t.getMoveValue();
+            techBonus += t.getMoveValue();
       }
       int adHocRange = moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
       if(adHocRange <= 0)
@@ -185,43 +185,47 @@ public class Unit {
       Random random = new Random();
       int techBonus = 0;
       for(Technology t: owner.getResearchedTechs()) {
-         if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
+         if(t.getUnitClass() == this.classification || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getAttackValue();
          if(t.getTileType() == currentTile.getType())
-         	techBonus += t.getAttackValue();
+            techBonus += t.getAttackValue();
       }
-      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus() + techBonus;
-      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus() + techBonus;
+      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus() + classBonus(target) + techBonus;
+      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus() + classBonus(target) + techBonus;
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
-      if(target.getClass().equals(UNIT_CLASS.INFANTRY))
-         attackNum += infAttackBonus;
-      else
-         attackNum += vehAttackBonus;
       if(isRetaliation)
          attackNum /= 2;
+      attackNum -= (int)((double)attackNum * ((double)(maxHealth - health)) / maxHealth);
       target.takeDamage(attackNum);
+   }
+   
+   public int classBonus(Unit target) {
+      if(target.getClassification().equals(UNIT_CLASS.INFANTRY))
+         return infAttackBonus;
+      else
+         return vehAttackBonus;
    }
    
    public void takeDamage(int amount) {
       Random random = new Random();
       int techBonus = 0;
       for(Technology t: owner.getResearchedTechs()) {
-         if(t.getUnitClass() == this.classification  || t.getUnitClass() == UNIT_CLASS.ALL)
+         if(t.getUnitClass() == this.classification || t.getUnitClass() == UNIT_CLASS.ALL)
             techBonus += t.getDefenseValue();
          if(t.getTileType() == currentTile.getType())
-         	techBonus+= t.getDefenseValue();
+            techBonus += t.getDefenseValue();
       }
       int adHocDefense = defense + currentTile.getEffect().getDefenseBonus() + techBonus;
       if(adHocDefense <= 0)
          adHocDefense = 1;
-      int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense);
-      health -= (int)(amount - Math.ceil(amount * (percMinus / 100)));
+      int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense / 2);
+      health -= amount - (int)((double)amount * ((double)percMinus / 100.0));
       alive = health > 0;
    }
    
    public String toString() {
-      return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName()
-            + " Moved: " + moved + " Attacked: " + attacked + " Defense: " + defense;
+      return "Class: " + classification + " Type: " + type + " Health: " + health + " x: " + x + " y: " + y + " Team: " + owner.getName() + " Moved: " + moved + " Attacked: " + attacked
+            + " Defense: " + defense;
    }
    
    public int getMoveRange() {

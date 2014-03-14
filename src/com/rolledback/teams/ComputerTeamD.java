@@ -23,7 +23,7 @@ public class ComputerTeamD extends ComputerTeam {
       CAPTURE, ENEMY;
    }
    
-   final int animationDelay = 500;
+   final int animationDelay = 0;
    
    public ComputerTeamD(String name, int size, int r, Game g) {
       super(name, size, r, g);

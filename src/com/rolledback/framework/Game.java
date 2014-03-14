@@ -57,6 +57,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    int drawDetectorOne = 0;
    int drawDetectorTwo = 0;
    
+   public int numTurns = 0;
+   
    public ReentrantLock logicLock;
    
    public Game(int x, int y, int ts, int oH, int oV, int gH, String fileToLoad) {
@@ -65,7 +67,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 50, 125);
+      teamOne = new ComputerTeamD("team one", 50, 125, this);
       teamTwo = new ComputerTeamD("team two", 50, 125, this);
       currentTeam = teamOne;
       
@@ -260,6 +262,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          currentTeam = teamOne;
       
       state = GAME_STATE.UPDATE;
+      numTurns++;
    }
    
    public void drawTiles(Graphics g) {
@@ -368,7 +371,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.setColor(Color.red);
                g.fillRect(xCorner, yCorner, tileSize - (2 * buffer), buffer);
                g.setColor(Color.green);
-               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy().getHealth() / 100.0)), buffer);
+               g.fillRect(xCorner, yCorner, (int)((double)(tileSize - (2 * buffer)) * (double)((double)world.getTiles()[y][x].getOccupiedBy().getHealth() / (double)world.getTiles()[y][x]
+                     .getOccupiedBy().getMaxHealth())), buffer);
             }
          }
       }

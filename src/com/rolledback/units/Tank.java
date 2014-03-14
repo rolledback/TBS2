@@ -12,7 +12,7 @@ public class Tank extends Unit {
       maxAttack = 20;
       infAttackBonus = -5;
       vehAttackBonus = 5;
-      defense = 12;
+      defense = 16;
       moveRange = 4;
       type = UNIT_TYPE.TANK;
    }

@@ -12,7 +12,7 @@ public class TankDestroyer extends Unit {
       maxAttack = 25;
       infAttackBonus = -15;
       vehAttackBonus = 10;
-      defense = 6;
+      defense = 8;
       moveRange = 3;
       type = UNIT_TYPE.TANK_DEST;
    }
