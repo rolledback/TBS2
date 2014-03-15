@@ -43,7 +43,7 @@ public class ComputerTeamC extends ComputerTeam {
             continue;
          
          Coordinate moveHere = null;
-         currUnit.calcMoveSpots();
+         currUnit.calcMoveSpots(false);
          
          // if you can't move, go to the next unit
          if(currUnit.getMoveSet().size() <= 0)

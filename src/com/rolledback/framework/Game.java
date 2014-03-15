@@ -67,8 +67,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new ComputerTeamD("team one", 50, 125, this);
-      teamTwo = new ComputerTeamD("team two", 50, 125, this);
+      teamOne = new Team("team one", 50, 100);
+      teamTwo = new ComputerTeamD("team two", 50, 100, this);
       currentTeam = teamOne;
       
       teamOne.setOpponent(teamTwo);
@@ -139,8 +139,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    }
    
    public void drawBackground(Graphics g) {
-      int horizOffset = (world.getTiles()[0].length % 2 == 0) ? 0 : tileSize / 2;
-      int vertiOffset = (world.getTiles().length % 2 == 0) ? 0 : tileSize / 2;
+      int horizOffset = (offsetHorizontal % tileSize == 0) ? 0 : tileSize / 2;
+      int vertiOffset = (offsetVertical % tileSize == 0) ? 0 : tileSize / 2;
       for(int r = 0; r < background.length; r++)
          for(int c = 0; c < background[0].length; c++) {
             g.setColor(new Color(185, 185, 250, 175));
@@ -289,9 +289,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                tileColor = Color.red;
             g.setColor(tileColor);
             g.fillRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical, tileSize, tileSize);
-            // g.setColor(Color.black);
-            // g.drawRect((x * tileSize) + offsetHorizontal, (y * tileSize) + offsetVertical,
-            // tileSize, tileSize);
          }
       }
    }
@@ -324,8 +321,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.drawImage(GraphicsManager.getUnitImages()[1], xCorner, yCorner, tileSize, tileSize, this);
             else
                g.drawImage(GraphicsManager.getUnitImages()[5], xCorner, yCorner, tileSize, tileSize, this);
-         if(temp.hasAttacked() || temp.hasMoved() && teamOne.equals(currentTeam)) {
+         if(temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
+            g.fillRect(xCorner, yCorner, tileSize, tileSize);
+         }
+         if(temp.hasAttacked() && teamOne.equals(currentTeam)) {
+            g.setColor(new Color(212, 212, 212, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
       }
@@ -354,8 +355,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
                g.drawImage(GraphicsManager.getUnitImages()[9], xCorner, yCorner, tileSize, tileSize, this);
             else
                g.drawImage(GraphicsManager.getUnitImages()[13], xCorner, yCorner, tileSize, tileSize, this);
-         if(temp.hasAttacked() || temp.hasMoved() && teamTwo.equals(currentTeam)) {
+         if(temp.hasMoved() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
+            g.fillRect(xCorner, yCorner, tileSize, tileSize);
+         }
+         if(temp.hasAttacked() && teamTwo.equals(currentTeam)) {
+            g.setColor(new Color(212, 212, 212, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
       }
@@ -389,7 +394,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       history.add(new Coordinate(x, y));
       
       if(unitSelected) {
-         if(!selectedUnit.hasMoved() && !selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
+         if(!selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
             Logger.consolePrint("selected unit attacking: " + targetUnit, "game");
             attackMove(x, y);
@@ -431,8 +436,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          selectedUnit = selectedTile.getOccupiedBy();
          unitSelected = true;
          if(selectedUnit.getOwner().equals(currentTeam)) {
-            selectedUnit.calcMoveSpots();
-            if(!selectedUnit.hasMoved())
+            selectedUnit.calcMoveSpots(selectedUnit.hasMoved() && !selectedUnit.hasAttacked());
+            if(!selectedUnit.hasMoved() || (selectedUnit.hasMoved() && !selectedUnit.hasAttacked()))
                state = GAME_STATE.DISPLAY_MOVE;
          }
       }

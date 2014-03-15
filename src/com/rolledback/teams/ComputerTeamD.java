@@ -65,7 +65,7 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public Coordinate moveUnit(Unit u) {
-      u.calcMoveSpots();
+      u.calcMoveSpots(false);
       if(u.getCaptureSet().size() != 0)
          return captureMove(u);
       else if(u.getAttackSet().size() != 0)
@@ -96,7 +96,7 @@ public class ComputerTeamD extends ComputerTeam {
             }
          }
       }
-      if(u.getType() == UNIT_TYPE.INFANTRY) {
+      if(u.getClassification() == UNIT_CLASS.INFANTRY) {
          Object[] closestCaptureTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.CAPTURE, opponent);
          int closestCaptureDisance = (int)closestCaptureTuple[0];
          Tile closestCaptureTile = (Tile)closestCaptureTuple[2];
@@ -156,7 +156,7 @@ public class ComputerTeamD extends ComputerTeam {
    
    public void sortUnits() {
       for(Unit u: units) {
-         u.calcMoveSpots();
+         u.calcMoveSpots(false);
       }
       
       int avgX = 0;

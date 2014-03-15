@@ -8,10 +8,10 @@ public class RPGTeam extends Unit {
    public RPGTeam(int x, int y, Tile t, Team o) {
       super(x, y, t, o);
       classification = UNIT_CLASS.INFANTRY;
-      minAttack = 10;
-      maxAttack = 15;
-      infAttackBonus = -5;
-      vehAttackBonus = 5;
+      minAttack = 40;
+      maxAttack = 50;
+      infAttackBonus = -20;
+      vehAttackBonus = 0;
       defense = 10;
       moveRange = 2;
       type = UNIT_TYPE.RPG;

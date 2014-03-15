@@ -81,8 +81,8 @@ public class Unit {
       this.x = x;
       this.y = y;
       setDir(DIRECTION.RIGHT);
-      health = 50;
-      maxHealth = 50;
+      health = 100;
+      maxHealth = 100;
       alive = true;
       moved = false;
       currentTile = t;
@@ -93,7 +93,7 @@ public class Unit {
       captureSet = new HashSet<Coordinate>();
    }
    
-   public void calcMoveSpots() {
+   public void calcMoveSpots(boolean atkOnly) {
       World world = this.currentTile.getWorld();
       int techBonus = 0;
       for(Technology t: owner.getResearchedTechs()) {
@@ -102,8 +102,8 @@ public class Unit {
          if(t.getTileType() == currentTile.getType())
             techBonus += t.getMoveValue();
       }
-      int adHocRange = moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
-      if(adHocRange <= 0)
+      int adHocRange = (atkOnly) ? 0 : moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
+      if(adHocRange <= 0 && !atkOnly)
          adHocRange = 1;
       currentTile.setOccupied(false);
       attackSet.clear();
@@ -162,7 +162,7 @@ public class Unit {
    public boolean canCapture(Tile tile) {
       if(!(tile instanceof CapturableTile))
          return false;
-      if(type != UNIT_TYPE.INFANTRY)
+      if(classification != UNIT_CLASS.INFANTRY)
          return false;
       return ((CapturableTile)tile).getOwner() == null || !owner.equals(((CapturableTile)tile).getOwner());
    }
@@ -195,7 +195,7 @@ public class Unit {
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
       if(isRetaliation)
          attackNum /= 2;
-      attackNum -= (int)((double)attackNum * ((double)(maxHealth - health)) / maxHealth);
+      attackNum *= (double)health / (double)maxHealth;
       target.takeDamage(attackNum);
    }
    
@@ -357,6 +357,8 @@ public class Unit {
    }
    
    public void setHealth(int health) {
+      if(health > maxHealth)
+         health = maxHealth;
       this.health = health;
    }
    

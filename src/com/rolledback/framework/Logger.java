@@ -16,7 +16,7 @@ public class Logger {
    // Cartographer.java = cartographer
    
    private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("map", "launcher", "cartographer");   
+   private static List<String> validTags = asList("map", "launcher", "cartographer");
    private static int tagLength = 3;
    
    public static String timeStamp() {

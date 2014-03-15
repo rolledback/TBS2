@@ -14,7 +14,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class Factory extends CapturableTile {
    
    private LinkedHashMap<UNIT_TYPE, Integer> productionList;
-   private int resourceValue = 50;
+   private int resourceValue = 10;
    
    public Factory(World w, int x, int y, Team team, Image t) {
       super(w, x, y, new TerrainEffect(0, 10, 0), 'F', team);

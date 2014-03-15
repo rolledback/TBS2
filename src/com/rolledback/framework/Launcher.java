@@ -175,7 +175,7 @@ public class Launcher {
       
       JFrame frame;
       int winner[] = { 0, 0 };
-      for(int i = 0; i < 1; i++) {
+      for(int i = 0; i < 10000; i++) {
          Logger.consolePrint("Constructing frame.", "launcher");
          frame = new JFrame("TBS2");
          Logger.consolePrint("Game " + i, "launcher");

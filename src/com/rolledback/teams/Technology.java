@@ -26,7 +26,7 @@ public class Technology {
    private Team effectedTeam;
    
    public enum TECH_NAME {
-      APCR, GPS, ART, CON, FORT, MILI;
+      APCR, GPS, ART, CON, FORT, MILI, FIELD;
       
       public String toString() {
          if(this == ART)
@@ -41,6 +41,8 @@ public class Technology {
             return "GPS Navigation";
          if(this == FORT)
             return "Fortifications";
+         if(this == FIELD)
+            return "Field Repairs";
          else
             return null;
       }
@@ -58,6 +60,8 @@ public class Technology {
             return GPS;
          if(s.equals("Fortifications"))
             return FORT;
+         if(s.equals("Field Repairs"))
+            return FIELD;
          else
             return null;
       }
@@ -72,8 +76,8 @@ public class Technology {
                      ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY);
             }
          }));
-         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(TECH_NAME.MILI));
-         researcher.getTechTree().remove(TECH_NAME.MILI);         
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);         
       }
       else if(name == TECH_NAME.ART) {
          researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
@@ -82,24 +86,40 @@ public class Technology {
                   u.takeDamage((int)(u.getHealth() * .25));
             }
          }));
-         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(TECH_NAME.ART));
-         researcher.getTechTree().remove(TECH_NAME.ART);
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);
 
       }
       else if(name == TECH_NAME.CON) {
          researcher.getResearchedTechs().add(new Technology(researcher, UNIT_TYPE.INFANTRY, .50));
-         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(TECH_NAME.CON));
-         researcher.getTechTree().remove(TECH_NAME.CON);
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.APCR) {
          researcher.getResearchedTechs().add(new Technology(researcher, UNIT_CLASS.VEHICLE, 5, 0, 0));
-         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(TECH_NAME.APCR));
-         researcher.getTechTree().remove(TECH_NAME.APCR);
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.GPS) {
          researcher.getResearchedTechs().add(new Technology(researcher, UNIT_CLASS.ALL, 0, 0, 1));
-         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(TECH_NAME.GPS));
-         researcher.getTechTree().remove(TECH_NAME.GPS);
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);
+      }
+      else if(name == TECH_NAME.FORT) {
+         researcher.getResearchedTechs().add(new Technology(researcher, TILE_TYPE.CITY, 5, 10, -1));
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name);
+      }
+      else if(name == TECH_NAME.FIELD) {
+         researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
+            public void run() {
+               for(Unit u: ((Team)effectObjectOne).getUnits())
+                  if(u.getClassification() == UNIT_CLASS.VEHICLE)
+                     u.setHealth(u.getHealth() + u.getMaxAttack() / 4);
+            }
+         }));
+         researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
+         researcher.getTechTree().remove(name); 
       }
       
    }

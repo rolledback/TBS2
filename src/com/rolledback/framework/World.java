@@ -444,11 +444,15 @@ public class World {
          Random rand = new Random();
          int col = rand.nextInt(max - min) + min;
          int row = rand.nextInt(height - 1) + 1;
-         while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
-            col = rand.nextInt(max - min) + min;
-            row = rand.nextInt(height - 1) + 1;
+         int nc = 0;
+         while(nc < 2) {
+            while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
+               col = rand.nextInt(max - min) + min;
+               row = rand.nextInt(height - 1) + 1;
+            }
+            tiles[row][col] = new City(this, col, row, null, GraphicsManager.getTileTextures().get("cityGrey.png"));
+            nc++;
          }
-         tiles[row][col] = new City(this, col, row, null, GraphicsManager.getTileTextures().get("cityGrey.png"));
       }
       
    }
