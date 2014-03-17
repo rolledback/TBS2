@@ -68,7 +68,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       teamOne = new Team("team one", 50, 100, 1);
-      teamTwo = new Team("team two", 50, 100, 2);
+      teamTwo = new ComputerTeamD("team two", 50, 100, this, 2);
       currentTeam = teamOne;
       
       teamOne.setOpponent(teamTwo);
@@ -93,8 +93,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedY = 0;
       
       infoBox = new GameGUI("TBS2 GUI");
-      infoBox.pack();
-      infoBox.setResizable(false);
       infoBox.updateInfo(null, world.getTiles()[0][0], teamOne, teamTwo);
    }
    

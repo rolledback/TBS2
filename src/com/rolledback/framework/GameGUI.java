@@ -70,6 +70,7 @@ public class GameGUI extends JFrame {
    
    public static void main(String args[]) {
       GameGUI test = new GameGUI("Test");
+      System.out.println(test.toString());
    }
    
    public GameGUI(String n) {
@@ -85,14 +86,18 @@ public class GameGUI extends JFrame {
       guiPanel.add(northInfoPanel, BorderLayout.PAGE_START);
       guiPanel.add(southInfoPanel, BorderLayout.PAGE_END);
       guiPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-      canvasPanel.setPreferredSize(new Dimension(164, 164));
-      unitPanel.setPreferredSize(new Dimension(146, 164));
-      terrainPanel.setPreferredSize(new Dimension(106, 164));    
-      teamOnePanel.setPreferredSize(new Dimension(204, 93));
-      teamTwoPanel.setPreferredSize(new Dimension(204, 93));
+
       this.add(guiPanel);
       this.pack();
       this.setVisible(true);
+      
+      canvasPanel.setPreferredSize(new Dimension(canvasPanel.getWidth(), canvasPanel.getHeight()));
+      unitPanel.setPreferredSize(new Dimension(unitPanel.getWidth(), unitPanel.getHeight()));
+      terrainPanel.setPreferredSize(new Dimension(terrainPanel.getWidth(), terrainPanel.getHeight()));    
+      teamOnePanel.setPreferredSize(new Dimension(teamOnePanel.getWidth(), teamOnePanel.getHeight()));
+      teamTwoPanel.setPreferredSize(new Dimension(teamTwoPanel.getWidth(), teamTwoPanel.getHeight()));      
+      this.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()));
+      this.setResizable(false);
    }
    
    public void setupNorth() {
@@ -126,22 +131,22 @@ public class GameGUI extends JFrame {
       unitPanel.setLayout(unitLayout);
       
       unitName = new JLabel();
-      unitName.setText("Type: ");
+      unitName.setText("Type: TANK DESTROYER");
       
       unitHealth = new JLabel();
-      unitHealth.setText("Health: ");
+      unitHealth.setText("Health: 100");
       
       unitInfAttack = new JLabel();
-      unitInfAttack.setText("Inf Atk: ");
+      unitInfAttack.setText("Inf Atk: 100-100");
       
       unitVehAttack = new JLabel();
-      unitVehAttack.setText("Veh Atk: ");
+      unitVehAttack.setText("Veh Atk: 100-100");
       
       unitDefense = new JLabel();
-      unitDefense.setText("Def: ");
+      unitDefense.setText("Def: 100");
       
       unitMove = new JLabel();
-      unitMove.setText("Move Range: ");
+      unitMove.setText("Move Range: 100");
       
       unitPanel.add(unitName);
       unitPanel.add(unitHealth);
@@ -159,16 +164,16 @@ public class GameGUI extends JFrame {
       terrainPanel.setLayout(terrainLayout);
       
       terrainName = new JLabel();
-      terrainName.setText("Type: ");
+      terrainName.setText("Type: MOUNTAIN TEMP");
       
       attackBonus = new JLabel();
-      attackBonus.setText("Atk Bonus: ");
+      attackBonus.setText("Atk Bonus: 100");
       
       defenseBonus = new JLabel();
-      defenseBonus.setText("Def Bonus: ");
+      defenseBonus.setText("Def Bonus: 100");
       
       moveBonus = new JLabel();
-      moveBonus.setText("Move Bonus: ");
+      moveBonus.setText("Move Bonus: 100");
       
       terrainPanel.add(terrainName);
       terrainPanel.add(attackBonus);
@@ -200,16 +205,16 @@ public class GameGUI extends JFrame {
       teamOnePanel.setLayout(teamOneLayout);
       
       nameOne = new JLabel();
-      nameOne.setText("Name: ");
+      nameOne.setText("Name: TEAM ONE CPU VER D");
       
       resOne = new JLabel();
-      resOne.setText("Res: ");
+      resOne.setText("Res: 1000000");
       
       numCitiesOne = new JLabel();
-      numCitiesOne.setText("Num Cities: ");
+      numCitiesOne.setText("Num Cities: 100");
       
       numFactOne = new JLabel();
-      numFactOne.setText("Num Factories: ");
+      numFactOne.setText("Num Factories: 100");
       
       teamOnePanel.add(nameOne);
       teamOnePanel.add(resOne);
@@ -225,16 +230,16 @@ public class GameGUI extends JFrame {
       teamTwoPanel.setLayout(teamTwoLayout);
       
       nameTwo = new JLabel();
-      nameTwo.setText("Name: ");
+      nameTwo.setText("Name: TEAM TWO CPU VER D");
       
       resTwo = new JLabel();
-      resTwo.setText("Res: ");
+      resTwo.setText("Res: 1000000");
       
       numCitiesTwo = new JLabel();
-      numCitiesTwo.setText("Num Cities: ");
+      numCitiesTwo.setText("Num Cities: 100");
       
       numFactTwo = new JLabel();
-      numFactTwo.setText("Num Factories: ");
+      numFactTwo.setText("Num Factories: 100");
       
       teamTwoPanel.add(nameTwo);
       teamTwoPanel.add(resTwo);
@@ -321,13 +326,13 @@ class UnitPanel extends JPanel {
    private Image terrainImage = GraphicsManager.getTileTextures().get("grass.png");
    
    public void paintComponent(Graphics g) {
-      g.drawImage(terrainImage, 20, 20, 128, 128, this);
+      g.drawImage(terrainImage, (int)((this.getWidth() - 128) / 2.0), (int)((this.getHeight() - 128) / 2.0), 128, 128, this);
       if(unitImage != null) {
-         g.drawImage(unitImage, 20, 20, 128, 128, this);
+         g.drawImage(unitImage, (int)((this.getWidth() - 128) / 2.0), (int)((this.getHeight() - 128) / 2.0), 128, 128, this);
          
          int buffer = (int)((double)128 * .10);
-         int xCorner = 20 + buffer;
-         int yCorner = 20 + buffer;
+         int xCorner = (int)(((this.getWidth() - 128) / 2.0) + buffer);
+         int yCorner = (int)(((this.getHeight() - 128) / 2.0) + buffer);
          
          g.setColor(Color.red);
          g.fillRect(xCorner, yCorner, 128 - (2 * buffer), buffer);
