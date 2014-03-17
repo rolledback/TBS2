@@ -1,5 +1,6 @@
 package com.rolledback.units;
 
+import java.awt.Image;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -50,10 +51,10 @@ public class Unit {
    private HashSet<Coordinate> moveSet;
    private HashSet<Coordinate> attackSet;
    private HashSet<Coordinate> captureSet;
-   protected int minAttack;
-   protected int maxAttack;
-   protected int infAttackBonus;
-   protected int vehAttackBonus;
+   protected int minInfantryAttack;
+   protected int maxInfantryAttack;
+   protected int minVehicleAttack;
+   protected int maxVehicleAttack;
    protected int defense;
    protected int attackRange;
    protected int moveRange;
@@ -67,14 +68,17 @@ public class Unit {
    protected UNIT_CLASS classification;
    protected UNIT_TYPE type;
    
+   protected Image leftTexture;
+   protected Image rightTexture;
+   
    private DIRECTION dir;
    private Team owner;
    
    public Unit(int x, int y, Tile t, Team o) {
-      minAttack = 0;
-      maxAttack = 0;
-      infAttackBonus = 0;
-      vehAttackBonus = 0;
+      minInfantryAttack = 0;
+      maxInfantryAttack = 0;
+      minVehicleAttack = 0;
+      maxVehicleAttack = 0;
       defense = 0;
       attackRange = 0;
       moveRange = 0;
@@ -190,8 +194,9 @@ public class Unit {
          if(t.getTileType() == currentTile.getType())
             techBonus += t.getAttackValue();
       }
-      int adHocMaxAttack = maxAttack + currentTile.getEffect().getAttackBonus() + classBonus(target) + techBonus;
-      int adHocMinAttack = minAttack + currentTile.getEffect().getAttackBonus() + classBonus(target) + techBonus;
+      int[] minAndMax = attackValues(target);
+      int adHocMinAttack = minAndMax[0] + currentTile.getEffect().getAttackBonus() + techBonus;
+      int adHocMaxAttack = minAndMax[1] + currentTile.getEffect().getAttackBonus() + techBonus;
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
       if(isRetaliation)
          attackNum /= 2;
@@ -199,11 +204,17 @@ public class Unit {
       target.takeDamage(attackNum);
    }
    
-   public int classBonus(Unit target) {
-      if(target.getClassification().equals(UNIT_CLASS.INFANTRY))
-         return infAttackBonus;
-      else
-         return vehAttackBonus;
+   public int[] attackValues(Unit target) {
+      int[] ret = new int[2];
+      if(target.getClassification().equals(UNIT_CLASS.INFANTRY)) {
+         ret[0] = minInfantryAttack;
+         ret[1] = maxInfantryAttack;
+      }
+      else {
+         ret[0] = minVehicleAttack;
+         ret[1] = maxVehicleAttack;
+      }
+      return ret;
    }
    
    public void takeDamage(int amount) {
@@ -304,22 +315,6 @@ public class Unit {
       this.alive = alive;
    }
    
-   public int getMaxAttack() {
-      return maxAttack;
-   }
-   
-   public void setMaxAttack(int maxAttack) {
-      this.maxAttack = maxAttack;
-   }
-   
-   public int getMinAttack() {
-      return minAttack;
-   }
-   
-   public void setMinAttack(int minAttack) {
-      this.minAttack = minAttack;
-   }
-   
    public int getDefense() {
       return defense;
    }
@@ -376,5 +371,53 @@ public class Unit {
    
    public void setMaxHealth(int maxHealth) {
       this.maxHealth = maxHealth;
+   }
+
+   public Image getLeftTexture() {
+      return leftTexture;
+   }
+
+   public void setLeftTexture(Image leftTexture) {
+      this.leftTexture = leftTexture;
+   }
+
+   public Image getRightTexture() {
+      return rightTexture;
+   }
+
+   public void setRightTexture(Image rightTexture) {
+      this.rightTexture = rightTexture;
+   }
+
+   public int getMinInfantryAttack() {
+      return minInfantryAttack;
+   }
+
+   public void setMinInfantryAttack(int minInfantryAttack) {
+      this.minInfantryAttack = minInfantryAttack;
+   }
+
+   public int getMaxInfantryAttack() {
+      return maxInfantryAttack;
+   }
+
+   public void setMaxInfantryAttack(int maxInfantryAttack) {
+      this.maxInfantryAttack = maxInfantryAttack;
+   }
+
+   public int getMinVehicleAttack() {
+      return minVehicleAttack;
+   }
+
+   public void setMinVehicleAttack(int minVehicleAttack) {
+      this.minVehicleAttack = minVehicleAttack;
+   }
+
+   public int getMaxVehicleAttack() {
+      return maxVehicleAttack;
+   }
+
+   public void setMaxVehicleAttack(int maxVehicleAttack) {
+      this.maxVehicleAttack = maxVehicleAttack;
    }
 }

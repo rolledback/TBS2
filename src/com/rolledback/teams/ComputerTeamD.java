@@ -25,8 +25,8 @@ public class ComputerTeamD extends ComputerTeam {
    
    final int animationDelay = 0;
    
-   public ComputerTeamD(String name, int size, int r, Game g) {
-      super(name, size, r, g);
+   public ComputerTeamD(String name, int size, int r, Game g, int n) {
+      super(name, size, r, g, n);
    }
    
    public void executeTurn() {

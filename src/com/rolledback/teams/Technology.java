@@ -1,7 +1,9 @@
 package com.rolledback.teams;
 
+import java.awt.Image;
 import java.util.Map;
 
+import com.rolledback.framework.GraphicsManager;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
@@ -72,8 +74,10 @@ public class Technology {
          researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(City c: ((Team)effectObjectOne).getCities())
-                  if(!c.isOccupied())
-                     ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY);
+                  if(!c.isOccupied()) {
+                     Image[] textures = GraphicsManager.typetoImage(UNIT_TYPE.INFANTRY, ((Team)effectObjectOne).getTeamNumber());
+                     ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY, textures[0], textures[1]);
+                  }
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
@@ -115,7 +119,7 @@ public class Technology {
             public void run() {
                for(Unit u: ((Team)effectObjectOne).getUnits())
                   if(u.getClassification() == UNIT_CLASS.VEHICLE)
-                     u.setHealth(u.getHealth() + u.getMaxAttack() / 4);
+                     u.setHealth(u.getHealth() + u.getMaxHealth() / 2);
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));

@@ -39,8 +39,8 @@ public class World {
    }
    
    public World() {
-      teamOne = new Team("", 0, 0);
-      teamTwo = new Team("", 0, 0);
+      teamOne = new Team("", 0, 0, 1);
+      teamTwo = new Team("", 0, 0, 2);
    }
    
    public World(int w, int h, boolean rivers) {
@@ -50,8 +50,8 @@ public class World {
       }
       tiles = new Tile[h][w];
       heightMap = new int[h][w];
-      teamOne = new Team("", 0, 0);
-      teamTwo = new Team("", 0, 0);
+      teamOne = new Team("", 0, 0, 1);
+      teamTwo = new Team("", 0, 0, 2);
       buildMap();
    }
    
@@ -549,10 +549,17 @@ public class World {
                || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
          }
-         if(x == team.getTeamSize() - 1)
-            team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY);
-         else
-            team.createUnit(tiles[row][col], randUnitType());
+         if(x == team.getTeamSize() - 1) {
+            if(team.equals(teamOne))
+               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryRed_left"), GraphicsManager.getTileTextures().get("infantryRed_right"));
+            else if(team.equals(teamOne))
+               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryBlue_left"), GraphicsManager.getTileTextures().get("infantryBlue_right"));
+         }
+         else {
+            UNIT_TYPE rand = randUnitType();
+            Image[] textures = GraphicsManager.typetoImage(rand, team.getTeamNumber());
+            team.createUnit(tiles[row][col], rand, textures[0], textures[1]);
+         }
          if(team.equals(teamTwo))
             team.getUnits().get(x).setDir(DIRECTION.LEFT);
          if((x + 1) % (double)(team.getTeamSize() / (width / 5)) == 0)

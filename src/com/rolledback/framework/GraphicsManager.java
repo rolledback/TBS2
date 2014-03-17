@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 
 import javax.imageio.ImageIO;
 
+import com.rolledback.units.Unit.UNIT_TYPE;
+
 public class GraphicsManager {
    
    private static Image[] unitImages;
@@ -84,6 +86,51 @@ public class GraphicsManager {
          Logger.consolePrint("ERROR loading image. " + e.toString(), "manager");
          e.printStackTrace();
       }
+   }
+   
+   public static Image[] typetoImage(UNIT_TYPE type, int team) {
+      Image[] ret = new Image[2];
+      if(type == UNIT_TYPE.INFANTRY) {
+         if(team == 1) {
+            ret[0] = unitImages[0];
+            ret[1] = unitImages[4];
+         }
+         else {
+            ret[0] = unitImages[8];
+            ret[1] = unitImages[12];
+         }
+      }
+      if(type == UNIT_TYPE.RPG) {
+         if(team == 1) {
+            ret[0] = unitImages[1];
+            ret[1] = unitImages[5];
+         }
+         else {
+            ret[0] = unitImages[9];
+            ret[1] = unitImages[13];
+         }
+      }
+      if(type == UNIT_TYPE.TANK) {
+         if(team == 1) {
+            ret[0] = unitImages[2];
+            ret[1] = unitImages[6];
+         }
+         else {
+            ret[0] = unitImages[10];
+            ret[1] = unitImages[14];
+         }
+      }
+      if(type == UNIT_TYPE.TANK_DEST) {
+         if(team == 1) {
+            ret[0] = unitImages[3];
+            ret[1] = unitImages[7];
+         }
+         else {
+            ret[0] = unitImages[11];
+            ret[1] = unitImages[15];
+         }
+      }
+      return ret;
    }
    
    public static Image[] getUnitImages() {

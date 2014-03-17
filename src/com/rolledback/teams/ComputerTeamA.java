@@ -15,8 +15,8 @@ import com.rolledback.units.Unit.UNIT_CLASS;
 
 public class ComputerTeamA extends ComputerTeam {
    
-   public ComputerTeamA(String name, int size, int r, Game g) {
-      super(name, size, r, g);
+   public ComputerTeamA(String name, int size, int r, Game g, int n) {
+      super(name, size, r, g, n);
    }
    
    public void executeTurn() {
@@ -207,6 +207,7 @@ public class ComputerTeamA extends ComputerTeam {
          numInRange.put(opponentI.next(), 0.0);
       
       // go through all friendly units and calculate damage they can inflict on all enemies in range
+      // FIX THE 0 THING AT THE END OF THIS WHILE LOOP, NOT THAT IT REALLY MATTERS...
       ListIterator<Unit> teamI = units.listIterator();
       while(teamI.hasNext()) {
          Unit currUnit = teamI.next();
@@ -215,7 +216,7 @@ public class ComputerTeamA extends ComputerTeam {
             for(int col = 0; col < game.gameWidth; col++) {
                if(currUnit.getAttackSet().contains(new Coordinate(col, row)))
                   numInRange.put(game.getWorld().getTiles()[row][col].getOccupiedBy(), numInRange.get(game.getWorld().getTiles()[row][col].getOccupiedBy())
-                        + currUnit.getMaxAttack());
+                        + 0);
             }
          }
       }

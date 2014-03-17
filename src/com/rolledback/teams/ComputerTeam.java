@@ -10,8 +10,8 @@ public abstract class ComputerTeam extends Team {
    Coordinate target;
    Unit targetUnit;
    
-   public ComputerTeam(String name, int size, int r, Game g) {
-      super(name, size, r);
+   public ComputerTeam(String name, int size, int r, Game g, int n) {
+      super(name, size, r, n);
       game = g;
    }
    

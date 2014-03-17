@@ -59,7 +59,8 @@ public class Factory extends CapturableTile {
       if(getWorld().getTiles()[y][x].isOccupied())
          return false;
       owner.setResources(owner.getResources() - productionList.get(type));
-      owner.createUnit(getWorld().getTiles()[y][x], type);
+      Image[] textures = GraphicsManager.typetoImage(type, owner.getTeamNumber());
+      owner.createUnit(getWorld().getTiles()[y][x], type, textures[0], textures[1]);      
       owner.getUnits().get(owner.getUnits().size() - 1).setAttacked(true);
       owner.getUnits().get(owner.getUnits().size() - 1).setMoved(true);
       return true;

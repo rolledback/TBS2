@@ -27,7 +27,6 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
-import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class Game extends JPanel implements MouseListener, ActionListener {
    
@@ -52,6 +51,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    Rectangle[][] grid;
    GAME_STATE state;
    Image[][] background;
+   GameGUI infoBox;
    
    int UNIT_DENSITY = 5;
    int drawDetectorOne = 0;
@@ -67,8 +67,8 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 50, 100);
-      teamTwo = new ComputerTeamD("team two", 50, 100, this);
+      teamOne = new Team("team one", 50, 100, 1);
+      teamTwo = new ComputerTeamD("team two", 50, 100, this, 2);
       currentTeam = teamOne;
       
       teamOne.setOpponent(teamTwo);
@@ -91,6 +91,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       selectedX = 0;
       selectedY = 0;
+      
+      infoBox = new GameGUI();
+      infoBox.pack();
+      infoBox.setResizable(false);
+      infoBox.updateInfo(null, world.getTiles()[0][0], teamOne, teamTwo);
    }
    
    public void run() {
@@ -222,6 +227,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void switchTeams() {
       Logger.consolePrint("switching teams", "game");
+      infoBox.updateInfo(teamOne, teamTwo);
       unitSelected = false;
       selectedUnit = null;
       Iterator<Unit> i = currentTeam.getUnits().iterator();
@@ -298,29 +304,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       Font font = new Font("Serif", Font.PLAIN, 22);
       g.setFont(font);
       for(Unit temp: teamOne.getUnits()) {
-         UNIT_TYPE u = temp.getType();
          int xCorner = tileSize * temp.getX() + offsetHorizontal;
          int yCorner = tileSize * temp.getY() + offsetVertical;
-         if(u == UNIT_TYPE.INFANTRY)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[0], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[4], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.TANK)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[2], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[6], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.TANK_DEST)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[3], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[7], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.RPG)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[1], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[5], xCorner, yCorner, tileSize, tileSize, this);
+         if(temp.getDir() == DIRECTION.LEFT)
+            g.drawImage(temp.getLeftTexture(), xCorner, yCorner, tileSize, tileSize, this);
+         else
+            g.drawImage(temp.getRightTexture(), xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
@@ -332,29 +321,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
       
       for(Unit temp: teamTwo.getUnits()) {
-         UNIT_TYPE u = temp.getType();
          int xCorner = tileSize * temp.getX() + offsetHorizontal;
          int yCorner = tileSize * temp.getY() + offsetVertical;
-         if(u == UNIT_TYPE.INFANTRY)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[8], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[12], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.TANK)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[10], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[14], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.TANK_DEST)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[11], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[15], xCorner, yCorner, tileSize, tileSize, this);
-         if(u == UNIT_TYPE.RPG)
-            if(temp.getDir() == DIRECTION.LEFT)
-               g.drawImage(GraphicsManager.getUnitImages()[9], xCorner, yCorner, tileSize, tileSize, this);
-            else
-               g.drawImage(GraphicsManager.getUnitImages()[13], xCorner, yCorner, tileSize, tileSize, this);
+         if(temp.getDir() == DIRECTION.LEFT)
+            g.drawImage(temp.getLeftTexture(), xCorner, yCorner, tileSize, tileSize, this);
+         else
+            g.drawImage(temp.getRightTexture(), xCorner, yCorner, tileSize, tileSize, this);
          if(temp.hasMoved() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
@@ -390,7 +362,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
-      
+      infoBox.updateInfo(selectedTile.getOccupiedBy(), selectedTile, teamOne, teamTwo);
       history.add(new Coordinate(x, y));
       
       if(unitSelected) {
@@ -426,7 +398,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
             Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
-            selectedUnit.setMoved(true);
+            selectedUnit.setMoved(true);            
          }
          unitSelected = false;
          state = GAME_STATE.UPDATE;
@@ -575,6 +547,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             for(int col = 0; col < gameWidth; col++)
                if(grid[row][col].contains(eventX, eventY)) {
                   gameLogic(col, row);
+                  infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
                   return;
                }
       }

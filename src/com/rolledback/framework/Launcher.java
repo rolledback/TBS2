@@ -18,8 +18,8 @@ import javax.swing.JTextField;
 public class Launcher {
    
    static private Game newGame;
-   static private int winFractionHeight = 7;
-   static private int winFractionWidth = 7;
+   static private int winFractionHeight = 10;
+   static private int winFractionWidth = 4;
    
    public static void main(String args[]) {
       Logger.consolePrint("Getting map files.", "launcher");

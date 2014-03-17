@@ -21,8 +21,8 @@ public class ComputerTeamB extends ComputerTeam {
    
    final int animationDelay = 50;
    
-   public ComputerTeamB(String name, int size, int r, Game g) {
-      super(name, size, r, g);
+   public ComputerTeamB(String name, int size, int r, Game g, int n) {
+      super(name, size, r, g, n);
    }
    
    public void executeTurn() {
@@ -233,6 +233,7 @@ public class ComputerTeamB extends ComputerTeam {
          numInRange.put(opponentI.next(), 0.0);
       
       // go through all enemy units in range and determine how much damage attacker can inflict
+      // YEP THIS NEEDS TO BE FIXED...LOL...
       Unit currUnit = attacker;
       currUnit.calcMoveSpots(false);
       Iterator<Coordinate> moveSetIterator = currUnit.getMoveSet().iterator();
@@ -241,7 +242,7 @@ public class ComputerTeamB extends ComputerTeam {
          if(currUnit.getAttackSet().contains(currentSpot)) {
             // increment HashMap value of any enemy unit you can attack
             Unit temp = game.getWorld().getTiles()[currentSpot.getY()][currentSpot.getX()].getOccupiedBy();
-            numInRange.put(temp, numInRange.get(temp) + currUnit.getMaxAttack() + currUnit.getCurrentTile().getEffect().getAttackBonus());
+            numInRange.put(temp, numInRange.get(temp) + 0 + currUnit.getCurrentTile().getEffect().getAttackBonus());
          }
       }
       

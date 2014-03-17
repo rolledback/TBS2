@@ -24,8 +24,8 @@ public class ComputerTeamC extends ComputerTeam {
    final int animationDelay = 0;
    ArrayList<Coordinate> cityLocations;
    
-   public ComputerTeamC(String name, int size, int r, Game g) {
-      super(name, size, r, g);
+   public ComputerTeamC(String name, int size, int r, Game g, int n) {
+      super(name, size, r, g, n);
       cityLocations = null;
    }
    

@@ -1,5 +1,6 @@
 package com.rolledback.teams;
 
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -28,8 +29,9 @@ public class Team {
    private int teamSize;
    private int resources;
    private boolean firstTurn;
+   private int teamNumber;
    
-   public Team(String name, int size, int r) {
+   public Team(String name, int size, int r, int n) {
       units = new ArrayList<Unit>();
       cities = new ArrayList<City>();
       factories = new ArrayList<Factory>();
@@ -38,6 +40,7 @@ public class Team {
       this.name = name;
       resources = r;
       firstTurn = true;
+      setTeamNumber(n);
       initProductionList();
       initTechTree();
    }
@@ -61,15 +64,15 @@ public class Team {
       techTree.put(TECH_NAME.GPS, 300);
    }
    
-   public void createUnit(Tile t, UNIT_TYPE uType) {
+   public void createUnit(Tile t, UNIT_TYPE uType, Image lI, Image rI) {
       if(uType == UNIT_TYPE.TANK)
-         units.add(new Tank(t.getX(), t.getY(), t, this));
+         units.add(new Tank(t.getX(), t.getY(), t, this, lI, rI));
       else if(uType == UNIT_TYPE.TANK_DEST)
-         units.add(new TankDestroyer(t.getX(), t.getY(), t, this));
+         units.add(new TankDestroyer(t.getX(), t.getY(), t, this, lI, rI));
       else if(uType == UNIT_TYPE.INFANTRY)
-         units.add(new Infantry(t.getX(), t.getY(), t, this));
+         units.add(new Infantry(t.getX(), t.getY(), t, this, lI, rI));
       else if(uType == UNIT_TYPE.RPG)
-         units.add(new RPGTeam(t.getX(), t.getY(), t, this));
+         units.add(new RPGTeam(t.getX(), t.getY(), t, this, lI, rI));
       t.setOccupied(true);
       t.setOccupiedBy(units.get(units.size() - 1));
    }
@@ -160,5 +163,13 @@ public class Team {
    
    public void setOpponent(Team opponent) {
       this.opponent = opponent;
+   }
+
+   public int getTeamNumber() {
+      return teamNumber;
+   }
+
+   public void setTeamNumber(int teamNumber) {
+      this.teamNumber = teamNumber;
    }
 }

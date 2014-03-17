@@ -149,7 +149,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    public MapEditor(int x, int y, int t, int oH, int oV) {
       setFocusable(true);
       menu = new EscMenu();
-      dummyTeam = new Team("dummy", 0, 0);
+      dummyTeam = new Team("dummy", 0, 0, 1);
       width = x;
       height = y;
       tileSize = t;
