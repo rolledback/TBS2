@@ -68,7 +68,12 @@ public class GameGUI extends JFrame {
    private JLabel numCitiesTwo;
    private JLabel numFactTwo;
    
-   public GameGUI() {
+   public static void main(String args[]) {
+      GameGUI test = new GameGUI("Test");
+   }
+   
+   public GameGUI(String n) {
+      super(n);
       guiPanel = new JPanel();
       this.setupNorth();
       this.setupSouth();
@@ -80,8 +85,13 @@ public class GameGUI extends JFrame {
       guiPanel.add(northInfoPanel, BorderLayout.PAGE_START);
       guiPanel.add(southInfoPanel, BorderLayout.PAGE_END);
       guiPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-      this.setPreferredSize(new Dimension(460, 320));
+      canvasPanel.setPreferredSize(new Dimension(164, 164));
+      unitPanel.setPreferredSize(new Dimension(146, 164));
+      terrainPanel.setPreferredSize(new Dimension(106, 164));    
+      teamOnePanel.setPreferredSize(new Dimension(204, 93));
+      teamTwoPanel.setPreferredSize(new Dimension(204, 93));
       this.add(guiPanel);
+      this.pack();
       this.setVisible(true);
    }
    
@@ -206,8 +216,7 @@ public class GameGUI extends JFrame {
       teamOnePanel.add(numCitiesOne);
       teamOnePanel.add(numFactOne);
       
-      teamOnePanel.setBorder(new TitledBorder(new LineBorder(Color.RED, 1), "Team One Info"));
-      
+      teamOnePanel.setBorder(new TitledBorder(new LineBorder(Color.RED, 1), "Team One Info"));      
    }
    
    public void setupTeamTwo() {
