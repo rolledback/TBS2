@@ -141,7 +141,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void drawBackground(Graphics g) {
       int horizOffset = (offsetHorizontal % tileSize == 0) ? 0 : tileSize / 2;
-      int vertiOffset = (offsetVertical % tileSize == 0) ? tileSize / 2 : 0;
+      int vertiOffset = (offsetVertical % tileSize == 0) ? 0 : tileSize / 2;
       for(int r = 0; r < background.length; r++)
          for(int c = 0; c < background[0].length; c++) {
             g.setColor(new Color(185, 185, 250, 175));
