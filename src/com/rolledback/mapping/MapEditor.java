@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import com.rolledback.framework.GameGUI;
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.Launcher;
 import com.rolledback.framework.World;
@@ -52,7 +53,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    
    private static final long serialVersionUID = 1L;
    private static int winFractionHeight = 10;
-   private static int winFractionWidth = 6;
+   private static int winFractionWidth = 4;
    
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random", "Custom" };
@@ -82,7 +83,6 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
                myPanel.add(yField);
                
                int result = JOptionPane.showConfirmDialog(null, myPanel, "Please Enter X and Y Values", JOptionPane.OK_CANCEL_OPTION);
-               System.out.println(result);
                if(result == JOptionPane.OK_OPTION) {
                   x = Integer.parseInt(xField.getText());
                   y = Integer.parseInt(yField.getText());
@@ -97,8 +97,6 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       }
       if(x == -1) {
          int[] dimensions = Launcher.autoCalcDimensions(tileSize);
-         System.out.println(tileSize);
-         System.out.println(Arrays.toString(dimensions));
          init(dimensions[0], dimensions[1]);
       }
       else if(x != -1) {
@@ -113,9 +111,18 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
       
-      // reduce the dimensions by 10%
+      // reduce the dimensions
       screenHeight -= (int)((double)screenHeight / winFractionHeight);
       screenWidth -= (int)((double)screenWidth / winFractionWidth);
+      
+      JFrame test = new JFrame();
+		GameGUI t = new GameGUI();
+		test.add(t);
+		test.pack();
+		test.setVisible(true);
+		int guiHeight = test.getHeight();
+		test.dispose();
+		screenHeight -= guiHeight;
       
       // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
@@ -126,14 +133,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       int tileSize = 128;
       int gameWidth = x;
       int gameHeight = y;
-      int guiHeight = 0;
       
-      while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight - guiHeight) && tileSize >= 1) {
+      while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight) && tileSize >= 1) {
          tileSize /= 2;
       }
-      
+
       int offsetHorizontal = screenWidth - (gameWidth * tileSize);
-      int offsetVertical = screenHeight - guiHeight - (gameHeight * tileSize);
+      int offsetVertical = screenHeight - (gameHeight * tileSize);
       
       window = new JFrame("Map Editor");
       MapEditor editor = new MapEditor(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2);
@@ -162,9 +168,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       offsetHorizontal = oH;
       offsetVertical = oV;
       currentTexture = GraphicsManager.getTileTextures().get("grass.png");
-      
-      setVisible(true);
-      
+      setVisible(true);      
       setDoubleBuffered(true);
       
       String[] availTextures = new String[0];

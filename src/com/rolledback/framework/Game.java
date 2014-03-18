@@ -37,7 +37,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    ArrayList<Coordinate> history = new ArrayList<Coordinate>();
    
    private static final long serialVersionUID = 1L;
-   public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, guiHeight, selectedX, selectedY;
+   public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, selectedX, selectedY;
    public Team teamOne, teamTwo;
    
    Team currentTeam;
@@ -61,7 +61,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public ReentrantLock logicLock;
    
-   public Game(int x, int y, int ts, int oH, int oV, int gH, String fileToLoad) {
+   public Game(int x, int y, int ts, int oH, int oV, String fileToLoad, GameGUI iB) {
       gameWidth = x;
       gameHeight = y;
       
@@ -87,13 +87,11 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             grid[row][col] = new Rectangle((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
       this.setBackground(Color.black);
       
-      guiHeight = gH;
-      
       selectedX = 0;
       selectedY = 0;
       
-      infoBox = new GameGUI("TBS2 GUI");
-      infoBox.updateInfo(null, world.getTiles()[0][0], teamOne, teamTwo);
+      infoBox = iB;
+      //infoBox.updateInfo(null, world.getTiles()[0][0], teamOne, teamTwo);
    }
    
    public void run() {
@@ -143,7 +141,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    
    public void drawBackground(Graphics g) {
       int horizOffset = (offsetHorizontal % tileSize == 0) ? 0 : tileSize / 2;
-      int vertiOffset = (offsetVertical % tileSize == 0) ? 0 : tileSize / 2;
+      int vertiOffset = (offsetVertical % tileSize == 0) ? tileSize / 2 : 0;
       for(int r = 0; r < background.length; r++)
          for(int c = 0; c < background[0].length; c++) {
             g.setColor(new Color(185, 185, 250, 175));
@@ -167,60 +165,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             else
                background[r][c] = GraphicsManager.getTileTextures().get("mountain.png");
          }
-   }
-   
-   public void drawGui(Graphics g) {
-      g.setColor(Color.GRAY);
-      g.fillRect(0, this.getHeight() - guiHeight, this.getWidth(), guiHeight);
-      
-      g.setColor(Color.DARK_GRAY);
-      g.fillRect(0, this.getHeight() - guiHeight, this.getWidth(), 16);
-      g.fillRect(0, this.getHeight() - 16, this.getWidth(), 16);
-      g.fillRect(0, this.getHeight() - guiHeight, 16, guiHeight);
-      g.fillRect(this.getWidth() - 16, this.getHeight() - guiHeight, 16, guiHeight);
-      
-      currentTileGui(g);
-   }
-   
-   public void currentTileGui(Graphics g) {
-      Color tileColor;
-      if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.FOREST)
-         tileColor = new Color(0, 128, 0);
-      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.PLAIN)
-         tileColor = new Color(126, 208, 102);
-      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.MOUNTAIN)
-         tileColor = Color.LIGHT_GRAY;
-      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.RIVER)
-         tileColor = new Color(41, 32, 132);
-      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.BRIDGE)
-         tileColor = new Color(128, 128, 0);
-      else if(world.getTiles()[selectedY][selectedX].getType() == TILE_TYPE.CITY) {
-         if(((City)world.getTiles()[selectedY][selectedX]).getOwner() == null)
-            tileColor = Color.MAGENTA;
-         else if(((City)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
-            tileColor = Color.orange;
-         else
-            tileColor = Color.cyan;
-      }
-      else {
-         if(((Factory)world.getTiles()[selectedY][selectedX]).getOwner().equals(teamOne))
-            tileColor = Color.red;
-         else
-            tileColor = Color.blue;
-      }
-      g.setColor(tileColor);
-      g.fillRect(32, this.getHeight() - guiHeight + 32, 128, 128);
-      
-      g.setColor(Color.black);
-      Font font = new Font("Arial", Font.BOLD, 12);
-      g.setFont(font);
-      g.drawString("Current Tile: " + world.getTiles()[selectedY][selectedX].getType(), 102, this.getHeight() - guiHeight + 45);
-      g.drawString("Attack Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getAttackBonus(), 102, this.getHeight() - guiHeight + 62);
-      g.drawString("Defense Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getDefenseBonus(), 102, this.getHeight() - guiHeight + 79);
-      g.drawString("Move Bonus: " + world.getTiles()[selectedY][selectedX].getEffect().getMoveBonus(), 102, this.getHeight() - guiHeight + 96);
-      g.drawRect(32, this.getHeight() - guiHeight + 32, 128, 128);
-      for(int x = 0; x < 5; x++)
-         g.drawRect(24 + x, this.getHeight() - guiHeight + 24 + x, 300 - (2 * x), 80 - (2 * x));
    }
    
    public void switchTeams() {
