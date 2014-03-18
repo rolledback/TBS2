@@ -19,7 +19,7 @@ public class Launcher {
    
    static private Game newGame;
    static private int winFractionHeight = 10;
-   static private int winFractionWidth = 4;
+   static private int winFractionWidth = 6;
    
    public static void main(String args[]) {
       Logger.consolePrint("Getting map files.", "launcher");
@@ -33,7 +33,7 @@ public class Launcher {
       ArrayList<Object> choices = new ArrayList<Object>();
       for(int f = 0; f < files.length; f++) {
          if(files[f].endsWith(".map")) {
-            int[] size = getDimensions(directory + "\\" + files[f]);
+            int[] size = (System.getProperty("os.name").equals("Linux")) ? getDimensions(directory + "/" + files[f]) : getDimensions(directory + "\\" + files[f]);            
             if(size.length != 0)
                choices.add(files[f].substring(0, files[f].lastIndexOf(".")) + ": (" + size[0] + "x" + size[1] + ")");
          }
@@ -88,7 +88,10 @@ public class Launcher {
                }
             }
             else if(size.contains(":")) {
-               fileToLoad = directory + "\\" + size.substring(0, size.lastIndexOf(":")) + ".map";
+            	if(System.getProperty("os.name").equals("Linux"))
+            		fileToLoad = directory + "/" + size.substring(0, size.lastIndexOf(":")) + ".map";
+            	else
+            		fileToLoad = directory + "\\" + size.substring(0, size.lastIndexOf(":")) + ".map";
                dimensions = getDimensions(fileToLoad);
             }
             else {
@@ -191,7 +194,10 @@ public class Launcher {
          frame.setResizable(false);
          
          frame.setVisible(true);
-         frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
+         if(System.getProperty("os.name").equals("Linux"))
+         	frame.setSize(screenWidth, screenHeight);
+         else
+         	frame.setSize(screenWidth + frame.getInsets().right + frame.getInsets().left, screenHeight + frame.getInsets().top + frame.getInsets().bottom);
          newGame.setVisible(true);
          Logger.consolePrint("Running game.", "launcher");
          newGame.run();

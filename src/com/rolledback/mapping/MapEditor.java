@@ -9,6 +9,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.Box;
@@ -50,8 +51,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    private Image[][] background;
    
    private static final long serialVersionUID = 1L;
-   private static int winFractionHeight = 7;
-   private static int winFractionWidth = 7;
+   private static int winFractionHeight = 10;
+   private static int winFractionWidth = 6;
    
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random", "Custom" };
@@ -96,6 +97,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       }
       if(x == -1) {
          int[] dimensions = Launcher.autoCalcDimensions(tileSize);
+         System.out.println(tileSize);
+         System.out.println(Arrays.toString(dimensions));
          init(dimensions[0], dimensions[1]);
       }
       else if(x != -1) {
@@ -141,7 +144,10 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       window.setResizable(false);
       window.setVisible(true);
-      window.setSize(screenWidth + window.getInsets().right + window.getInsets().left, screenHeight + window.getInsets().top + window.getInsets().bottom);
+      if(System.getProperty("os.name").equals("Linux"))
+      	window.setSize(screenWidth, screenHeight);
+      else
+      	window.setSize(screenWidth + window.getInsets().right + window.getInsets().left, screenHeight + window.getInsets().top + window.getInsets().bottom);
       window.setVisible(true);
       window.setLocation(75, 75);
    }
