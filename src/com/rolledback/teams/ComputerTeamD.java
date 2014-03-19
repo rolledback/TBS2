@@ -23,7 +23,7 @@ public class ComputerTeamD extends ComputerTeam {
       CAPTURE, ENEMY;
    }
    
-   final int animationDelay = 500;
+   final int animationDelay = 100;
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
@@ -239,8 +239,7 @@ public class ComputerTeamD extends ComputerTeam {
                      // if you are looking for an enemy then you can offer anything on to the queue
                      // if you are looking for a city, you only want to offer passable tiles onto
                      // the queue
-                     if(!world[r][c].isOccupied() || (world[r][c].isOccupied() && world[r][c].getOccupiedBy().getOwner().equals(this))
-                           || mission == BFS_TYPE.ENEMY)
+                     if(!world[r][c].isOccupied() || (world[r][c].isOccupied() && world[r][c].getOccupiedBy().getOwner().equals(this)) || mission == BFS_TYPE.ENEMY)
                         if(unit.canTraverse(world[r][c])) {
                            set.add(world[r][c]);
                            queue.offer(world[r][c]);

@@ -67,7 +67,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
-      teamOne = new Team("team one", 50, 100, 1);
+      teamOne = new ComputerTeamD("team one", 50, 100, this, 1);
       teamTwo = new ComputerTeamD("team two", 50, 100, this, 2);
       currentTeam = teamOne;
       
@@ -91,7 +91,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedY = 0;
       
       infoBox = iB;
-      //infoBox.updateInfo(null, world.getTiles()[0][0], teamOne, teamTwo);
+      
+      setDoubleBuffered(true);
+      setIgnoreRepaint(true);
    }
    
    public void run() {
@@ -179,25 +181,25 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setAttacked(false);
       }
       
-//      if(teamOne.getUnits().size() == 1) {
-//         drawDetectorOne++;
-//         if(drawDetectorOne == 30) {
-//            teamOne.getUnits().clear();
-//            Logger.consolePrint("default win detected", "game");
-//         }
-//      }
-//      else
-//         drawDetectorOne = 0;
-//      
-//      if(teamTwo.getUnits().size() == 1) {
-//         drawDetectorTwo++;
-//         if(drawDetectorTwo == 30) {
-//            teamTwo.getUnits().clear();
-//            Logger.consolePrint("default win detected", "game");
-//         }
-//      }
-//      else
-//         drawDetectorTwo = 0;
+      // if(teamOne.getUnits().size() == 1) {
+      // drawDetectorOne++;
+      // if(drawDetectorOne == 30) {
+      // teamOne.getUnits().clear();
+      // Logger.consolePrint("default win detected", "game");
+      // }
+      // }
+      // else
+      // drawDetectorOne = 0;
+      //
+      // if(teamTwo.getUnits().size() == 1) {
+      // drawDetectorTwo++;
+      // if(drawDetectorTwo == 30) {
+      // teamTwo.getUnits().clear();
+      // Logger.consolePrint("default win detected", "game");
+      // }
+      // }
+      // else
+      // drawDetectorTwo = 0;
       
       for(City c: currentTeam.getCities())
          c.produceResources();
@@ -339,7 +341,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
             Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
-            selectedUnit.setMoved(true);            
+            selectedUnit.setMoved(true);
          }
          unitSelected = false;
          state = GAME_STATE.UPDATE;
@@ -482,10 +484,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int row = arg0.getY() / tileSize;
-         int col = arg0.getX() / tileSize;
+         int row = (arg0.getY() - offsetVertical) / tileSize;
+         int col = (arg0.getX() - offsetHorizontal) / tileSize;
          if(row >= gameHeight || col >= gameWidth || row < 0 || col < 0)
-         	return;
+            return;
          infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
          gameLogic(col, row);
          infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);

@@ -115,13 +115,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       screenWidth -= (int)((double)screenWidth / winFractionWidth);
       
       JFrame test = new JFrame();
-		GameGUI t = new GameGUI();
-		test.add(t);
-		test.pack();
-		test.setVisible(true);
-		int guiHeight = t.getHeight();
-		test.dispose();
-		screenHeight -= guiHeight;
+      GameGUI t = new GameGUI();
+      test.add(t);
+      test.pack();
+      test.setVisible(true);
+      int guiHeight = test.getHeight();
+      test.dispose();
+      screenHeight -= guiHeight;
       
       // further reduce them until divisible by 128, 64, 32, and 16
       while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
@@ -136,7 +136,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight) && tileSize >= 1) {
          tileSize /= 2;
       }
-
+      
       int offsetHorizontal = screenWidth - (gameWidth * tileSize);
       int offsetVertical = screenHeight - (gameHeight * tileSize);
       
@@ -150,9 +150,9 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       window.setResizable(false);
       window.setVisible(true);
       if(System.getProperty("os.name").equals("Linux"))
-      	window.setSize(screenWidth, screenHeight);
+         window.setSize(screenWidth, screenHeight);
       else
-      	window.setSize(screenWidth + window.getInsets().right + window.getInsets().left, screenHeight + window.getInsets().top + window.getInsets().bottom);
+         window.setSize(screenWidth + window.getInsets().right + window.getInsets().left, screenHeight + window.getInsets().top + window.getInsets().bottom);
       window.setVisible(true);
       window.setLocation(75, 75);
    }
@@ -167,7 +167,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       offsetHorizontal = oH;
       offsetVertical = oV;
       currentTexture = GraphicsManager.getTileTextures().get("grass.png");
-      setVisible(true);      
+      setVisible(true);
       setDoubleBuffered(true);
       
       String[] availTextures = new String[0];
@@ -246,10 +246,10 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-      	int row = arg0.getY() / tileSize;
-         int col = arg0.getX() / tileSize;
+         int row = (arg0.getY() - offsetVertical) / tileSize;
+         int col = (arg0.getX() - offsetHorizontal) / tileSize;
          if(row >= height || col >= width || row < 0 || col < 0)
-         	return;
+            return;
          currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
          if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
             tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
@@ -369,10 +369,10 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    @Override
    public void mouseDragged(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int row = arg0.getY() / tileSize;
-         int col = arg0.getX() / tileSize;
+         int row = (arg0.getY() - offsetVertical) / tileSize;
+         int col = (arg0.getX() - offsetHorizontal) / tileSize;
          if(row >= height || col >= width || row < 0 || col < 0)
-         	return;
+            return;
          currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
          if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
             tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
