@@ -138,7 +138,7 @@ public class Launcher {
 		test.pack();
 		test.setVisible(true);
 
-		int guiHeight = test.getHeight();
+		int guiHeight = t.getHeight();
 		test.dispose();
 		screenHeight -= guiHeight;
 		screenHeight -= (int) ((double) screenHeight / winFractionHeight);
@@ -169,7 +169,7 @@ public class Launcher {
 		test.add(t);
 		test.pack();
 		test.setVisible(true);
-		int guiHeight = test.getHeight();
+		int guiHeight = t.getHeight();
 		test.dispose();
 		screenHeight -= guiHeight;
 
@@ -194,7 +194,7 @@ public class Launcher {
 		int winner[] = { 0, 0 };
 		for (int i = 0; i < 10000; i++) {
 			Logger.consolePrint("Constructing frame.", "launcher");
-			frame = new JFrame("TBS2");
+			frame = new JFrame("TBS2 " + Arrays.toString(winner));
 			frame.getContentPane().setLayout(new BorderLayout());
 			Logger.consolePrint("Game " + i, "launcher");
 			long start = System.currentTimeMillis();
@@ -238,7 +238,6 @@ public class Launcher {
 			// }
 			// Logger.consolePrint("Click history saved.", "launcher");
 			newGame = null;
-			frame.dispose();
 			frame = null;
 			Logger.consolePrint("Next game.", "launcher");
 		}

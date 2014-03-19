@@ -9,7 +9,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.Box;
@@ -120,7 +119,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
 		test.add(t);
 		test.pack();
 		test.setVisible(true);
-		int guiHeight = test.getHeight();
+		int guiHeight = t.getHeight();
 		test.dispose();
 		screenHeight -= guiHeight;
       
@@ -247,29 +246,26 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int eventX = arg0.getX();
-         int eventY = arg0.getY();
-         for(int row = 0; row < height; row++)
-            for(int col = 0; col < width; col++) {
-               if(grid[row][col].contains(eventX, eventY)) {
-                  currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
-                  if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
-                     tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
-                     tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
-                     tiles[row][col] = new River(null, col, row, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
-                     tiles[row][col] = new Mountain(null, col, row);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
-                     tiles[row][col] = new Plain(null, col, row);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
-                     tiles[row][col] = new Bridge(null, col, row, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
-                     tiles[row][col] = new Forest(null, col, row);
-                  repaint();
-               }
-            }
+      	int row = arg0.getY() / tileSize;
+         int col = arg0.getX() / tileSize;
+         if(row >= height || col >= width || row < 0 || col < 0)
+         	return;
+         currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
+         if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
+            tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
+            tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
+            tiles[row][col] = new River(null, col, row, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
+            tiles[row][col] = new Mountain(null, col, row);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
+            tiles[row][col] = new Plain(null, col, row);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
+            tiles[row][col] = new Bridge(null, col, row, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
+            tiles[row][col] = new Forest(null, col, row);
+         repaint();
       }
       else {
          if(!texturePicker.isVisible()) {
@@ -373,29 +369,26 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    @Override
    public void mouseDragged(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int eventX = arg0.getX();
-         int eventY = arg0.getY();
-         for(int row = 0; row < height; row++)
-            for(int col = 0; col < width; col++) {
-               if(grid[row][col].contains(eventX, eventY)) {
-                  currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
-                  if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
-                     tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
-                     tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
-                     tiles[row][col] = new River(null, col, row, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
-                     tiles[row][col] = new Mountain(null, col, row);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
-                     tiles[row][col] = new Plain(null, col, row);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
-                     tiles[row][col] = new Bridge(null, col, row, currentTexture);
-                  else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
-                     tiles[row][col] = new Forest(null, col, row);
-                  repaint();
-               }
-            }
+         int row = arg0.getY() / tileSize;
+         int col = arg0.getX() / tileSize;
+         if(row >= height || col >= width || row < 0 || col < 0)
+         	return;
+         currentTexture = GraphicsManager.getTileTextures().get(texturePicker.getCurrTexture());
+         if(texturePicker.getCurrTexture().toLowerCase().contains("city"))
+            tiles[row][col] = new City(null, col, row, dummyTeam, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("factory"))
+            tiles[row][col] = new Factory(null, col, row, dummyTeam, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("river"))
+            tiles[row][col] = new River(null, col, row, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("mountain"))
+            tiles[row][col] = new Mountain(null, col, row);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("grass"))
+            tiles[row][col] = new Plain(null, col, row);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("bridge"))
+            tiles[row][col] = new Bridge(null, col, row, currentTexture);
+         else if(texturePicker.getCurrTexture().toLowerCase().contains("forest"))
+            tiles[row][col] = new Forest(null, col, row);
+         repaint();
       }
       else {
          if(!texturePicker.isVisible()) {

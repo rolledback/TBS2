@@ -482,16 +482,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
-         int eventX = arg0.getX();
-         int eventY = arg0.getY();
-         for(int row = 0; row < gameHeight; row++)
-            for(int col = 0; col < gameWidth; col++)
-               if(grid[row][col].contains(eventX, eventY)) {
-                  infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
-                  gameLogic(col, row);
-                  infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
-                  return;
-               }
+         int row = arg0.getY() / tileSize;
+         int col = arg0.getX() / tileSize;
+         if(row >= gameHeight || col >= gameWidth || row < 0 || col < 0)
+         	return;
+         infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
+         gameLogic(col, row);
+         infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
+         return;
       }
       else
          state = GAME_STATE.SWITCH_TEAMS;
