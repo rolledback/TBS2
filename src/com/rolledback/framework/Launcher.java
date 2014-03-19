@@ -203,7 +203,7 @@ public class Launcher {
          gamePanelWidth--;
       while(gamePanelHeight % 64 != 0 || gamePanelHeight % 32 != 0 || gamePanelHeight % 128 != 0 || gamePanelHeight % 16 != 0)
          gamePanelHeight--;
-      Logger.consolePrint("Final reduction resulting in screen size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+      Logger.consolePrint("Final reduction resulting in panel size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
       
       // find out what tile size will first fit the given width and height (x, y)
       int tileSize = 128;

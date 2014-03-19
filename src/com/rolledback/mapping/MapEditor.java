@@ -1,5 +1,6 @@
 package com.rolledback.mapping;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -22,6 +23,7 @@ import javax.swing.SwingUtilities;
 import com.rolledback.framework.GameGUI;
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.Launcher;
+import com.rolledback.framework.Logger;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
@@ -35,7 +37,6 @@ import com.rolledback.terrain.Tile;
 
 public class MapEditor extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
    
-   private static JFrame window;
    private int width;
    private int height;
    private int tileSize;
@@ -106,55 +107,75 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    }
    
    public static void init(int x, int y) {
+   	Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "editor");
+   	
       // get the size of the screen
-      int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
-      int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+      int editorPanelHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+      int editorPanelWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+      Logger.consolePrint("Screen resolution: " + editorPanelWidth + "x" + editorPanelHeight, "editor");
       
       // reduce the dimensions
-      screenHeight -= (int)((double)screenHeight / winFractionHeight);
-      screenWidth -= (int)((double)screenWidth / winFractionWidth);
+      editorPanelHeight -= (int)((double)editorPanelHeight / winFractionHeight);
+      editorPanelWidth -= (int)((double)editorPanelWidth / winFractionWidth);
+      Logger.consolePrint("Initial reduction resulting in screen size of: " + editorPanelWidth + "x" + editorPanelHeight, "editor");
       
-      JFrame test = new JFrame();
-      GameGUI t = new GameGUI();
-      test.add(t);
-      test.pack();
-      test.setVisible(true);
-      int guiHeight = test.getHeight();
-      test.dispose();
-      screenHeight -= guiHeight;
+      // create the game window
+      Logger.consolePrint("Constructing editor window.", "editor");
+      JFrame window = new JFrame("Map Editor");
+      window.setResizable(false);
+      window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      window.getContentPane().setLayout(new BorderLayout());
+      
+      // create and add the GUI to the game window
+      GameGUI infoBox = new GameGUI();
+      window.add(infoBox, BorderLayout.SOUTH);
+      window.pack();
+      
+      // remove how tall the GUI is from the gamePanel's height
+      int guiHeight = infoBox.getHeight();
+      editorPanelHeight -= guiHeight;
+      window.remove(infoBox);
+      Logger.consolePrint("Removing height of gui of: " + infoBox.getSize(), "editor");      
       
       // further reduce them until divisible by 128, 64, 32, and 16
-      while(screenWidth % 64 != 0 || screenWidth % 32 != 0 || screenWidth % 128 != 0 || screenWidth % 16 != 0)
-         screenWidth--;
-      while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
-         screenHeight--;
+      while(editorPanelWidth % 64 != 0 || editorPanelWidth % 32 != 0 || editorPanelWidth % 128 != 0 || editorPanelWidth % 16 != 0)
+      	editorPanelWidth--;
+      while(editorPanelHeight % 64 != 0 || editorPanelHeight % 32 != 0 || editorPanelHeight % 128 != 0 || editorPanelHeight % 16 != 0)
+      	editorPanelHeight--;
+      Logger.consolePrint("Final reduction resulting in panel size of: " + editorPanelWidth + "x" + editorPanelHeight, "editor");
       
       int tileSize = 128;
       int gameWidth = x;
       int gameHeight = y;
       
-      while((gameWidth * tileSize > screenWidth || gameHeight * tileSize > screenHeight) && tileSize >= 1) {
+      while((gameWidth * tileSize > editorPanelWidth || gameHeight * tileSize > editorPanelHeight) && tileSize >= 1) {
          tileSize /= 2;
       }
       
-      int offsetHorizontal = screenWidth - (gameWidth * tileSize);
-      int offsetVertical = screenHeight - (gameHeight * tileSize);
+      int offsetHorizontal = editorPanelWidth - (gameWidth * tileSize);
+      int offsetVertical = editorPanelHeight - (gameHeight * tileSize);
       
-      window = new JFrame("Map Editor");
-      MapEditor editor = new MapEditor(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2);
-      editor.setDoubleBuffered(true);
-      editor.setSize(screenWidth, screenHeight);
-      editor.createBackground();
-      window.getContentPane().add(editor);
+      MapEditor editorPanel = new MapEditor(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2);
+      editorPanel.setSize(editorPanelWidth, editorPanelHeight);
+      editorPanel.createBackground();
+      window.getContentPane().add(editorPanel);
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       window.setResizable(false);
       window.setVisible(true);
+      Logger.consolePrint("Resizing using rules for OS: " + System.getProperty("os.name"), "editor");
       if(System.getProperty("os.name").equals("Linux"))
-         window.setSize(screenWidth, screenHeight);
-      else
-         window.setSize(screenWidth + window.getInsets().right + window.getInsets().left, screenHeight + window.getInsets().top + window.getInsets().bottom);
+         window.setSize(editorPanelWidth, editorPanelHeight);
+      else {
+      	Logger.consolePrint("Inset left = " + window.getInsets().left, "editor");
+         Logger.consolePrint("Inset right = " + window.getInsets().right, "editor");
+         Logger.consolePrint("Inset top = " + window.getInsets().top, "editor");
+         Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "editor");
+         window.setSize(editorPanelWidth + window.getInsets().right + window.getInsets().left, editorPanelHeight + window.getInsets().top + window.getInsets().bottom);
+      }
       window.setVisible(true);
       window.setLocation(75, 75);
+      Logger.consolePrint("Final window dimensions: " + window.getSize(), "editor");
+      Logger.consolePrint("Final editor panel dimensions: " + editorPanel.getSize(), "editor");
    }
    
    public MapEditor(int x, int y, int t, int oH, int oV) {
@@ -187,6 +208,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       addMouseListener(this);
       addMouseMotionListener(this);
       addKeyListener(this);
+      setDoubleBuffered(true);
    }
    
    public void paintComponent(Graphics g) {

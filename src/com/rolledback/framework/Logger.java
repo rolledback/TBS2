@@ -14,9 +14,10 @@ public class Logger {
    // Any of the CPU teams = ai
    // General error messages = error
    // Cartographer.java = cartographer
+	// MapEditor.java = editor
    
    private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("launcher", "cartographer");
+   private static List<String> validTags = asList("launcher", "cartographer", "editor");
    private static int tagLength = 3;
    
    public static String timeStamp() {
