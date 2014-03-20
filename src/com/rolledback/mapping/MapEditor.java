@@ -107,8 +107,8 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    }
    
    public static void init(int x, int y) {
-   	Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "editor");
-   	
+      Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "editor");
+      
       // get the size of the screen
       int editorPanelHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int editorPanelWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -135,13 +135,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       int guiHeight = infoBox.getHeight();
       editorPanelHeight -= guiHeight;
       window.remove(infoBox);
-      Logger.consolePrint("Removing height of gui of: " + infoBox.getSize(), "editor");      
+      Logger.consolePrint("Removing height of gui of: " + infoBox.getSize(), "editor");
       
       // further reduce them until divisible by 128, 64, 32, and 16
       while(editorPanelWidth % 64 != 0 || editorPanelWidth % 32 != 0 || editorPanelWidth % 128 != 0 || editorPanelWidth % 16 != 0)
-      	editorPanelWidth--;
+         editorPanelWidth--;
       while(editorPanelHeight % 64 != 0 || editorPanelHeight % 32 != 0 || editorPanelHeight % 128 != 0 || editorPanelHeight % 16 != 0)
-      	editorPanelHeight--;
+         editorPanelHeight--;
       Logger.consolePrint("Final reduction resulting in panel size of: " + editorPanelWidth + "x" + editorPanelHeight, "editor");
       
       int tileSize = 128;
@@ -166,7 +166,7 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       if(System.getProperty("os.name").equals("Linux"))
          window.setSize(editorPanelWidth, editorPanelHeight);
       else {
-      	Logger.consolePrint("Inset left = " + window.getInsets().left, "editor");
+         Logger.consolePrint("Inset left = " + window.getInsets().left, "editor");
          Logger.consolePrint("Inset right = " + window.getInsets().right, "editor");
          Logger.consolePrint("Inset top = " + window.getInsets().top, "editor");
          Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "editor");

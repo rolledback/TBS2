@@ -23,7 +23,7 @@ public class ComputerTeamD extends ComputerTeam {
       CAPTURE, ENEMY;
    }
    
-   final int animationDelay = 100;
+   final int animationDelay = 0;
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
@@ -76,45 +76,18 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public Coordinate simpleMove(Unit u) {
-      Object[] closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.ENEMY, opponent);
-      int closestEnemyDistance = (int)closestEnemyTuple[0];
-      Tile closesestEnemyTile = (Tile)closestEnemyTuple[2];
+      Object[] closestEnemyTuple;
+      if(u.getClassification() != UNIT_CLASS.INFANTRY)
+         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.ENEMY, opponent);
+      else
+         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.CAPTURE, opponent);
       
-      Coordinate bestMoveSpot = null;
-      int minMoveDistance = Integer.MAX_VALUE;
-      if(closesestEnemyTile != null) {
-         minMoveDistance = closestEnemyDistance;
-         for(Coordinate c: u.getMoveSet()) {
-            int d;
-            if(closestEnemyDistance < game.getWidth() / 2)
-               d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closesestEnemyTile.getX(), closesestEnemyTile.getY(), u);
-            else
-               d = distanceForumula(c.getX(), c.getY(), closesestEnemyTile.getX(), closesestEnemyTile.getY());
-            if(d < minMoveDistance) {
-               bestMoveSpot = c;
-               minMoveDistance = d;
-            }
-         }
-      }
-      if(u.getClassification() == UNIT_CLASS.INFANTRY) {
-         Object[] closestCaptureTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.CAPTURE, opponent);
-         int closestCaptureDisance = (int)closestCaptureTuple[0];
-         Tile closestCaptureTile = (Tile)closestCaptureTuple[2];
-         
-         if(closestCaptureTile != null && closestCaptureDisance < closestEnemyDistance) {
-            for(Coordinate c: u.getMoveSet()) {
-               int d;
-               if(closestEnemyDistance < game.getWidth() / 2)
-                  d = distance(game.getWorld().getTiles(), c.getX(), c.getY(), closestCaptureTile.getX(), closestCaptureTile.getY(), u);
-               else
-                  d = distanceForumula(c.getX(), c.getY(), closestCaptureTile.getX(), closestCaptureTile.getY());
-               if(d < minMoveDistance) {
-                  bestMoveSpot = c;
-                  minMoveDistance = d;
-               }
-            }
-         }
-      }
+      int closestEnemyDistance = (int)closestEnemyTuple[0];
+      if(closestEnemyDistance == Integer.MAX_VALUE)
+         return null;
+      CoordinateNode bestMoveSpotNode = (CoordinateNode)closestEnemyTuple[2];
+      
+      Coordinate bestMoveSpot = new Coordinate(bestMoveSpotNode.getX(), bestMoveSpotNode.getY());
       return bestMoveSpot;
    }
    
@@ -200,32 +173,49 @@ public class ComputerTeamD extends ComputerTeam {
    
    public Object[] closestObject(Tile[][] world, Unit unit, BFS_TYPE mission, Team targetOwner) {
       Object[] resultsTuple = new Object[3];
-      LinkedList<Tile> queue = new LinkedList<Tile>();
-      HashSet<Tile> set = new HashSet<Tile>();
-      set.add(world[unit.getY()][unit.getX()]);
-      queue.offer(world[unit.getY()][unit.getX()]);
+      
+      LinkedList<CoordinateNode> queue = new LinkedList<CoordinateNode>();
+      HashSet<CoordinateNode> set = new HashSet<CoordinateNode>();
+      
+      queue.offer(new CoordinateNode(true, null, unit.getX(), unit.getY()));
+      set.add(queue.peek());
       queue.offer(null);
       world[unit.getY()][unit.getX()].setOccupied(false);
-      int distance = 0;
       
+      int distance = 0;
       while(queue.size() > 1) {
-         Tile t = queue.poll();
-         if(t == null) {
+         CoordinateNode n = queue.poll();
+         
+         if(n == null) {
             distance++;
             queue.offer(null);
+            continue;
          }
-         else if(mission == BFS_TYPE.CAPTURE && unit.canCapture(t)) {
+         Tile t = world[n.getY()][n.getX()];
+         if(mission == BFS_TYPE.CAPTURE && (unit.canCapture(t) || (t.isOccupied() && t.getOccupiedBy().getOwner().equals(targetOwner)))) {
             world[unit.getY()][unit.getX()].setOccupied(true);
+            
+            CoordinateNode moveNode = n;
+            while(moveNode != null && !moveNode.isReachable()) {
+               moveNode = moveNode.getPrev();
+            }
             resultsTuple[0] = distance;
             resultsTuple[1] = new Coordinate(t.getX(), t.getY());
-            resultsTuple[2] = t;
+            resultsTuple[2] = moveNode;
+            
             return resultsTuple;
          }
          else if(mission == BFS_TYPE.ENEMY && t.isOccupied() && t.getOccupiedBy().getOwner().equals(targetOwner)) {
             world[unit.getY()][unit.getX()].setOccupied(true);
+            
+            CoordinateNode moveNode = n;
+            while(moveNode != null && !moveNode.isReachable()) {
+               moveNode = moveNode.getPrev();
+            }
             resultsTuple[0] = distance;
             resultsTuple[1] = new Coordinate(t.getX(), t.getY());
-            resultsTuple[2] = t;
+            resultsTuple[2] = moveNode;
+            
             return resultsTuple;
          }
          else {
@@ -235,15 +225,18 @@ public class ComputerTeamD extends ComputerTeam {
                try {
                   int r = t.getY() + yDirs[i];
                   int c = t.getX() + xDirs[i];
-                  if(!set.contains(world[r][c])) {
+                  CoordinateNode temp = new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), n, c, r);
+                  if(!set.contains(temp)) {
                      // if you are looking for an enemy then you can offer anything on to the queue
                      // if you are looking for a city, you only want to offer passable tiles onto
                      // the queue
-                     if(!world[r][c].isOccupied() || (world[r][c].isOccupied() && world[r][c].getOccupiedBy().getOwner().equals(this)) || mission == BFS_TYPE.ENEMY)
-                        if(unit.canTraverse(world[r][c])) {
-                           set.add(world[r][c]);
-                           queue.offer(world[r][c]);
-                        }
+                     // if(!world[r][c].isOccupied() || (world[r][c].isOccupied() &&
+                     // world[r][c].getOccupiedBy().getOwner().equals(this)) || mission ==
+                     // BFS_TYPE.ENEMY || true)
+                     if(unit.canTraverse(world[r][c])) {
+                        queue.offer(temp);
+                        set.add(temp);
+                     }
                   }
                }
                catch(Exception e) {
@@ -304,4 +297,68 @@ public class ComputerTeamD extends ComputerTeam {
       world[unit.getY()][unit.getX()].setOccupied(true);
       return distance;
    }
+}
+
+class CoordinateNode {
+   
+   private boolean reachable;
+   private CoordinateNode prev;
+   private int x;
+   private int y;
+   
+   public CoordinateNode(boolean r, CoordinateNode p, int x, int y) {
+      setReachable(r);
+      setPrev(p);
+      this.x = x;
+      this.y = y;
+   }
+   
+   public boolean equals(Object compare) {
+      if(compare == null)
+         return false;
+      if(compare.getClass() != this.getClass())
+         return false;
+      return ((CoordinateNode)compare).getX() == this.getX() && ((CoordinateNode)compare).getY() == this.getY();
+   }
+   
+   public int hashCode() {
+      return (this.getX() * 31) + this.getY();
+   }
+   
+   public String toString() {
+      return "x: " + x + " y: " + y;
+   }
+   
+   public boolean isReachable() {
+      return reachable;
+   }
+   
+   public void setReachable(boolean reachable) {
+      this.reachable = reachable;
+   }
+   
+   public CoordinateNode getPrev() {
+      return prev;
+   }
+   
+   public void setPrev(CoordinateNode prev) {
+      this.prev = prev;
+   }
+   
+   public int getX() {
+      return x;
+   }
+   
+   public void setX(int x) {
+      this.x = x;
+   }
+   
+   public int getY() {
+      return y;
+   }
+   
+   public void setY(int y) {
+      this.y = y;
+   }
+   
 }

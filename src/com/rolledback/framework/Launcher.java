@@ -162,8 +162,8 @@ public class Launcher {
          screenWidth--;
       while(screenHeight % 64 != 0 || screenHeight % 32 != 0 || screenHeight % 128 != 0 || screenHeight % 16 != 0)
          screenHeight--;
-
-      int[] d = { screenWidth / size, screenHeight / size };      
+      
+      int[] d = { screenWidth / size, screenHeight / size };
       return d;
    }
    
