@@ -21,8 +21,8 @@ public class ComputerAnalysis {
       File coordinateDump = new File("dump.txt");
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
-      int width = 26;
-      int height = 14;
+      int width = 22;
+      int height = 10;
       int size = 64;
       
       for(int x = 0; x < width; x++)

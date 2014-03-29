@@ -34,7 +34,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
    }
    
-   ArrayList<Coordinate> history = new ArrayList<Coordinate>();
+   public ArrayList<Coordinate> history = new ArrayList<Coordinate>();
    
    private static final long serialVersionUID = 1L;
    public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, selectedX, selectedY;
@@ -180,26 +180,6 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          temp.setMoved(false);
          temp.setAttacked(false);
       }
-      
-      // if(teamOne.getUnits().size() == 1) {
-      // drawDetectorOne++;
-      // if(drawDetectorOne == 30) {
-      // teamOne.getUnits().clear();
-      // Logger.consolePrint("default win detected", "game");
-      // }
-      // }
-      // else
-      // drawDetectorOne = 0;
-      //
-      // if(teamTwo.getUnits().size() == 1) {
-      // drawDetectorTwo++;
-      // if(drawDetectorTwo == 30) {
-      // teamTwo.getUnits().clear();
-      // Logger.consolePrint("default win detected", "game");
-      // }
-      // }
-      // else
-      // drawDetectorTwo = 0;
       
       for(City c: currentTeam.getCities())
          c.produceResources();

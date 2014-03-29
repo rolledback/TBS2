@@ -33,16 +33,13 @@ public class GameGUI extends JPanel {
    private Image tImage;
    
    private JPanel unitPanel;
-   private GridLayout unitLayout;
-   
+   private GridLayout unitLayout;   
    private JLabel unitName;
    private JLabel unitHealth;
-   private JLabel unitInfAttack;
-   private JLabel unitVehAttack;
    private JLabel unitDefense;
    private JLabel unitMove;
-   private JPanel terrainPanel;
    
+   private JPanel terrainPanel;   
    private GridLayout terrainLayout;
    private JLabel terrainName;
    private JLabel attackBonus;
@@ -50,8 +47,7 @@ public class GameGUI extends JPanel {
    private JLabel moveBonus;
    
    private JPanel teamInfoPanel;
-   private GridLayout teamLayout;
-   
+   private GridLayout teamLayout;   
    private JPanel teamOnePanel;
    private GridLayout teamOneLayout;
    private JLabel nameOne;
@@ -142,12 +138,6 @@ public class GameGUI extends JPanel {
       unitHealth = new JLabel();
       unitHealth.setText("Health: 100");
       
-      unitInfAttack = new JLabel();
-      unitInfAttack.setText("Inf Atk: 100-100");
-      
-      unitVehAttack = new JLabel();
-      unitVehAttack.setText("Veh Atk: 100-100");
-      
       unitDefense = new JLabel();
       unitDefense.setText("Def: 100");
       
@@ -156,8 +146,6 @@ public class GameGUI extends JPanel {
       
       unitPanel.add(unitName);
       unitPanel.add(unitHealth);
-      unitPanel.add(unitInfAttack);
-      unitPanel.add(unitVehAttack);
       unitPanel.add(unitDefense);
       unitPanel.add(unitMove);
       
@@ -285,8 +273,6 @@ public class GameGUI extends JPanel {
       if(unit != null) {
          unitName.setText("Type: " + unit.getType().toString());
          unitHealth.setText("Health: " + unit.getHealth() + "/" + unit.getMaxHealth());
-         unitInfAttack.setText("Inf Atk: " + unit.getMinInfantryAttack() + "-" + unit.getMaxInfantryAttack());
-         unitVehAttack.setText("Veh Atk: " + unit.getMinVehicleAttack() + "-" + unit.getMaxVehicleAttack());
          unitDefense.setText("Def: " + Integer.toString(unit.getDefense()));
          unitMove.setText("Move Range: " + Integer.toString(unit.getMoveRange()));
          uImage = unit.getRightTexture();
@@ -294,8 +280,6 @@ public class GameGUI extends JPanel {
       else {
          unitName.setText("Type: ");
          unitHealth.setText("Health: ");
-         unitInfAttack.setText("Inf Atk: ");
-         unitVehAttack.setText("Veh Atk: ");
          unitDefense.setText("Def: ");
          unitMove.setText("Move Range: ");
          uImage = null;

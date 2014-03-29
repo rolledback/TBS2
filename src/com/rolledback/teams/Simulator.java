@@ -1,13 +1,16 @@
-
-package com.rolledback.framework;
+package com.rolledback.teams;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.Box;
@@ -17,8 +20,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Launcher {
-   
+import com.rolledback.framework.Coordinate;
+import com.rolledback.framework.Game;
+import com.rolledback.framework.GameGUI;
+import com.rolledback.framework.Launcher;
+import com.rolledback.framework.Logger;
+
+public class Simulator {
    static private int winFractionHeight = 10;
    static private int winFractionWidth = 4;
    
@@ -169,86 +177,107 @@ public class Launcher {
    }
    
    public static void init(int x, int y, String fileName) {
-      Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "launcher");
-      
-      // get the size of the screen
-      int gamePanelHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
-      int gamePanelWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
-      Logger.consolePrint("Screen resolution: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
-      
-      // reduce the dimensions
-      gamePanelHeight -= (int)((double)gamePanelHeight / winFractionHeight);
-      gamePanelWidth -= (int)((double)gamePanelWidth / winFractionWidth);
-      Logger.consolePrint("Initial reduction resulting in screen size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
-      
-      // create the game window
-      Logger.consolePrint("Constructing game window.", "launcher");
-      JFrame window = new JFrame("TBS 2");
-      window.setResizable(false);
-      window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      window.getContentPane().setLayout(new BorderLayout());
-      
-      // create and add the GUI to the game window
-      GameGUI infoBox = new GameGUI();
-      window.add(infoBox, BorderLayout.SOUTH);
-      window.pack();
-      
-      // remove how tall the GUI is from the gamePanel's height
-      int guiHeight = infoBox.getHeight();
-      gamePanelHeight -= guiHeight;
-      infoBox.fixComponents();
-      Logger.consolePrint("Intial gui dimensions: " + infoBox.getSize(), "launcher");
-      
-      // further reduce the dimensions until divisible by 128, 64, 32, and 16
-      while(gamePanelWidth % 64 != 0 || gamePanelWidth % 32 != 0 || gamePanelWidth % 128 != 0 || gamePanelWidth % 16 != 0)
-         gamePanelWidth--;
-      while(gamePanelHeight % 64 != 0 || gamePanelHeight % 32 != 0 || gamePanelHeight % 128 != 0 || gamePanelHeight % 16 != 0)
-         gamePanelHeight--;
-      Logger.consolePrint("Final reduction resulting in panel size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
-      
-      // find out what tile size will first fit the given width and height (x, y)
-      int tileSize = 128;
-      int gameWidth = x;
-      int gameHeight = y;
-      
-      while((gameWidth * tileSize > gamePanelWidth || gameHeight * tileSize > gamePanelHeight) && tileSize >= 1)
-         tileSize /= 2;
-      Logger.consolePrint("Tile size: " + tileSize, "launcher");
-      
-      // calculate the offset
-      int offsetHorizontal = gamePanelWidth - (gameWidth * tileSize);
-      int offsetVertical = gamePanelHeight - (gameHeight * tileSize);
-      
-      // initialize the game and add it to the window
-      Game gamePanel = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, fileName, infoBox);
-      gamePanel.setSize(gamePanelWidth, gamePanelHeight);
-      gamePanel.createBackground();
-      window.add(gamePanel, BorderLayout.CENTER);
-      infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.teamOne, gamePanel.teamTwo);
-      
-      // set the game size and finish up creating the window
-      gamePanel.setPreferredSize(new Dimension(gamePanelWidth, gamePanelHeight));
-      gamePanel.setSize(gamePanel.getPreferredSize());
-      Logger.consolePrint("Resizing using rules for OS: " + System.getProperty("os.name"), "launcher");
-      if(System.getProperty("os.name").equals("Linux"))
-         window.setSize(gamePanelWidth, gamePanelHeight + guiHeight);
-      else {
-         Logger.consolePrint("Inset left = " + window.getInsets().left, "launcher");
-         Logger.consolePrint("Inset right = " + window.getInsets().right, "launcher");
-         Logger.consolePrint("Inset top = " + window.getInsets().top, "launcher");
-         Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "launcher");
-         window.setSize(gamePanelWidth + window.getInsets().right + window.getInsets().left, gamePanelHeight + window.getInsets().top + window.getInsets().bottom + infoBox.getHeight());
+      int[] winners = new int[2];
+      for(int i = 0; i < 100000; i++) {
+         Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "launcher");
+         
+         // get the size of the screen
+         int gamePanelHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+         int gamePanelWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+         Logger.consolePrint("Screen resolution: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         
+         // reduce the dimensions
+         gamePanelHeight -= (int)((double)gamePanelHeight / winFractionHeight);
+         gamePanelWidth -= (int)((double)gamePanelWidth / winFractionWidth);
+         Logger.consolePrint("Initial reduction resulting in screen size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         
+         // create the game window
+         Logger.consolePrint("Constructing game window.", "launcher");
+         JFrame window = new JFrame("TBS 2 " + Arrays.toString(winners));
+         window.setResizable(false);
+         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         window.getContentPane().setLayout(new BorderLayout());
+         
+         // create and add the GUI to the game window
+         GameGUI infoBox = new GameGUI();
+         window.add(infoBox, BorderLayout.SOUTH);
+         window.pack();
+         
+         // remove how tall the GUI is from the gamePanel's height
+         int guiHeight = infoBox.getHeight();
+         gamePanelHeight -= guiHeight;
+         infoBox.fixComponents();
+         Logger.consolePrint("Intial gui dimensions: " + infoBox.getSize(), "launcher");
+         
+         // further reduce the dimensions until divisible by 128, 64, 32, and 16
+         while(gamePanelWidth % 64 != 0 || gamePanelWidth % 32 != 0 || gamePanelWidth % 128 != 0 || gamePanelWidth % 16 != 0)
+            gamePanelWidth--;
+         while(gamePanelHeight % 64 != 0 || gamePanelHeight % 32 != 0 || gamePanelHeight % 128 != 0 || gamePanelHeight % 16 != 0)
+            gamePanelHeight--;
+         Logger.consolePrint("Final reduction resulting in panel size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         
+         // find out what tile size will first fit the given width and height (x, y)
+         int tileSize = 128;
+         int gameWidth = x;
+         int gameHeight = y;
+         
+         while((gameWidth * tileSize > gamePanelWidth || gameHeight * tileSize > gamePanelHeight) && tileSize >= 1)
+            tileSize /= 2;
+         Logger.consolePrint("Tile size: " + tileSize, "launcher");
+         
+         // calculate the offset
+         int offsetHorizontal = gamePanelWidth - (gameWidth * tileSize);
+         int offsetVertical = gamePanelHeight - (gameHeight * tileSize);
+         
+         // initialize the game and add it to the window
+         Game gamePanel = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, fileName, infoBox);
+         gamePanel.setSize(gamePanelWidth, gamePanelHeight);
+         gamePanel.createBackground();
+         window.add(gamePanel, BorderLayout.CENTER);
+         infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.teamOne, gamePanel.teamTwo);
+         
+         // set the game size and finish up creating the window
+         gamePanel.setPreferredSize(new Dimension(gamePanelWidth, gamePanelHeight));
+         gamePanel.setSize(gamePanel.getPreferredSize());
+         Logger.consolePrint("Resizing using rules for OS: " + System.getProperty("os.name"), "launcher");
+         if(System.getProperty("os.name").equals("Linux"))
+            window.setSize(gamePanelWidth, gamePanelHeight + guiHeight);
+         else {
+            Logger.consolePrint("Inset left = " + window.getInsets().left, "launcher");
+            Logger.consolePrint("Inset right = " + window.getInsets().right, "launcher");
+            Logger.consolePrint("Inset top = " + window.getInsets().top, "launcher");
+            Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "launcher");
+            window.setSize(gamePanelWidth + window.getInsets().right + window.getInsets().left, gamePanelHeight + window.getInsets().top + window.getInsets().bottom + infoBox.getHeight());
+         }
+         window.setVisible(true);
+         Logger.consolePrint("Final window dimensions: " + window.getSize(), "launcher");
+         Logger.consolePrint("Final game panel dimensions: " + gamePanel.getSize(), "launcher");
+         Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "launcher");
+         
+         // setup complete, run the game
+         Logger.consolePrint("Running game.", "launcher");
+         gamePanel.run();
+         if(gamePanel.winner.equals(gamePanel.teamOne)) 
+            winners[0]++;
+         else
+            winners[1]++;
+         if(!window.isVisible()) {
+            System.out.println(Arrays.toString(winners));
+         }
+
+         try {
+            PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
+            for(Coordinate c: gamePanel.history)
+               out.println(c.getX() + " " + c.getY());
+            out.close();
+         }
+         catch(FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+         
+         window.dispose();
+         window = null;
       }
-      window.setVisible(true);
-      Logger.consolePrint("Final window dimensions: " + window.getSize(), "launcher");
-      Logger.consolePrint("Final game panel dimensions: " + gamePanel.getSize(), "launcher");
-      Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "launcher");
-      
-      // setup complete, run the game
-      Logger.consolePrint("Running game.", "launcher");
-      gamePanel.run();
-      JOptionPane.showMessageDialog(new JFrame(), "Winner: " + gamePanel.winner.getName(), "WIN", JOptionPane.INFORMATION_MESSAGE);
-      System.exit(1);
    }
-   
 }

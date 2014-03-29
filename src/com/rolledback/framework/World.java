@@ -2,6 +2,8 @@ package com.rolledback.framework;
 
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 import com.rolledback.mapping.Cartographer;
@@ -17,6 +19,7 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
+import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class World {
@@ -32,8 +35,11 @@ public class World {
       heightMap = new int[h][w];
       teamOne = a;
       teamTwo = b;
-      if(fileToLoad.equals(""))
-         buildMap();
+      if(fileToLoad.equals("")) {
+         boolean accept = false;
+         while(!accept)
+            accept = buildMap();
+      }
       else
          tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this)[1];
    }
@@ -122,7 +128,7 @@ public class World {
       }
    }
    
-   public void buildMap() {
+   public boolean buildMap() {
       long start = System.currentTimeMillis();
       Logger.consolePrint("building map", "map");
       Logger.consolePrint("dimensions: " + width + ", " + height, "map");
@@ -134,6 +140,52 @@ public class World {
       placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5)));
       long end = System.currentTimeMillis();
       Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)", "map");
+      return validMap();
+   }
+   
+   public boolean validMap() {
+      HashSet<Coordinate> notVisited = new HashSet<Coordinate>();
+      for(int r = 0; r < height; r++)
+         for(int c = 0; c < width; c++)
+            notVisited.add(new Coordinate(c, r));
+      
+      int firstX = 0;
+      int firstY = 0;
+      while(tiles[firstY][firstX].getType() == TILE_TYPE.RIVER) {
+         Random rand = new Random();
+         firstX = rand.nextInt(width);
+         firstY = rand.nextInt(height);
+      }
+      
+      LinkedList<Tile> queue = new LinkedList<Tile>();
+      HashSet<Tile> set = new HashSet<Tile>();
+      queue.offer(tiles[0][0]);
+      while(queue.size() > 0) {
+         Tile t = queue.poll();
+         int[] yDirs = { 0, 0, 1, -1 };
+         int[] xDirs = { 1, -1, 0, 0 };
+         for(int i = 0; i < 4; i++)
+            try {
+               if(!set.contains(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]])) {
+                  if(!tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isOccupied())
+                     if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isVehiclePassable()) {
+                        // the previous if statement should be both veh and inf, but AI updates are needed before this can happen
+                        set.add(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
+                        notVisited.remove(new Coordinate(t.getX() + xDirs[i], t.getY() + yDirs[i]));
+                        queue.offer(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
+                     }
+               }
+            }
+            catch(Exception e) {
+               // out of bounds
+            }         
+      }
+      
+      for(Coordinate c: notVisited)
+         if(tiles[c.getY()][c.getX()].getType() != TILE_TYPE.RIVER && tiles[c.getY()][c.getX()].getType() != TILE_TYPE.MOUNTAIN)
+            return false;
+      
+      return true;
    }
    
    public void initialTerrain() {
