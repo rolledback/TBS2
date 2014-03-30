@@ -1,12 +1,12 @@
 package com.rolledback.units;
 
 import java.awt.Image;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.World;
+import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.Team;
 import com.rolledback.teams.Technology;
 import com.rolledback.terrain.CapturableTile;
@@ -165,6 +165,8 @@ public class Unit {
    }
    
    public void move(Tile tile) {
+      if(tile.getType() == TILE_TYPE.RIVER)
+         ((ComputerTeam)owner).delay(100000);
       if(x < tile.getX())
          setDir(DIRECTION.RIGHT);
       if(x > tile.getX())

@@ -37,8 +37,13 @@ public class World {
       teamTwo = b;
       if(fileToLoad.equals("")) {
          boolean accept = false;
-         while(!accept)
+         while(!accept) {
             accept = buildMap();
+            if(!accept) {
+               Logger.consolePrint("Map rejected.", "temp");
+               resetMap();
+            }
+         }
       }
       else
          tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this)[1];
@@ -141,6 +146,13 @@ public class World {
       long end = System.currentTimeMillis();
       Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)", "map");
       return validMap();
+   }
+   
+   public void resetMap() {
+      tiles = new Tile[height][width];;
+      heightMap = new int[height][width];;
+      teamOne.getFactories().clear();
+      teamTwo.getFactories().clear();
    }
    
    public boolean validMap() {

@@ -29,9 +29,11 @@ import com.rolledback.framework.Logger;
 public class Simulator {
    static private int winFractionHeight = 10;
    static private int winFractionWidth = 4;
+   static private boolean watchSim = true;
+   static private boolean printDump = false;
    
    public static void main(String args[]) {
-      Logger.consolePrint("Getting map files.", "launcher");
+      Logger.consolePrint("Getting map files.", "simulator");
       File directory = new File("maps");
       // if you are editing in eclipse, looks at files in the map folder in the
       // workspace
@@ -67,12 +69,12 @@ public class Simulator {
       int[] dimensions = new int[0];
       String fileToLoad = "";
       if(tileSize == -1) {
-         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose map:", "Launcher", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+         Object s = JOptionPane.showInputDialog(new JPanel(), "Choose map:", "simulator", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
          if(s != null) {
             String choice = (String)s;
-            Logger.consolePrint("Combobox choice: " + choice, "launcher");
+            Logger.consolePrint("Combobox choice: " + choice, "simulator");
             if(choice.equals("Random Size")) {
-               Logger.consolePrint("Choosing a random tile size.", "launcher");
+               Logger.consolePrint("Choosing a random tile size.", "simulator");
                int[] sizes = { 8, 16, 32, 64, 128 };
                tileSize = sizes[new Random().nextInt(sizes.length)];
                dimensions = Launcher.autoCalcDimensions(tileSize);
@@ -92,7 +94,7 @@ public class Simulator {
                   if(result == JOptionPane.OK_OPTION) {
                      x = Integer.parseInt(xField.getText());
                      y = Integer.parseInt(yField.getText());
-                     Logger.consolePrint("User input of: " + x + "x" + y + ".", "launcher");
+                     Logger.consolePrint("User input of: " + x + "x" + y + ".", "simulator");
                   }
                }
                catch(Exception e) {
@@ -101,7 +103,7 @@ public class Simulator {
                }
             }
             else if(choice.contains(":")) {
-               Logger.consolePrint("File chosen.", "launcher");
+               Logger.consolePrint("File chosen.", "simulator");
                if(System.getProperty("os.name").equals("Linux"))
                   fileToLoad = directory + "/" + choice.substring(0, choice.lastIndexOf(":")) + ".map";
                else
@@ -163,7 +165,7 @@ public class Simulator {
       window.pack();
       
       int guiHeight = infoBox.getHeight();
-      Logger.consolePrint("Dummy gui dimensions: " + infoBox.getSize(), "launcher");
+      Logger.consolePrint("Dummy gui dimensions: " + infoBox.getSize(), "simulator");
       window.dispose();
       screenHeight -= guiHeight;
       
@@ -179,20 +181,20 @@ public class Simulator {
    public static void init(int x, int y, String fileName) {
       int[] winners = new int[2];
       for(int i = 0; i < 100000; i++) {
-         Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "launcher");
+         Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "simulator");
          
          // get the size of the screen
          int gamePanelHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
          int gamePanelWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
-         Logger.consolePrint("Screen resolution: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         Logger.consolePrint("Screen resolution: " + gamePanelWidth + "x" + gamePanelHeight, "simulator");
          
          // reduce the dimensions
          gamePanelHeight -= (int)((double)gamePanelHeight / winFractionHeight);
          gamePanelWidth -= (int)((double)gamePanelWidth / winFractionWidth);
-         Logger.consolePrint("Initial reduction resulting in screen size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         Logger.consolePrint("Initial reduction resulting in screen size of: " + gamePanelWidth + "x" + gamePanelHeight, "simulator");
          
          // create the game window
-         Logger.consolePrint("Constructing game window.", "launcher");
+         Logger.consolePrint("Constructing game window.", "simulator");
          JFrame window = new JFrame("TBS 2 " + Arrays.toString(winners));
          window.setResizable(false);
          window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -207,14 +209,14 @@ public class Simulator {
          int guiHeight = infoBox.getHeight();
          gamePanelHeight -= guiHeight;
          infoBox.fixComponents();
-         Logger.consolePrint("Intial gui dimensions: " + infoBox.getSize(), "launcher");
+         Logger.consolePrint("Intial gui dimensions: " + infoBox.getSize(), "simulator");
          
          // further reduce the dimensions until divisible by 128, 64, 32, and 16
          while(gamePanelWidth % 64 != 0 || gamePanelWidth % 32 != 0 || gamePanelWidth % 128 != 0 || gamePanelWidth % 16 != 0)
             gamePanelWidth--;
          while(gamePanelHeight % 64 != 0 || gamePanelHeight % 32 != 0 || gamePanelHeight % 128 != 0 || gamePanelHeight % 16 != 0)
             gamePanelHeight--;
-         Logger.consolePrint("Final reduction resulting in panel size of: " + gamePanelWidth + "x" + gamePanelHeight, "launcher");
+         Logger.consolePrint("Final reduction resulting in panel size of: " + gamePanelWidth + "x" + gamePanelHeight, "simulator");
          
          // find out what tile size will first fit the given width and height (x, y)
          int tileSize = 128;
@@ -223,7 +225,7 @@ public class Simulator {
          
          while((gameWidth * tileSize > gamePanelWidth || gameHeight * tileSize > gamePanelHeight) && tileSize >= 1)
             tileSize /= 2;
-         Logger.consolePrint("Tile size: " + tileSize, "launcher");
+         Logger.consolePrint("Tile size: " + tileSize, "simulator");
          
          // calculate the offset
          int offsetHorizontal = gamePanelWidth - (gameWidth * tileSize);
@@ -239,45 +241,45 @@ public class Simulator {
          // set the game size and finish up creating the window
          gamePanel.setPreferredSize(new Dimension(gamePanelWidth, gamePanelHeight));
          gamePanel.setSize(gamePanel.getPreferredSize());
-         Logger.consolePrint("Resizing using rules for OS: " + System.getProperty("os.name"), "launcher");
+         Logger.consolePrint("Resizing using rules for OS: " + System.getProperty("os.name"), "simulator");
          if(System.getProperty("os.name").equals("Linux"))
             window.setSize(gamePanelWidth, gamePanelHeight + guiHeight);
          else {
-            Logger.consolePrint("Inset left = " + window.getInsets().left, "launcher");
-            Logger.consolePrint("Inset right = " + window.getInsets().right, "launcher");
-            Logger.consolePrint("Inset top = " + window.getInsets().top, "launcher");
-            Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "launcher");
+            Logger.consolePrint("Inset left = " + window.getInsets().left, "simulator");
+            Logger.consolePrint("Inset right = " + window.getInsets().right, "simulator");
+            Logger.consolePrint("Inset top = " + window.getInsets().top, "simulator");
+            Logger.consolePrint("Inset bottom = " + window.getInsets().bottom, "simulator");
             window.setSize(gamePanelWidth + window.getInsets().right + window.getInsets().left, gamePanelHeight + window.getInsets().top + window.getInsets().bottom + infoBox.getHeight());
          }
-         window.setVisible(true);
-         Logger.consolePrint("Final window dimensions: " + window.getSize(), "launcher");
-         Logger.consolePrint("Final game panel dimensions: " + gamePanel.getSize(), "launcher");
-         Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "launcher");
+         if(watchSim)
+            window.setVisible(true);
+         Logger.consolePrint("Final window dimensions: " + window.getSize(), "simulator");
+         Logger.consolePrint("Final game panel dimensions: " + gamePanel.getSize(), "simulator");
+         Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "simulator");
          
          // setup complete, run the game
-         Logger.consolePrint("Running game.", "launcher");
+         Logger.consolePrint("Running game.", "simulator");
          gamePanel.run();
          if(gamePanel.winner.equals(gamePanel.teamOne)) 
             winners[0]++;
          else
             winners[1]++;
          if(!window.isVisible()) {
-            System.out.println(Arrays.toString(winners));
-         }
-
-         try {
-            PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
-            for(Coordinate c: gamePanel.history)
-               out.println(c.getX() + " " + c.getY());
-            out.close();
-         }
-         catch(FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.consolePrint(Arrays.toString(winners), "simulator");
          }
          
+         if(printDump)
+            try {
+               PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
+               for(Coordinate c: gamePanel.history)
+                  out.println(c.getX() + " " + c.getY());
+               out.close();
+            }
+            catch(FileNotFoundException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
          window.dispose();
-         window = null;
       }
    }
 }

@@ -15,9 +15,11 @@ public class Logger {
    // General error messages = error
    // Cartographer.java = cartographer
    // MapEditor.java = editor
+   // Simulator.java = simulator
+   // random stuffs = temp
    
-   private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("launcher", "game");
+   private static boolean consolePrintingOn = false;
+   private static List<String> validTags = asList("temp");
    private static int tagLength = 3;
    
    public static String timeStamp() {

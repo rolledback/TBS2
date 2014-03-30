@@ -33,7 +33,7 @@ public class EscMenu extends JDialog implements ActionListener {
       fc = new JFileChooser();
       
       // Create the open button
-      openButton = new JButton("Open a File...");
+      openButton = new JButton("Open File...");
       openButton.addActionListener(this);
       
       // Create the save button
