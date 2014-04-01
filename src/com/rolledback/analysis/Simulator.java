@@ -1,4 +1,4 @@
-package com.rolledback.teams;
+package com.rolledback.analysis;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -236,7 +236,7 @@ public class Simulator {
          gamePanel.setSize(gamePanelWidth, gamePanelHeight);
          gamePanel.createBackground();
          window.add(gamePanel, BorderLayout.CENTER);
-         infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.teamOne, gamePanel.teamTwo);
+         infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.getTeamOne(), gamePanel.getTeamTwo());
          
          // set the game size and finish up creating the window
          gamePanel.setPreferredSize(new Dimension(gamePanelWidth, gamePanelHeight));
@@ -260,7 +260,7 @@ public class Simulator {
          // setup complete, run the game
          Logger.consolePrint("Running game.", "simulator");
          gamePanel.run();
-         if(gamePanel.winner.equals(gamePanel.teamOne)) 
+         if(gamePanel.getWinner().equals(gamePanel.getTeamOne())) 
             winners[0]++;
          else
             winners[1]++;
@@ -271,7 +271,7 @@ public class Simulator {
          if(printDump)
             try {
                PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
-               for(Coordinate c: gamePanel.history)
+               for(Coordinate c: gamePanel.getClickHistory())
                   out.println(c.getX() + " " + c.getY());
                out.close();
             }

@@ -148,8 +148,8 @@ public class ComputerTeamC extends ComputerTeam {
       // find the locations of all cities (Should cache this)
       if(cityLocations == null) {
          cityLocations = new ArrayList<Coordinate>();
-         for(int row = 0; row < game.gameHeight; row++)
-            for(int col = 0; col < game.gameWidth; col++)
+         for(int row = 0; row < game.getGameHeight(); row++)
+            for(int col = 0; col < game.getGameWidth(); col++)
                if(game.getWorld().getTiles()[row][col].getType() == TILE_TYPE.CITY)
                   cityLocations.add(new Coordinate(col, row));
       }

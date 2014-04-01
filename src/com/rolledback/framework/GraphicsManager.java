@@ -8,13 +8,20 @@ import javax.imageio.ImageIO;
 
 import com.rolledback.units.Unit.UNIT_TYPE;
 
+/**
+ * The GraphicsManager loads and stores all grapical related objects for the game. This includes
+ * tile textures and unit images.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class GraphicsManager {
    
    private static Image[] unitImages;
    private static LinkedHashMap<String, Image> tileTextures;
    
    static {
-      tileTextures = new LinkedHashMap<String, Image>(); 
+      tileTextures = new LinkedHashMap<String, Image>();
       Logger.consolePrint("loading tile textures", "manager");
       try {
          tileTextures.put("grass.png", ImageIO.read(GraphicsManager.class.getClassLoader().getResource("grass.png")));
@@ -88,6 +95,14 @@ public class GraphicsManager {
       }
    }
    
+   /**
+    * Given a specific unit type and the number representing what color of unit is desired, returns
+    * an array containing both the left and right (in that order) facing images for that unit.
+    * 
+    * @param type the unit type for what image is wanted
+    * @param team represents what color of unit is wanted, 1 for red, 2 for blue
+    * @return array of images corresponding to type and team
+    */
    public static Image[] typetoImage(UNIT_TYPE type, int team) {
       Image[] ret = new Image[2];
       if(type == UNIT_TYPE.INFANTRY) {
@@ -133,12 +148,22 @@ public class GraphicsManager {
       return ret;
    }
    
+   /**
+    * Retrieves the array of unit textures.
+    * 
+    * @return the unitImages array.
+    */
    public static Image[] getUnitImages() {
       return unitImages;
    }
    
+   /**
+    * Returns the hash map of tile textures.
+    * 
+    * @return the tileTextures hash map.
+    */
    public static LinkedHashMap<String, Image> getTileTextures() {
       return tileTextures;
-   }   
+   }
    
 }

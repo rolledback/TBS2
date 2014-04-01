@@ -19,16 +19,34 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
-import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
+/**
+ * The world class contains all information and objects concerning the actual tile/terrain of the
+ * Game class. The primary object of the World class is the Tiles matrix. This matrix can either be
+ * randomly generated via the buildMap function, or is loaded from a .map file, as passed in by the
+ * fileToLoad variable in the primary world constructor.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class World {
    private Team teamOne, teamTwo;
    private Tile tiles[][];
    private int heightMap[][];
    private int width, height;
    
-   public World(int w, int h, Team a, Team b, int t, String fileToLoad) {
+   /**
+    * Primary constructor. Called by the Game.java constructor
+    * 
+    * @param w the width of the world (tiles)
+    * @param h the height of the world (tiles)
+    * @param a the first team of the game
+    * @param b the second team of the game
+    * @param fileToLoad if the user chose to load a map, this will be the file's name, empty string
+    *           if not loading a file.
+    */
+   public World(int w, int h, Team a, Team b, String fileToLoad) {
       width = w;
       height = h;
       tiles = new Tile[h][w];
@@ -49,11 +67,21 @@ public class World {
          tiles = (Tile[][])Cartographer.readMapFile(fileToLoad, tiles, this)[1];
    }
    
+   /**
+    * Dummy constructor. Used by the map editor. Only initializes the teams.
+    */
    public World() {
       teamOne = new Team("", 0, 0, 1);
       teamTwo = new Team("", 0, 0, 2);
    }
    
+   /**
+    * Secondary dummy constructor. Also used by the map editor. Used to generate a random map.
+    * 
+    * @param w
+    * @param h
+    * @param rivers
+    */
    public World(int w, int h, boolean rivers) {
       if(rivers) {
          width = w;
@@ -66,6 +94,9 @@ public class World {
       buildMap();
    }
    
+   /**
+    * Prints out the map, with tiles represented by their mapChar variable.
+    */
    public void printMap() {
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
@@ -75,6 +106,10 @@ public class World {
       }
    }
    
+   /**
+    * Prints out all the units on the map, uppercase letters belong to teamOne and lowercase belong
+    * to teamTwo.
+    */
    public void printUnits() {
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
@@ -103,6 +138,10 @@ public class World {
       }
    }
    
+   /**
+    * Prints out all the units on the map, uppercase letters belong to teamOne and lowercase belong
+    * to teamTwo. Also places an X at the given x, y location.
+    */
    public void printUnits(int x, int y) {
       for(int row = 0; row < height; row++) {
          for(int col = 0; col < width; col++) {
@@ -133,6 +172,13 @@ public class World {
       }
    }
    
+   /**
+    * Primary function fall for random map generation. First creates an initial set of basic
+    * terrain. Then a height map based on that terrain. After that rivers, factories, and cities are
+    * placed in that order.
+    * 
+    * @return whether or not the map is considered valid, based on the result of a call to validMap
+    */
    public boolean buildMap() {
       long start = System.currentTimeMillis();
       Logger.consolePrint("building map", "map");
@@ -148,13 +194,24 @@ public class World {
       return validMap();
    }
    
+   /**
+    * Resets all variables changed in the buildMap function. This includes resetting the tiles and
+    * height map matrix, and clearing each team's factory list.
+    */
    public void resetMap() {
-      tiles = new Tile[height][width];;
-      heightMap = new int[height][width];;
+      tiles = new Tile[height][width];
+      heightMap = new int[height][width];
       teamOne.getFactories().clear();
       teamTwo.getFactories().clear();
    }
    
+   /**
+    * Performs a breadth first search from the first non-river or non-mountain tile possible. Checks
+    * to make sure that all non-river & non-mountain tiles are then reachable from that tile. If all
+    * are not, then there the map is considered invalid.
+    * 
+    * @return false if the map is not valid as defined by the method description.
+    */
    public boolean validMap() {
       HashSet<Coordinate> notVisited = new HashSet<Coordinate>();
       for(int r = 0; r < height; r++)
@@ -163,7 +220,7 @@ public class World {
       
       int firstX = 0;
       int firstY = 0;
-      while(tiles[firstY][firstX].getType() == TILE_TYPE.RIVER) {
+      while(tiles[firstY][firstX].getType() == TILE_TYPE.RIVER || tiles[firstY][firstX].getType() == TILE_TYPE.MOUNTAIN) {
          Random rand = new Random();
          firstX = rand.nextInt(width);
          firstY = rand.nextInt(height);
@@ -181,7 +238,8 @@ public class World {
                if(!set.contains(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]])) {
                   if(!tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isOccupied())
                      if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isVehiclePassable()) {
-                        // the previous if statement should be both veh and inf, but AI updates are needed before this can happen
+                        // the previous if statement should be both veh and inf, but AI updates are
+                        // needed before this can happen
                         set.add(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                         notVisited.remove(new Coordinate(t.getX() + xDirs[i], t.getY() + yDirs[i]));
                         queue.offer(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
@@ -190,7 +248,7 @@ public class World {
             }
             catch(Exception e) {
                // out of bounds
-            }         
+            }
       }
       
       for(Coordinate c: notVisited)
@@ -200,6 +258,10 @@ public class World {
       return true;
    }
    
+   /**
+    * Randomly generates the initial terrain. Initial terrain being only plains, forests and
+    * mountains.
+    */
    public void initialTerrain() {
       Logger.consolePrint("creating initial terrain", "map");
       double numPlains = 0;
@@ -229,6 +291,11 @@ public class World {
       Logger.consolePrint("plains: " + numPlains * 100 + "% forest: " + numForests * 100 + "% mountains: " + numMountains * 100 + "%", "map");
    }
    
+   /**
+    * Creates the height map for a given map. Mountains are given a height of 3, while all adjacent
+    * tiles are given a height of 2, and then those adjacent to those a height of 1. The height map
+    * is used in the river generation process.
+    */
    public void createHeightMap() {
       Logger.consolePrint("creating height map", "map");
       double heightAvg = 0;
@@ -255,6 +322,10 @@ public class World {
       Logger.consolePrint("average height: " + heightAvg / (width * height), "map");
    }
    
+   /**
+    * Top level function call for the generation of rivers. Controls max river length, minimum river
+    * length, and the minimum number of rivers needed.
+    */
    public void generateRivers() {
       Logger.consolePrint("creating rivers", "map");
       int maxLength = (int)(Math.sqrt(height * height + width * width) / 2);
@@ -299,6 +370,14 @@ public class World {
       Logger.consolePrint(numGenerated + " rivers generated (" + rate + "% failure)", "map");
    }
    
+   /**
+    * Generates a singular river. Called by the generateRivers function.
+    * 
+    * @param MLE the max length estimate paramater. The river generated will have a max length in
+    *           the range of MLE / 2 to MLE.
+    * @return an ArrayList containing the coordinates that make up the river. The tiles at these
+    *         coordinate locations are not yet rivers though.
+    */
    public ArrayList<Coordinate> generateRiver(int MLE) {
       ArrayList<Coordinate> riverPath = new ArrayList<Coordinate>();
       Random rand = new Random();
@@ -337,6 +416,16 @@ public class World {
       return riverPath;
    }
    
+   /**
+    * Returns a random spot adjacent to the given row and col. The direction for the next spot is
+    * biased towards going to the left and downwards.
+    * 
+    * @param col x location of the current river spot.
+    * @param row y location of the current river spot.
+    * @param pathSoFar the path of the river up until this point.
+    * @return the next spot in the path, if null is returned then none of the 4 adjacent spots were
+    *         valid.
+    */
    public Coordinate nextRiverSpot(int col, int row, ArrayList<Coordinate> pathSoFar) {
       Coordinate next = null;
       int height = heightMap[row][col];
@@ -366,6 +455,14 @@ public class World {
       return next;
    }
    
+   /**
+    * Calculates the number of type river tiles next to the given spot.
+    * 
+    * @param col the x location of the spot being inspected
+    * @param row the y location of the spot being inspected
+    * @param pathSoFar the path so far of the current river
+    * @return the number of type river tiles next to the spot
+    */
    public int numRiverNextTo(int col, int row, ArrayList<Coordinate> pathSoFar) {
       int numRivers = 0;
       if(row + 1 < height && (pathSoFar.contains(new Coordinate(col, row + 1)) || tiles[row + 1][col].getType() == TILE_TYPE.RIVER))
@@ -379,6 +476,12 @@ public class World {
       return numRivers;
    }
    
+   /**
+    * Places bridges at random interior non-corner tiles on the river.
+    * 
+    * @param path all the coordinates of the river.
+    * @return number of bridges placed on the river.
+    */
    public int placeBridges(ArrayList<Coordinate> path) {
       Random rand = new Random();
       int spot = rand.nextInt(path.size());
@@ -415,6 +518,12 @@ public class World {
       return numBridges;
    }
    
+   /**
+    * Determines what texture each spot in the river should have based on the relative locations of
+    * the next and previous river spots.
+    * 
+    * @param riverPath the path of the river.
+    */
    public void setRiverTileDirections(ArrayList<Coordinate> riverPath) {
       int currX = riverPath.get(0).getX();
       int currY = riverPath.get(0).getY();
@@ -502,6 +611,13 @@ public class World {
       }
    }
    
+   /**
+    * Randomly places cities on the map.
+    * 
+    * @param numCities number of cities to place.
+    * @param min the lowest numbered column the cities can be placed on.
+    * @param max the highest numbered column the cities can be placed on.
+    */
    public void placeCities(int numCities, int min, int max) {
       Logger.consolePrint("placing " + numCities + " cities", "map");
       for(int x = 0; x < numCities; x++) {
@@ -521,6 +637,12 @@ public class World {
       
    }
    
+   /**
+    * Randomly places factories belonging to the given team on the map, two per column.
+    * 
+    * @param min the lowest numbered column the cities can be placed on.
+    * @param max the highest numbered column the cities can be placed on.
+    */
    public void placeFactories(Team team, int min, int max) {
       Logger.consolePrint("placing factories for " + team.getName(), "map");
       for(int col = min; col < max; col += 2) {
@@ -536,6 +658,13 @@ public class World {
       }
    }
    
+   /**
+    * Counts the number of mountains next to the given spot.
+    * 
+    * @param col the x location of the current spot.
+    * @param row the y location of the current spot.
+    * @return the number of mountains next to the current spot.
+    */
    public boolean mountainNextTo(int col, int row) {
       if(col < width - 1 && tiles[row][col + 1].getType() == TILE_TYPE.MOUNTAIN)
          return true;
@@ -548,62 +677,13 @@ public class World {
       return false;
    }
    
-   public void lookForTraps() {
-      boolean north, south, east, west;
-      for(int row = 0; row < tiles.length; row++) {
-         north = false;
-         south = false;
-         east = false;
-         west = false;
-         for(int col = 0; col < tiles[row].length; col++) {
-            north = row - 1 < 0 || tiles[row - 1][col].getType() == TILE_TYPE.MOUNTAIN;
-            south = row + 1 >= height || tiles[row + 1][col].getType() == TILE_TYPE.MOUNTAIN;
-            east = col + 1 >= width || tiles[row][col + 1].getType() == TILE_TYPE.MOUNTAIN;
-            west = col - 1 < 0 || tiles[row][col - 1].getType() == TILE_TYPE.MOUNTAIN;
-            if(north && south && east && west)
-               if(!(row - 1 < 0))
-                  tiles[row - 1][col] = new Plain(this, col, row - 1);
-               else if(!(row + 1 >= height))
-                  tiles[row + 1][col] = new Plain(this, col, row + 1);
-               else if(!(col + 1 >= width))
-                  tiles[row][col + 1] = new Plain(this, col + 1, row);
-               else
-                  tiles[row][col - 1] = new Plain(this, col - 1, row);
-         }
-      }
-   }
-   
-   public String mapKey() {
-      String key = height + "-" + width;
-      String terrainKeys[] = new String[height];
-      for(int row = 0; row < tiles.length; row++) {
-         terrainKeys[row] = "";
-         for(int col = 0; col < tiles[row].length; col++) {
-            char currentTile = tiles[row][col].getMapChar();
-            switch(currentTile) {
-               case ('p'):
-                  terrainKeys[row] += 0;
-               break;
-               case ('f'):
-                  terrainKeys[row] += 1;
-               break;
-               case ('m'):
-                  terrainKeys[row] += 2;
-               break;
-               case ('F'):
-                  terrainKeys[row] += 3;
-               break;
-               default:
-                  terrainKeys[row] += 0;
-               break;
-            }
-         }
-      }
-      for(int row = 0; row < tiles.length; row++)
-         key += '-' + terrainKeys[row];
-      return key.toString();
-   }
-   
+   /**
+    * Randomly generates and places an army on the map for the given team.
+    * 
+    * @param team team to which the units will be long to.
+    * @param minCol the lowest numbered column the units can be placed on.
+    * @param maxCol the highest numbered column the units can be placed on.
+    */
    public void buildArmy(Team team, int minCol, int maxCol) {
       Logger.consolePrint("Building army for: " + team.getName(), "map");
       int col = minCol;
@@ -634,13 +714,11 @@ public class World {
       Logger.consolePrint("Done building army for: " + team.getName(), "map");
    }
    
-   public void destroyUnit(Tile t) {
-      Unit toRemove = t.getOccupiedBy();
-      toRemove.getOwner().removeUnit(toRemove);
-      t.setOccupied(false);
-      t.setOccupiedBy(null);
-   }
-   
+   /**
+    * Destroys the given unit.
+    * 
+    * @param u the unit to be destroyed.
+    */
    public void destroyUnit(Unit u) {
       Team owner = u.getOwner();
       owner.removeUnit(u);
@@ -648,8 +726,12 @@ public class World {
       u.getCurrentTile().setOccupiedBy(null);
    }
    
+   /**
+    * Chooses a random unit type and returns it.
+    * 
+    * @return a unit type.
+    */
    public UNIT_TYPE randUnitType() {
-      // return UNIT_TYPE.INFANTRY;
       return UNIT_TYPE.values()[(int)(Math.random() * UNIT_TYPE.values().length)];
    }
    

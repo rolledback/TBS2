@@ -73,6 +73,8 @@ public class Team {
          units.add(new Infantry(t.getX(), t.getY(), t, this, lI, rI));
       else if(uType == UNIT_TYPE.RPG)
          units.add(new RPGTeam(t.getX(), t.getY(), t, this, lI, rI));
+      else
+         return;
       t.setOccupied(true);
       t.setOccupiedBy(units.get(units.size() - 1));
    }

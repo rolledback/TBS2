@@ -48,7 +48,7 @@ public class ComputerTeamD extends ComputerTeam {
          }
       }
       
-      game.logicLock.lock();
+      game.getLogicLock().lock();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
@@ -61,7 +61,7 @@ public class ComputerTeamD extends ComputerTeam {
          }
          while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts < 32);
       }
-      game.logicLock.unlock();
+      game.getLogicLock().unlock();
    }
    
    public Coordinate moveUnit(Unit u) {

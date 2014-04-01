@@ -1,12 +1,8 @@
-
 package com.rolledback.framework;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -17,11 +13,40 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.rolledback.mapping.Cartographer;
+
+/**
+ * This file is used to launch a basic standard instance of the game, execution of which starts
+ * inside the main method. Upon execution, the user is presented with a JOptionPane that allows them
+ * to choose a variety of map choices. The window size for the game is based upon the
+ * winFractionHeight and winFractionWidth variables which subtract a fraction of the
+ * monitor/dispalys screen size and set this as the starting default screen value. From here, both
+ * the width and height are decremented until they are both divisible by 128, 64, 32, and 16. The
+ * main logic for creating the game's window, the game itself and it's gui can be found in the init
+ * function.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class Launcher {
    
+   /**
+    * Fraction of the screen's height to be removed from the screen size.
+    */
    static private int winFractionHeight = 10;
+   /**
+    * Fraction of the screen's width to be removed from the screen size.
+    */
    static private int winFractionWidth = 4;
    
+   /**
+    * Starting location for all function calls of the game. Presents user with a dialog box
+    * containing a drop down box. Box includes a list of of .map files in the map directory, options
+    * to fill the entire screen with a given tile size (in pixels), a random choice of the tile size
+    * options, or the option to give the width and height desired.
+    * 
+    * @param args
+    */
    public static void main(String args[]) {
       Logger.consolePrint("Getting map files.", "launcher");
       File directory = new File("maps");
@@ -36,7 +61,7 @@ public class Launcher {
       ArrayList<Object> choices = new ArrayList<Object>();
       for(int f = 0; f < files.length; f++) {
          if(files[f].endsWith(".map")) {
-            int[] size = (System.getProperty("os.name").equals("Linux")) ? getDimensions(directory + "/" + files[f]) : getDimensions(directory + "\\" + files[f]);
+            int[] size = (System.getProperty("os.name").equals("Linux")) ? Cartographer.getDimensions(directory + "/" + files[f]) : Cartographer.getDimensions(directory + "\\" + files[f]);
             if(size.length != 0)
                choices.add(files[f].substring(0, files[f].lastIndexOf(".")) + ": (" + size[0] + "x" + size[1] + ")");
          }
@@ -98,7 +123,7 @@ public class Launcher {
                   fileToLoad = directory + "/" + choice.substring(0, choice.lastIndexOf(":")) + ".map";
                else
                   fileToLoad = directory + "\\" + choice.substring(0, choice.lastIndexOf(":")) + ".map";
-               dimensions = getDimensions(fileToLoad);
+               dimensions = Cartographer.getDimensions(fileToLoad);
             }
             else {
                tileSize = Integer.parseInt(choice.split("x")[0]);
@@ -116,27 +141,13 @@ public class Launcher {
          System.exit(-1);
    }
    
-   public static int[] getDimensions(String name) {
-      BufferedInputStream mapReader;
-      byte[] map = new byte[6];
-      try {
-         mapReader = new BufferedInputStream(new FileInputStream(name));
-         mapReader.read(map);
-         mapReader.close();
-      }
-      catch(IOException e) {
-         return new int[0];
-      }
-      if(map[0] != 0x6d)
-         return new int[0];
-      int width = map[2] ^ (map[3] << 8);
-      int height = map[4] ^ (map[5] << 8);
-      int[] ret = new int[2];
-      ret[0] = width;
-      ret[1] = height;
-      return ret;
-   }
-   
+   /**
+    * Calculates the tile dimensions needed to fill up the entire window based on the given tile
+    * size (in pixels).
+    * 
+    * @param size desired size of tiles in pixels.
+    * @return array containing the width and height (in that order) for the desired tile size.
+    */
    public static int[] autoCalcDimensions(int size) {
       int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
       int screenWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -168,6 +179,15 @@ public class Launcher {
       return d;
    }
    
+   /**
+    * Starts the game based on the given parameters passed in from the user choices made in main.
+    * Handles creation of the window, game, and gui.
+    * 
+    * @param x width of the tiles grid
+    * @param y height of the tiles grid
+    * @param fileName name of the file to be loaded, if no file is to be loaded this will be an
+    *           empty string
+    */
    public static void init(int x, int y, String fileName) {
       Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "launcher");
       
@@ -224,7 +244,7 @@ public class Launcher {
       gamePanel.setSize(gamePanelWidth, gamePanelHeight);
       gamePanel.createBackground();
       window.add(gamePanel, BorderLayout.CENTER);
-      infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.teamOne, gamePanel.teamTwo);
+      infoBox.updateInfo(null, gamePanel.getWorld().getTiles()[0][0], gamePanel.getTeamOne(), gamePanel.getTeamTwo());
       
       // set the game size and finish up creating the window
       gamePanel.setPreferredSize(new Dimension(gamePanelWidth, gamePanelHeight));
@@ -247,7 +267,7 @@ public class Launcher {
       // setup complete, run the game
       Logger.consolePrint("Running game.", "launcher");
       gamePanel.run();
-      JOptionPane.showMessageDialog(new JFrame(), "Winner: " + gamePanel.winner.getName(), "WIN", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(new JFrame(), "Winner: " + gamePanel.getWinner().getName(), "WIN", JOptionPane.INFORMATION_MESSAGE);
       System.exit(1);
    }
    

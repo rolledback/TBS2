@@ -23,6 +23,14 @@ import com.rolledback.teams.Team;
 import com.rolledback.teams.Technology.TECH_NAME;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
+/**
+ * A FactoryOptionPane is created every time a human user clicks on a factory. It allows the user to
+ * create new units are research new technologies. As an extension of the JDialog class, a Game
+ * cannot continue to execute until the FactoryOptionPane has been closed.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class FactoryOptionPane extends JDialog {
    
    private static final long serialVersionUID = 1L;
@@ -48,7 +56,12 @@ public class FactoryOptionPane extends JDialog {
    private JComboBox<String> unitList;
    
    private int numResources;
-
+   
+   /**
+    * Constructor. The pane will is set to visible in the constructor.
+    * 
+    * @param caller the team that the options for the pane should come from.
+    */
    public FactoryOptionPane(Team caller) {
       setTitle("Factory");
       setSize(225, 150);
@@ -87,6 +100,14 @@ public class FactoryOptionPane extends JDialog {
       setVisible(true);
    }
    
+   /**
+    * Creates the card for unit production. Contains a dropdown of units that can be produced, two
+    * buttons, and a label of how many resources the caller team currently has. Hitting the ok
+    * button will do a check to make sure the caller team has enough resources for the unit.
+    * 
+    * @param productionList list of units that the caller team can produce mapped to Integer values
+    *           of how much they will cost in resources.
+    */
    public void createUnitPage(LinkedHashMap<UNIT_TYPE, Integer> productionList) {
       unitLayout = new GridLayout(0, 1, 5, 5);
       unitPanel = new JPanel(unitLayout);
@@ -138,6 +159,15 @@ public class FactoryOptionPane extends JDialog {
       unitPanel.add(unitCancelButton);
    }
    
+   /**
+    * Creates the card for technology research. Contains a dropdown of technologies that can be
+    * researched, two buttons, and a label of how many resources the caller team currently has.
+    * Hitting the ok button will do a check to make sure the caller team has enough resources for
+    * the technology.
+    * 
+    * @param techTree list of technologies that the caller team can reduce mapped to Integer values
+    *           of how much the technology cost in resources.
+    */
    public void createTechPage(LinkedHashMap<TECH_NAME, Integer> techTree) {
       techLayout = new GridLayout(0, 1, 5, 5);
       techPanel = new JPanel(techLayout);

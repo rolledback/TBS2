@@ -21,6 +21,14 @@ import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
 
+/**
+ * The GameGUI object is used to display info about the current Game. The GameGUI object is an
+ * extension of the JPanel class. This allows it to either be placed in the same window as the Game
+ * (the current implementation), or in a separate window.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class GameGUI extends JPanel {
    
    private static final long serialVersionUID = 1L;
@@ -33,13 +41,13 @@ public class GameGUI extends JPanel {
    private Image tImage;
    
    private JPanel unitPanel;
-   private GridLayout unitLayout;   
+   private GridLayout unitLayout;
    private JLabel unitName;
    private JLabel unitHealth;
    private JLabel unitDefense;
    private JLabel unitMove;
    
-   private JPanel terrainPanel;   
+   private JPanel terrainPanel;
    private GridLayout terrainLayout;
    private JLabel terrainName;
    private JLabel attackBonus;
@@ -47,7 +55,7 @@ public class GameGUI extends JPanel {
    private JLabel moveBonus;
    
    private JPanel teamInfoPanel;
-   private GridLayout teamLayout;   
+   private GridLayout teamLayout;
    private JPanel teamOnePanel;
    private GridLayout teamOneLayout;
    private JLabel nameOne;
@@ -66,6 +74,12 @@ public class GameGUI extends JPanel {
    private BoxLayout buttonLayout;
    private JButton endTurnButton;
    
+   /**
+    * Used to test the GUI. Will just create a place a GUI in it's own window with all starting
+    * values present.
+    * 
+    * @param args
+    */
    public static void main(String args[]) {
       JFrame test = new JFrame();
       GameGUI t = new GameGUI();
@@ -75,6 +89,9 @@ public class GameGUI extends JPanel {
       t.fixComponents();
    }
    
+   /**
+    * Constructor. The GUI is NOT set to visible at the end of it's creation.
+    */
    public GameGUI() {
       guiPanel = new JPanel();
       guiLayout = new BoxLayout(guiPanel, BoxLayout.X_AXIS);
@@ -110,6 +127,10 @@ public class GameGUI extends JPanel {
       super.paintComponent(g);
    }
    
+   /**
+    * Sets the preferred size of each component of GUI to the size they have while holding their
+    * placeholder/max length values.
+    */
    public void fixComponents() {
       canvasPanel.setPreferredSize(new Dimension(canvasPanel.getWidth(), canvasPanel.getHeight()));
       unitPanel.setPreferredSize(new Dimension(unitPanel.getWidth(), unitPanel.getHeight()));
@@ -120,6 +141,10 @@ public class GameGUI extends JPanel {
       guiPanel.setPreferredSize(new Dimension(guiPanel.getWidth(), guiPanel.getHeight()));
    }
    
+   /**
+    * Sets up the component containing the canvas which displays the texture of the current tile and
+    * the image of the unit occupying that tile (if any).
+    */
    public void setupCanvas() {
       canvasPanel = new UnitPanel();
       canvasPanel.setPreferredSize(new Dimension(164, 164));
@@ -127,6 +152,9 @@ public class GameGUI extends JPanel {
       canvasPanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Sets up the panel containing the information about the current unit (if any).
+    */
    public void setupUnit() {
       unitPanel = new JPanel();
       unitLayout = new GridLayout(6, 0, 0, 0);
@@ -153,6 +181,9 @@ public class GameGUI extends JPanel {
       unitPanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Sets up the panel containing the information about the current tile.
+    */
    public void setupTerrain() {
       terrainPanel = new JPanel();
       terrainLayout = new GridLayout(6, 0, 0, 0);
@@ -179,6 +210,10 @@ public class GameGUI extends JPanel {
       terrainPanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Sets up the panel containing the two panes which each contain information about the Game's
+    * first and second team.
+    */
    public void setupTeamPanel() {
       teamInfoPanel = new JPanel();
       
@@ -195,6 +230,9 @@ public class GameGUI extends JPanel {
       teamInfoPanel.setBackground(new Color(255, 255, 255, 0));
    }
    
+   /**
+    * Sets up the panel containing the information about the Game's first team.
+    */
    public void setupTeamOne() {
       teamOnePanel = new JPanel();
       teamOneLayout = new GridLayout(4, 0, 2, 2);
@@ -221,6 +259,9 @@ public class GameGUI extends JPanel {
       teamOnePanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Sets up the panel containing the information about the Game's second team.
+    */
    public void setupTeamTwo() {
       teamTwoPanel = new JPanel();
       teamTwoLayout = new GridLayout(4, 0, 2, 2);
@@ -247,6 +288,9 @@ public class GameGUI extends JPanel {
       teamTwoPanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Sets up the panel holding the end turn button. This button is currently NOT functional.
+    */
    public void setupButtonPanel() {
       buttonPanel = new JPanel();
       buttonLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
@@ -257,6 +301,12 @@ public class GameGUI extends JPanel {
       buttonPanel.setBackground(new Color(190, 190, 190));
    }
    
+   /**
+    * Updates the info only for each team.
+    * 
+    * @param one the Game's first team.
+    * @param two the Game's second team.
+    */
    public void updateInfo(Team one, Team two) {
       nameOne.setText("Name: " + one.getName());
       resOne.setText("Num Resources: " + one.getResources());
@@ -269,6 +319,14 @@ public class GameGUI extends JPanel {
       numFactTwo.setText("Num Factories: " + two.getFactories().size());
    }
    
+   /**
+    * Updates the info for each team, the current tile, and the current unit (if any).
+    * 
+    * @param unit the current unit, null if there isn't one.
+    * @param tile the current tile.
+    * @param one the Game's first team.
+    * @param two the Game's second team.
+    */
    public void updateInfo(Unit unit, Tile tile, Team one, Team two) {
       if(unit != null) {
          unitName.setText("Type: " + unit.getType().toString());
@@ -321,6 +379,10 @@ public class GameGUI extends JPanel {
    }
 }
 
+/**
+ * @author Matthew
+ * @version 1.0
+ */
 class UnitPanel extends JPanel {
    
    private static final long serialVersionUID = 1L;
@@ -329,6 +391,7 @@ class UnitPanel extends JPanel {
    private int unitMin;
    private Image terrainImage = GraphicsManager.getTileTextures().get("grass.png");
    
+   @Override
    public void paintComponent(Graphics g) {
       g.drawImage(terrainImage, (int)((this.getWidth() - 128) / 2.0), (int)((this.getHeight() - 128) / 2.0), 128, 128, this);
       if(unitImage != null) {

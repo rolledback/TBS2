@@ -5,8 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -28,39 +28,63 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
 
-public class Game extends JPanel implements MouseListener, ActionListener {
+/**
+ * The Game class contains all logic for running and displaying the game. An extension of JPanel,
+ * Game objects are meant to put inside of a JFrame. Each game is primarily made up of two team
+ * objects (one or more of which may be instances of ComputerTeam) and a World object (which itself
+ * contains important information regarding the tiles that make up the Game. Winning a game is
+ * defined as eliminating all enemy units. Both the paintComponent and gameLogic functions are
+ * critical sections, requiring the acquisition of the logicLock variable to execute. The main loop
+ * for the game can be found in the run function, which executes various functions depending on the
+ * value of the state variable.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
+public class Game extends JPanel implements MouseListener, KeyListener {
    
    public enum GAME_STATE {
       NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
    }
    
-   public ArrayList<Coordinate> history = new ArrayList<Coordinate>();
-   
+   private ArrayList<Coordinate> clickHistory = new ArrayList<Coordinate>();
    private static final long serialVersionUID = 1L;
-   public int gameWidth, gameHeight, teamSize, tileSize, offsetHorizontal, offsetVertical, selectedX, selectedY;
-   public Team teamOne, teamTwo;
-   
-   Team currentTeam;
-   public Team winner;
+   private int gameWidth;
+   private int gameHeight;
+   private int teamSize;
+   private int tileSize;
+   private int offsetHorizontal;
+   private int offsetVertical;
+   private int selectedX;
+   private int selectedY;
+   private Team teamOne;
+   private Team teamTwo;
+   private Team currentTeam;
+   private Team winner;
    private World world;
+   private boolean unitSelected;
+   private Tile selectedTile;
+   private Unit selectedUnit;
+   private Unit targetUnit;
+   private Rectangle[][] grid;
+   private GAME_STATE state;
+   private Image[][] background;
+   private GameGUI infoBox;
+   private int numTurns;
+   private ReentrantLock logicLock;
    
-   boolean unitSelected, ready;
-   Tile selectedTile;
-   Unit selectedUnit;
-   Unit targetUnit;
-   Rectangle[][] grid;
-   GAME_STATE state;
-   Image[][] background;
-   GameGUI infoBox;
-   
-   int UNIT_DENSITY = 5;
-   int drawDetectorOne = 0;
-   int drawDetectorTwo = 0;
-   
-   public int numTurns = 0;
-   
-   public ReentrantLock logicLock;
-   
+   /**
+    * Constructor.
+    * 
+    * @param x number of tiles in the width (x) direction.
+    * @param y number of tiles in the height (y) direction.
+    * @param ts size of the tiles, in pixels.
+    * @param oH horizontal offset, used when game doesn't fill entire screen horizontally.
+    * @param oV vertical offset, used when game doesn't fill entire screen vertically.
+    * @param fileToLoad if the user chose to load a map, this will be the file's name, empty string
+    *           if not loading a file.
+    * @param iB pointer to the GameGUI object used by the window in Launcher.java.
+    */
    public Game(int x, int y, int ts, int oH, int oV, String fileToLoad, GameGUI iB) {
       gameWidth = x;
       gameHeight = y;
@@ -76,11 +100,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       teamOne.setOpponent(teamTwo);
       teamTwo.setOpponent(teamOne);
       
-      world = new World(gameWidth, gameHeight, teamOne, teamTwo, ts, fileToLoad);
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo, fileToLoad);
       tileSize = ts;
       offsetHorizontal = oH;
       offsetVertical = oV;
-      addMouseListener(this);
       state = GAME_STATE.UPDATE;
       
       grid = new Rectangle[y][x];
@@ -94,10 +117,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
       infoBox = iB;
       
+      setNumTurns(0);
+      winner = null;
+      
       setDoubleBuffered(true);
       setIgnoreRepaint(true);
+      
+      addMouseListener(this);
+      addKeyListener(this);
    }
    
+   /**
+    * Main game loop. Runs as long as the GAME_STATE variable is not set to END_GAME Possible states
+    * are END_GAME (game over), UPDATE (repaint needs to be called), SWITCH_TEAMS (time for teams to
+    * be switched). Also sees if there is a winner.
+    */
    public void run() {
       while(state != GAME_STATE.END_GAME) {
          if(state != GAME_STATE.END_GAME && currentTeam instanceof ComputerTeam) {
@@ -118,12 +152,18 @@ public class Game extends JPanel implements MouseListener, ActionListener {
             else {
                if(currentTeam.isFirstTurn())
                   currentTeam.setFirstTurn(false);
+               setNumTurns(getNumTurns() + 1);
                switchTeams();
             }
          }
       }
    }
    
+   /**
+    * Redraws all game elements.
+    * 
+    * @param g
+    */
    public void paintComponent(Graphics g) {
       logicLock.lock();
       drawBackground(g);
@@ -143,6 +183,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       logicLock.unlock();
    }
    
+   /**
+    * Draws the background underneath the actual game tiles/units. All games, even if they fill up
+    * the entire screen actually have a background.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawBackground(Graphics g) {
       int horizOffset = (offsetHorizontal % tileSize == 0) ? 0 : tileSize / 2;
       int vertiOffset = (offsetVertical % tileSize == 0) ? 0 : tileSize / 2;
@@ -155,6 +201,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          }
    }
    
+   /**
+    * Creates the background and stores it in the background matrix.
+    */
    public void createBackground() {
       int w = (this.getWidth() + tileSize) / tileSize;
       int h = (this.getHeight() + tileSize) / tileSize;
@@ -171,6 +220,9 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          }
    }
    
+   /**
+    * Switches teams, teamOne -> teamTwo or teamTwo -> teamOne.
+    */
    public void switchTeams() {
       Logger.consolePrint("switching teams", "game");
       infoBox.updateInfo(teamOne, teamTwo);
@@ -194,9 +246,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          currentTeam = teamOne;
       
       state = GAME_STATE.UPDATE;
-      numTurns++;
+      setNumTurns(getNumTurns() + 1);
    }
    
+   /**
+    * Draws the game tiles.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawTiles(Graphics g) {
       for(int x = 0; x < gameWidth; x++)
          for(int y = 0; y < gameHeight; y++) {
@@ -205,6 +262,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
          }
    }
    
+   /**
+    * Draws the height map. Red is higher than yellow, which is higher than green. Blue indicates a
+    * river tile.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawHeightMap(Graphics g) {
       for(int x = 0; x < gameWidth; x++) {
          for(int y = 0; y < gameHeight; y++) {
@@ -225,6 +288,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
    }
    
+   /**
+    * Draws all units on the screen. If the units are facing left it grabs their left image, and
+    * vice versa for right. Team one's units are drawn first, and then team two's.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawUnits(Graphics g) {
       g.setColor(Color.black);
       Font font = new Font("Serif", Font.PLAIN, 22);
@@ -264,6 +333,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
    }
    
+   /**
+    * Draws health bars for each unit. Health bars take up 80% (rounded) of tileSize in width, and
+    * are 20% of the tileSize in height.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawHealthBars(Graphics g) {
       int buffer = (int)((double)tileSize * .10);
       for(int y = 0; y < gameHeight; y++) {
@@ -281,6 +356,14 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
    }
    
+   /**
+    * Performs all the logic associated with the "clicking" of a tile. Critical section of the code.
+    * Only allowed to execute if the EventQueue is not repainting the canvas. Handles selecting of
+    * units, moving of units, production of factories, capturing of capturable tiles.
+    * 
+    * @param xTile the x index of the tile in the tiles matrix
+    * @param yTile the y index of the tile in the tiles matrix
+    */
    public void gameLogic(int xTile, int yTile) {
       logicLock.lock();
       int x = xTile; // click data
@@ -288,7 +371,7 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
-      history.add(new Coordinate(x, y));
+      clickHistory.add(new Coordinate(x, y));
       
       if(unitSelected) {
          if(!selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
@@ -358,6 +441,12 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       logicLock.unlock();
    }
    
+   /**
+    * Draws the move, attack and capture spots of a selected unit. Move are blue, attack are red,
+    * and capture are yellow.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawMoveSpots(Graphics g) {
       Color moveColor = new Color(0, 128, 128, 135);
       Color attackColor = new Color(255, 0, 0, 135);
@@ -377,6 +466,15 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       
    }
    
+   /**
+    * Called when a unit is told to attack a unit at coordinates x, y (in relation to the tiles
+    * matrix). Logic for choosing which spot to move the unit to go first below the target, then
+    * above, then to the left, then to the right. If a player wants to choooe which spot to attack
+    * from (if there are more than one) then they can move their unit then attack.
+    * 
+    * @param x x coordinate of the target in the tiles matrix
+    * @param y y coordinate of the target in the tiles matrix
+    */
    public void attackMove(int x, int y) {
       if(Math.abs(selectedUnit.getX() - targetUnit.getX()) == 1 && targetUnit.getY() == selectedUnit.getY())
          return;
@@ -396,17 +494,22 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       }
    }
    
-   public void highLightTile(int x, int y, Color c) {
-      Graphics g = this.getGraphics();
-      g.setColor(c);
-      g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-   }
-   
+   /**
+    * Selects the tile at matrix coordinates x, y.
+    * 
+    * @param x x coordinate of the target in the tiles matrix
+    * @param y y coordinate of the target in the tiles matrix
+    * @return the tile located at x, y
+    */
    public Tile selectTile(int x, int y) {
       Tile selectedTile = world.getTiles()[y][x];
       return selectedTile;
    }
    
+   /**
+    * Produces a small output to the console. DOES NOT use the Logger class. This will always output
+    * no matter what.
+    */
    public void gameDebugMini() {
       System.out.println("Unit selected: " + unitSelected);
       System.out.println(selectedUnit);
@@ -415,6 +518,10 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Team two: " + teamTwo.toString());
    }
    
+   /**
+    * Produces a verbose debug output for the game. DOES NOT use the Logger class. This will always
+    * output no matter what.
+    */
    public void gameDebugFull() {
       System.out.println("----------------------------------");
       System.out.println("Game Debug: Full");
@@ -440,29 +547,28 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       System.out.println("Team two army size: " + teamTwo.getUnits().size());
    }
    
-   public static void delay(int n) {
-      long startDelay = System.currentTimeMillis();
-      long endDelay = 0;
-      while(endDelay - startDelay < n)
-         endDelay = System.currentTimeMillis();
-   }
-   
    @Override
    public void mouseClicked(MouseEvent arg0) {
+      // TODO Auto-generated method stub
    }
    
    @Override
    public void mouseEntered(MouseEvent arg0) {
       // TODO Auto-generated method stub
-      
    }
    
    @Override
    public void mouseExited(MouseEvent arg0) {
       // TODO Auto-generated method stub
-      
    }
    
+   /**
+    * Handles clicking for the game. For left clicks, calculates the x and y value of the tile
+    * clicked on, updates the GameGUI associated with the game, calls gameLogic, and once again
+    * updates the GameGUI. On the event of a right click, the game state will be changed to
+    * SWITCH_TEAMS which will cause the current team to be changed upon the next iteration of the
+    * run loop.
+    */
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
@@ -482,7 +588,21 @@ public class Game extends JPanel implements MouseListener, ActionListener {
    @Override
    public void mouseReleased(MouseEvent arg0) {
       // TODO Auto-generated method stub
-      
+   }
+   
+   @Override
+   public void keyPressed(KeyEvent arg0) {
+      // TODO Auto-generated method stub
+   }
+   
+   @Override
+   public void keyReleased(KeyEvent arg0) {
+      // TODO Auto-generated method stub
+   }
+   
+   @Override
+   public void keyTyped(KeyEvent arg0) {
+      // TODO Auto-generated method stub
    }
    
    public World getWorld() {
@@ -493,11 +613,68 @@ public class Game extends JPanel implements MouseListener, ActionListener {
       this.world = world;
    }
    
-   @Override
-   public void actionPerformed(ActionEvent arg0) {
-      // TODO Auto-generated method stub
-      System.out.println(arg0.toString());
-      
+   public Team getTeamOne() {
+      return teamOne;
+   }
+   
+   public void setTeamOne(Team teamOne) {
+      this.teamOne = teamOne;
+   }
+   
+   public Team getTeamTwo() {
+      return teamTwo;
+   }
+   
+   public void setTeamTwo(Team teamTwo) {
+      this.teamTwo = teamTwo;
+   }
+   
+   public Team getWinner() {
+      return winner;
+   }
+   
+   public void setWinner(Team winner) {
+      this.winner = winner;
+   }
+   
+   public ReentrantLock getLogicLock() {
+      return logicLock;
+   }
+   
+   public void setLogicLock(ReentrantLock logicLock) {
+      this.logicLock = logicLock;
+   }
+   
+   public ArrayList<Coordinate> getClickHistory() {
+      return clickHistory;
+   }
+   
+   public void setClickHistory(ArrayList<Coordinate> clickHistory) {
+      this.clickHistory = clickHistory;
+   }
+   
+   public int getGameWidth() {
+      return gameWidth;
+   }
+   
+   public void setGameWidth(int gameWidth) {
+      this.gameWidth = gameWidth;
+   }
+   
+   public int getGameHeight() {
+      return gameHeight;
+   }
+   
+   public void setGameHeight(int gameHeight) {
+      this.gameHeight = gameHeight;
+   }
+   
+   public int getNumTurns() {
+      return numTurns;
+   }
+   
+   public void setNumTurns(int numTurns) {
+      this.numTurns = numTurns;
    }
    
 }
