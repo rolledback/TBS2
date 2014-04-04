@@ -15,6 +15,12 @@ import javax.swing.JPanel;
 
 import com.rolledback.framework.GraphicsManager;
 
+/**
+ * Floating window for choosing which texture is the current texture for the map editor.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class TextureOptionPane extends JDialog {
    
    private static final long serialVersionUID = 1L;
@@ -25,6 +31,11 @@ public class TextureOptionPane extends JDialog {
    private JPanel topPanel;
    private BorderLayout layout;
    
+   /**
+    * Constructor
+    * 
+    * @param tileNames list of available texture names, drawn from the GraphicsManager class.
+    */
    public TextureOptionPane(String[] tileNames) {
       setTitle("Texture Picker");
       currTexture = "grass.png";
@@ -37,6 +48,11 @@ public class TextureOptionPane extends JDialog {
       setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
    }
    
+   /**
+    * Creates the actual drop down and picture label for the option pane.
+    * 
+    * @param names list of available texture names, passed in from the constructor.
+    */
    public void createPicker(String[] names) {
       layout = new BorderLayout();
       layout.setVgap(1);

@@ -14,6 +14,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+/**
+ * Menu that pops up when escape button is pressed in the MapEditor. Contains logic for the file
+ * chooser needed for saving/opening map files.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class EscMenu extends JDialog implements ActionListener {
    
    private static final long serialVersionUID = 1L;
@@ -24,6 +31,9 @@ public class EscMenu extends JDialog implements ActionListener {
    private boolean saveFile;
    private GridLayout layout;
    
+   /**
+    * Constructor.
+    */
    public EscMenu() {
       setName("Menu");
       layout = new GridLayout(0, 1, 5, 5);

@@ -54,8 +54,6 @@ public class GameGUI extends JPanel {
    private JLabel defenseBonus;
    private JLabel moveBonus;
    
-   private JPanel teamInfoPanel;
-   private GridLayout teamLayout;
    private JPanel teamOnePanel;
    private GridLayout teamOneLayout;
    private JLabel nameOne;
@@ -100,7 +98,8 @@ public class GameGUI extends JPanel {
       setupCanvas();
       setupUnit();
       setupTerrain();
-      setupTeamPanel();
+      setupTeamOne();
+      setupTeamTwo();
       setupButtonPanel();
       
       guiPanel.add(canvasPanel);
@@ -109,7 +108,9 @@ public class GameGUI extends JPanel {
       guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(terrainPanel);
       guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-      guiPanel.add(teamInfoPanel);
+      guiPanel.add(teamOnePanel);
+      guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
+      guiPanel.add(teamTwoPanel);
       guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(buttonPanel);
       guiPanel.setBackground(new Color(190, 190, 190));
@@ -147,8 +148,7 @@ public class GameGUI extends JPanel {
     */
    public void setupCanvas() {
       canvasPanel = new UnitPanel();
-      canvasPanel.setPreferredSize(new Dimension(164, 164));
-      canvasPanel.setBorder(new TitledBorder(new LineBorder(Color.BLACK, 1), "Current Tile & Unit"));
+      canvasPanel.setBorder(new TitledBorder(new LineBorder(Color.BLACK, 1), "Current Tile"));
       canvasPanel.setBackground(new Color(190, 190, 190));
    }
    
@@ -211,31 +211,11 @@ public class GameGUI extends JPanel {
    }
    
    /**
-    * Sets up the panel containing the two panes which each contain information about the Game's
-    * first and second team.
-    */
-   public void setupTeamPanel() {
-      teamInfoPanel = new JPanel();
-      
-      setupTeamOne();
-      setupTeamTwo();
-      
-      // define south layout
-      teamLayout = new GridLayout(2, 1, 2, 2);
-      teamInfoPanel.setLayout(teamLayout);
-      
-      // combine southern components
-      teamInfoPanel.add(teamOnePanel);
-      teamInfoPanel.add(teamTwoPanel);
-      teamInfoPanel.setBackground(new Color(255, 255, 255, 0));
-   }
-   
-   /**
     * Sets up the panel containing the information about the Game's first team.
     */
    public void setupTeamOne() {
       teamOnePanel = new JPanel();
-      teamOneLayout = new GridLayout(4, 0, 2, 2);
+      teamOneLayout = new GridLayout(4, 0, 0, 0);
       teamOnePanel.setLayout(teamOneLayout);
       
       nameOne = new JLabel();
@@ -264,7 +244,7 @@ public class GameGUI extends JPanel {
     */
    public void setupTeamTwo() {
       teamTwoPanel = new JPanel();
-      teamTwoLayout = new GridLayout(4, 0, 2, 2);
+      teamTwoLayout = new GridLayout(4, 0, 0, 0);
       teamTwoPanel.setLayout(teamTwoLayout);
       
       nameTwo = new JLabel();
@@ -390,21 +370,26 @@ class UnitPanel extends JPanel {
    private int unitMax;
    private int unitMin;
    private Image terrainImage = GraphicsManager.getTileTextures().get("grass.png");
+   private int canvasSize = 64;
+   
+   public UnitPanel() {
+      this.setPreferredSize(new Dimension(canvasSize + (int)(canvasSize * .75), canvasSize));
+   }
    
    @Override
    public void paintComponent(Graphics g) {
-      g.drawImage(terrainImage, (int)((this.getWidth() - 128) / 2.0), (int)((this.getHeight() - 128) / 2.0), 128, 128, this);
+      g.drawImage(terrainImage, (int)((this.getWidth() - canvasSize) / 2.0), (int)((this.getHeight() - canvasSize) / 2.0), canvasSize, canvasSize, this);
       if(unitImage != null) {
-         g.drawImage(unitImage, (int)((this.getWidth() - 128) / 2.0), (int)((this.getHeight() - 128) / 2.0), 128, 128, this);
+         g.drawImage(unitImage, (int)((this.getWidth() - canvasSize) / 2.0), (int)((this.getHeight() - canvasSize) / 2.0), canvasSize, canvasSize, this);
          
-         int buffer = (int)((double)128 * .10);
-         int xCorner = (int)(((this.getWidth() - 128) / 2.0) + buffer);
-         int yCorner = (int)(((this.getHeight() - 128) / 2.0) + buffer);
+         int buffer = (int)((double)canvasSize * .10);
+         int xCorner = (int)(((this.getWidth() - canvasSize) / 2.0) + buffer);
+         int yCorner = (int)(((this.getHeight() - canvasSize) / 2.0) + buffer);
          
          g.setColor(Color.red);
-         g.fillRect(xCorner, yCorner, 128 - (2 * buffer), buffer);
+         g.fillRect(xCorner, yCorner, canvasSize - (2 * buffer), buffer);
          g.setColor(Color.green);
-         g.fillRect(xCorner, yCorner, (int)((double)(128 - (2 * buffer)) * (double)((double)unitMin / (double)unitMax)), buffer);
+         g.fillRect(xCorner, yCorner, (int)((double)(canvasSize - (2 * buffer)) * (double)((double)unitMin / (double)unitMax)), buffer);
       }
    }
    

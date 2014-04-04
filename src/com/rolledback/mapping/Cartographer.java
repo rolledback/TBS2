@@ -20,8 +20,29 @@ import com.rolledback.terrain.River;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 
+/**
+ * Handles the reading and writing of .map files. Documentation concerning the format of .map files
+ * can be found in the readme file. In general, maps begin with a "magic number" of ox6D. After that
+ * the next byte contains the tile size (pixels for each tile). This byte is actually not currently
+ * used or even returned, but it is included in the file because of the potential for its use in the
+ * future. The next 4 bytes contain the width and height of the map, 2 each, in that order.
+ * Following those, there are (width*height) bytes, each byte representing a tile.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class Cartographer {
    
+   /**
+    * Opens a file and reads in the values. Makes sure that the file is properlly formatted.
+    * 
+    * @param fileName name of the file to be opened
+    * @param tiles tiles matrix that the map is to be loaded into
+    * @param w dummy world used in the byteToTile function
+    * @return an array of objects. If the file is inproperly formatted/an error is thrown, then the
+    *         array will only contain a false value in the 0th index. If the file is correct, then
+    *         the array will contain a true, the tiles matrix, the width, and then the height.
+    */
    public static Object[] readMapFile(String fileName, Tile[][] tiles, World w) {
       BufferedInputStream mapReader;
       try {
@@ -63,6 +84,15 @@ public class Cartographer {
       return ret;
    }
    
+   /**
+    * Creates a map file.
+    * 
+    * @param fileName name of the map file to be created. The .map part has to be included in the
+    *           string.
+    * @param tiles the tiles matrix to be written to the file
+    * @param tileSize tile size in pixels
+    * @return boolean which represents if the file was successfully created.
+    */
    public static boolean createMapFile(String fileName, Tile[][] tiles, int tileSize) {
       Logger.consolePrint("Creating file: " + fileName, "cartographer");
       int height = tiles.length;
@@ -103,6 +133,12 @@ public class Cartographer {
       return true;
    }
    
+   /**
+    * Converts a tile to it's byte code. Based on the tiles image.
+    * 
+    * @param tile the tile to be converted.
+    * @return the byte value of the tile.
+    */
    public static byte tileToByte(Tile tile) {
       if(tile.getType() == TILE_TYPE.BRIDGE) {
          if(tile.getTexture().equals(GraphicsManager.getTileTextures().get("bridge_horizontal.png")))
@@ -171,6 +207,15 @@ public class Cartographer {
       return 0b1111111;
    }
    
+   /**
+    * Converts a tile to byte code.
+    * 
+    * @param w world for the tiles to be put in.
+    * @param value byte code value to be converted.
+    * @param col column position of the tile.
+    * @param row row position of the tile.
+    * @return fully constructed tile to placed into a world's tile matrix.
+    */
    public static Tile byteToTile(World w, byte value, int col, int row) {
       switch(value) {
          case (byte)0:
@@ -258,6 +303,13 @@ public class Cartographer {
       return null;
    }
    
+   /**
+    * Returns only the dimensions of a .map file. Still performs the check for the magic number.
+    * 
+    * @param name name of the file to read.
+    * @return int array containing the dimensions of the map. If an error is thrown or the magic
+    *         number is not found then simply returns an array with a 0 only.
+    */
    public static int[] getDimensions(String name) {
       BufferedInputStream mapReader;
       byte[] map = new byte[6];
@@ -278,5 +330,5 @@ public class Cartographer {
       ret[1] = height;
       return ret;
    }
-
+   
 }

@@ -35,6 +35,14 @@ import com.rolledback.terrain.Plain;
 import com.rolledback.terrain.River;
 import com.rolledback.terrain.Tile;
 
+/**
+ * Similar to Launcher.java, but instead of starting a game, starts up the map editor program. The
+ * MapEditor class is also a JFrame, unlike the Launcher class which is entirely static. Controls
+ * for the map editor can be found in the readme file.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class MapEditor extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
    
    private int width;
@@ -52,9 +60,24 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    private Image[][] background;
    
    private static final long serialVersionUID = 1L;
-   private static int winFractionHeight = 10;
-   private static int winFractionWidth = 4;
    
+   /**
+    * Fraction of the screen's height to be removed from the screen size.
+    */
+   static private int winFractionHeight = 10;
+   /**
+    * Fraction of the screen's width to be removed from the screen size.
+    */
+   static private int winFractionWidth = 4;
+   
+   /**
+    * Starting location for all function calls of the map editor. Presents user with a dialog box
+    * containing a drop down box. Box includes a list of options to fill the entire screen with a
+    * given tile size (in pixels), a random choice of the tile size options, or the option to give
+    * the width and height desired.
+    * 
+    * @param args
+    */
    public static void main(String args[]) {
       Object[] possibilities = { "128x128", "64x64", "32x32", "16x16", "8x8", "4x4", "2x2", "Random", "Custom" };
       int tileSize = -1;
@@ -106,6 +129,13 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          System.exit(-1);
    }
    
+   /**
+    * Starts the game based on the given parameters passed in from the user choices made in main.
+    * Handles creation of the window, game, and gui.
+    * 
+    * @param x width of the tiles grid
+    * @param y height of the tiles grid
+    */
    public static void init(int x, int y) {
       Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "editor");
       
@@ -178,6 +208,15 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       Logger.consolePrint("Final editor panel dimensions: " + editorPanel.getSize(), "editor");
    }
    
+   /**
+    * Constructor.
+    * 
+    * @param x width of the tiles map
+    * @param y height of the tiles map
+    * @param t size of the tiles (in pixels)
+    * @param oH horizontal offset, used when game doesn't fill entire screen horizontally.
+    * @param oV vertical offset, used when game doesn't fill entire screen vertically.
+    */
    public MapEditor(int x, int y, int t, int oH, int oV) {
       setFocusable(true);
       menu = new EscMenu();
@@ -211,6 +250,11 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       setDoubleBuffered(true);
    }
    
+   /**
+    * Redraws all map editor elements.
+    * 
+    * @param g
+    */
    public void paintComponent(Graphics g) {
       drawBackground(g);
       for(int row = 0; row < height; row++) {
@@ -225,6 +269,12 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
       }
    }
    
+   /**
+    * Draws the background underneath the actual game tiles/units. All games, even if they fill up
+    * the entire screen actually have a background.
+    * 
+    * @param g Graphics object, passed in by paintComponent
+    */
    public void drawBackground(Graphics g) {
       int horizOffset = (tiles[0].length % 2 == 0) ? 0 : tileSize / 2;
       int vertiOffset = (tiles.length % 2 == 0) ? 0 : tileSize / 2;
@@ -237,6 +287,9 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
          }
    }
    
+   /**
+    * Creates the background and stores it in the background matrix.
+    */
    public void createBackground() {
       int w = (this.getWidth() + tileSize) / tileSize;
       int h = (this.getHeight() + tileSize) / tileSize;
@@ -265,6 +318,10 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    public void mouseExited(MouseEvent e) {
    }
    
+   /**
+    * Handles mouse clicking for the editor. Calculates which tile the mouse clicked, and changes it
+    * to the currently selected texture. Then proceeds to redraw all tiles.
+    */
    @Override
    public void mousePressed(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
@@ -302,7 +359,9 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    public void mouseReleased(MouseEvent e) {
    }
    
-   @Override
+   /**
+    * Handles key pressing for the editor. See the readme file for key mappings.
+    */
    public void keyPressed(KeyEvent e) {
       if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
          if(!menu.isVisible()) {
@@ -388,7 +447,10 @@ public class MapEditor extends JPanel implements MouseListener, MouseMotionListe
    public void keyTyped(KeyEvent e) {
    }
    
-   @Override
+   /**
+    * Handles mouse dragging for the editor. Calculates which tile the mouse clicked, and changes it
+    * to the currently selected texture. Then proceeds to redraw all tiles.
+    */
    public void mouseDragged(MouseEvent arg0) {
       if(SwingUtilities.isLeftMouseButton(arg0)) {
          int row = (arg0.getY() - offsetVertical) / tileSize;
