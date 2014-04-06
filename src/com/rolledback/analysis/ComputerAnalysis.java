@@ -13,17 +13,29 @@ import javax.swing.JPanel;
 
 import com.rolledback.framework.Coordinate;
 
+/**
+ * Used to analyze dump files of click histories. Uses a gradient to display the frequency of the
+ * clicks.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class ComputerAnalysis {
    
    static LinkedHashMap<Coordinate, Double> coordHash;
    
+   /**
+    * Reads in the dump file and passes the coordinate hash map to the Analysis Display object.
+    * 
+    * @param args
+    */
    public static void main(String args[]) {
       File coordinateDump = new File("dump.txt");
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
-      int width = 22;
-      int height = 10;
-      int size = 64;
+      int width = 176;
+      int height = 96;
+      int size = 8;
       
       for(int x = 0; x < width; x++)
          for(int y = 0; y < height; y++)
@@ -49,14 +61,19 @@ public class ComputerAnalysis {
       JFrame frame = new JFrame("Display");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
-      frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top
-            + frame.getInsets().bottom);
+      frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top + frame.getInsets().bottom);
       AnalysisDisplay display = new AnalysisDisplay(coordHash, maxValue);
       display.setSize(width * size, height * size);
       frame.add(display);
       display.setVisible(true);
    }
    
+   /**
+    * Parses the line of a dump.txt file into a coordinate.
+    * 
+    * @param line a line from dump.txt of the format <x coord> <y coord>
+    * @return the coordinate version of the line
+    */
    public static Coordinate processLine(String line) {
       String[] keys = line.split(" ");
       try {
@@ -69,11 +86,19 @@ public class ComputerAnalysis {
    }
 }
 
+/**
+ * Displays the data parsed by the ComputerAnalysis class. Uses a standard heat map to visually
+ * represent the frequency of clicks on a given tile. Blue being small amount of clicks, and red
+ * being the most.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 class AnalysisDisplay extends JPanel {
    
    LinkedHashMap<Coordinate, Double> values;
    int maxValue;
-   int size = 64;
+   int size = 8;
    
    private static final long serialVersionUID = 1L;
    Color[] gradient = {
@@ -104,6 +129,12 @@ class AnalysisDisplay extends JPanel {
          new Color(255, 40, 0),
          new Color(255, 0, 0), };
    
+   /**
+    * Constructor.
+    * 
+    * @param v Map containing values for all possible grid coordinates.
+    * @param mV The highest value in the map. Pre computed during parsing to save time.
+    */
    public AnalysisDisplay(LinkedHashMap<Coordinate, Double> v, int mV) {
       values = v;
       maxValue = mV;

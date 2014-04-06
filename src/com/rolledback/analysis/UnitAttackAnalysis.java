@@ -10,6 +10,16 @@ import com.rolledback.units.TankDestroyer;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
+/**
+ * Used to automatically provide a mathematical comparison of the various units. When run, will
+ * first calculate the average attack of each unit against every other unit. Will then calculate the
+ * average profit. Profit being defined as average damage delt minus average damage received in a
+ * counter attack. Only units declared inside the unitList list in the static code section will have
+ * their statistics calculated.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class UnitAttackAnalysis {
    
    public static void main(String[] args) {
@@ -40,6 +50,9 @@ public class UnitAttackAnalysis {
          System.out.print(" ");
    }
    
+   /**
+    * Calculates the average attack of every unit against every other unit.
+    */
    public static void calcAttackAverage() {
       System.out.println("Unit Attack Average Table:");
       printSpaces(tableTextSize + 2);
@@ -68,6 +81,10 @@ public class UnitAttackAnalysis {
       }
    }
    
+   /**
+    * Calculates the attack profit of every unit versus every other unit. See the class description
+    * for a definition of attack profit.
+    */
    public static void calcAttackProfit() {
       System.out.println("Unit Attack Profit Table:");
       printSpaces(tableTextSize + 2);
