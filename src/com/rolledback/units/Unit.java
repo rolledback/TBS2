@@ -6,9 +6,9 @@ import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.World;
-import com.rolledback.teams.ComputerTeam;
 import com.rolledback.teams.Team;
-import com.rolledback.teams.Technology;
+import com.rolledback.teams.ai.ComputerTeam;
+import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
@@ -20,28 +20,31 @@ public class Unit {
    }
    
    public enum UNIT_TYPE {
-      ALL, INFANTRY, RPG, TANK, TANK_DEST;
+      ALL("All"), INFANTRY("Infantry"), RPG("RPG Team"), TANK("Tank"), TANK_DEST("Tank Destroyer");
+      
+      private String name;
+      
+      UNIT_TYPE(String n) {
+         name = n;
+      }
       
       public String toString() {
-         if(this.equals(TANK))
-            return "Tank";
-         if(this.equals(TANK_DEST))
-            return "Tank Destroyer";
-         if(this.equals(INFANTRY))
-            return "Infantry";
-         else
-            return "RPG Team";
+         return name;
       }
       
       public static UNIT_TYPE stringToType(String s) {
-         if(s.equals("Tank"))
-            return TANK;
-         if(s.equals("Tank Destroyer"))
-            return TANK_DEST;
-         if(s.equals("Infantry"))
-            return INFANTRY;
-         else
-            return RPG;
+         switch(s) {
+            case "Tank":
+               return TANK;
+            case "Tank Destroyer":
+               return TANK_DEST;
+            case "Infantry":
+               return INFANTRY;
+            case "RPG Team":
+               return RPG;
+            default:
+               return null;
+         }
       }
    }
    
@@ -352,19 +355,19 @@ public class Unit {
    public void setMaxHealth(int maxHealth) {
       this.maxHealth = maxHealth;
    }
-
+   
    public Image getLeftTexture() {
       return leftTexture;
    }
-
+   
    public void setLeftTexture(Image leftTexture) {
       this.leftTexture = leftTexture;
    }
-
+   
    public Image getRightTexture() {
       return rightTexture;
    }
-
+   
    public void setRightTexture(Image rightTexture) {
       this.rightTexture = rightTexture;
    }

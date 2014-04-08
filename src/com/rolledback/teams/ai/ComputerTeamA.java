@@ -1,4 +1,4 @@
-package com.rolledback.teams;
+package com.rolledback.teams.ai;
 
 import java.util.ArrayList;
 import java.util.HashMap;

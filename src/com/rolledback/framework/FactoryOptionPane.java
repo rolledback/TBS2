@@ -20,7 +20,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import com.rolledback.teams.Team;
-import com.rolledback.teams.Technology.TECH_NAME;
+import com.rolledback.teams.technology.Technology.TECH_NAME;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 /**

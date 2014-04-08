@@ -4,7 +4,8 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import com.rolledback.teams.Technology.TECH_NAME;
+import com.rolledback.teams.technology.Technology;
+import com.rolledback.teams.technology.Technology.TECH_NAME;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
@@ -166,11 +167,11 @@ public class Team {
    public void setOpponent(Team opponent) {
       this.opponent = opponent;
    }
-
+   
    public int getTeamNumber() {
       return teamNumber;
    }
-
+   
    public void setTeamNumber(int teamNumber) {
       this.teamNumber = teamNumber;
    }

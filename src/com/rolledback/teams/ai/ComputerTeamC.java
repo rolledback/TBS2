@@ -1,4 +1,4 @@
-package com.rolledback.teams;
+package com.rolledback.teams.ai;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +10,7 @@ import java.util.Random;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;

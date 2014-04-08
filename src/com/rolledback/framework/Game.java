@@ -16,10 +16,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.rolledback.teams.ComputerTeam;
-import com.rolledback.teams.ComputerTeamD;
 import com.rolledback.teams.Team;
-import com.rolledback.teams.Technology;
+import com.rolledback.teams.ai.ComputerTeam;
+import com.rolledback.teams.ai.ComputerTeamD;
+import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;

@@ -1,16 +1,16 @@
-package com.rolledback.teams;
+package com.rolledback.teams.technology;
 
 import java.awt.Image;
-import java.util.Map;
 
 import com.rolledback.framework.GraphicsManager;
+import com.rolledback.teams.Team;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.UNIT_CLASS;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
-public class Technology {
+public abstract class Technology {
    
    // APCR Shells
    // GPS Navigation
@@ -19,59 +19,51 @@ public class Technology {
    // Fortifications
    // Militia
    
-   private UNIT_CLASS unitClass;
-   private TILE_TYPE tileType;
-   private int attackValue;
-   private int defenseValue;
-   private int moveValue;
-   private TechnologyEffect techEffect;
-   private Team effectedTeam;
+   protected UNIT_CLASS unitClass;
+   protected TILE_TYPE tileType;
+   protected int attackValue;
+   protected int defenseValue;
+   protected int moveValue;
+   protected Team effectedTeam;
    
    public enum TECH_NAME {
-      APCR, GPS, ART, CON, FORT, MILI, FIELD;
+      APCR("APCR Shells"), GPS("GPS Navigaion"), ART("Artillery Shells"), CON("Conscription"), FORT("Fortifications"), MILI("Militia"), FIELD("Field Repairs");
+      
+      private final String name;
+      
+      TECH_NAME(String n) {
+         name = n;
+      }
       
       public String toString() {
-         if(this == ART)
-            return "Artillery Barrage";
-         if(this == MILI)
-            return "Militia";
-         if(this == CON)
-            return "Conscription";
-         if(this == APCR)
-            return "APCR Shells";
-         if(this == GPS)
-            return "GPS Navigation";
-         if(this == FORT)
-            return "Fortifications";
-         if(this == FIELD)
-            return "Field Repairs";
-         else
-            return null;
+         return name;
       }
       
       public static TECH_NAME stringToName(String s) {
-         if(s.equals("Artillery Barrage"))
-            return ART;
-         if(s.equals("Militia"))
-            return MILI;
-         if(s.equals("Conscription"))
-            return CON;
-         if(s.equals("APCR Shells"))
-            return APCR;
-         if(s.equals("GPS Navigation"))
-            return GPS;
-         if(s.equals("Fortifications"))
-            return FORT;
-         if(s.equals("Field Repairs"))
-            return FIELD;
-         else
-            return null;
+         switch(s) {
+            case "Artillery Barrage":
+               return ART;
+            case "Militia":
+               return MILI;
+            case "Conscription":
+               return CON;
+            case "APCR Shells":
+               return APCR;
+            case "GPS Navigation":
+               return GPS;
+            case "Fortifications":
+               return FORT;
+            case "Field Repairs":
+               return FIELD;
+            default:
+               return null;
+         }
       }
    }
    
    public static void researchTech(Team researcher, TECH_NAME name) {
       if(name == TECH_NAME.MILI) {
-         researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
+         researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(City c: ((Team)effectObjectOne).getCities())
                   if(!c.isOccupied()) {
@@ -81,10 +73,10 @@ public class Technology {
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
-         researcher.getTechTree().remove(name);         
+         researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.ART) {
-         researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
+         researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(Unit u: (((Team)effectObjectOne).getOpponent()).getUnits())
                   u.takeDamage((int)(u.getHealth() * .25));
@@ -92,30 +84,30 @@ public class Technology {
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
-
+         
       }
       else if(name == TECH_NAME.CON) {
-         researcher.getResearchedTechs().add(new Technology(researcher, UNIT_TYPE.INFANTRY, .50));
+         researcher.getResearchedTechs().add(new FactoryTechnology(researcher, UNIT_TYPE.INFANTRY, .50));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.APCR) {
-         researcher.getResearchedTechs().add(new Technology(researcher, UNIT_CLASS.VEHICLE, 5, 0, 0));
+         researcher.getResearchedTechs().add(new UnitTechnology(researcher, UNIT_CLASS.VEHICLE, 5, 0, 0));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.GPS) {
-         researcher.getResearchedTechs().add(new Technology(researcher, UNIT_CLASS.ALL, 0, 0, 1));
+         researcher.getResearchedTechs().add(new UnitTechnology(researcher, UNIT_CLASS.ALL, 0, 0, 1));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.FORT) {
-         researcher.getResearchedTechs().add(new Technology(researcher, TILE_TYPE.CITY, 5, 10, -1));
+         researcher.getResearchedTechs().add(new TileTechnology(researcher, TILE_TYPE.CITY, 5, 10, -1));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
       }
       else if(name == TECH_NAME.FIELD) {
-         researcher.getResearchedTechs().add(new Technology(researcher, new TechnologyEffect(researcher, null) {
+         researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(Unit u: ((Team)effectObjectOne).getUnits())
                   if(u.getClassification() == UNIT_CLASS.VEHICLE)
@@ -123,42 +115,9 @@ public class Technology {
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
-         researcher.getTechTree().remove(name); 
+         researcher.getTechTree().remove(name);
       }
       
-   }
-   
-   // unit mod tech
-   public Technology(Team t, UNIT_CLASS unit, int a, int d, int m) {
-      effectedTeam = t;
-      unitClass = unit;
-      attackValue = a;
-      defenseValue = d;
-      moveValue = m;
-   }
-   
-   // tile mod tech
-   public Technology(Team t, TILE_TYPE tile, int a, int d, int m) {
-      effectedTeam = t;
-      tileType = tile;
-      attackValue = a;
-      defenseValue = d;
-      moveValue = m;
-   }
-   
-   // instant effect
-   public Technology(Team t, TechnologyEffect effect) {
-      effectedTeam = t;
-      techEffect = effect;
-      effect.run();
-   }
-   
-   // factory tech
-   public Technology(Team t, UNIT_TYPE type, double discount) {
-      effectedTeam = t;
-      for(Map.Entry<UNIT_TYPE, Integer> entry: effectedTeam.getProductionList().entrySet())
-         if(entry.getKey() == type || type == UNIT_TYPE.ALL)
-            entry.setValue(entry.getValue() - (int)(entry.getValue() * discount));
    }
    
    public int getAttackValue() {
@@ -185,14 +144,6 @@ public class Technology {
       this.moveValue = moveValue;
    }
    
-   public TechnologyEffect getTechEffect() {
-      return techEffect;
-   }
-   
-   public void setTechEffect(TechnologyEffect techEffect) {
-      this.techEffect = techEffect;
-   }
-   
    public Team getEffectedTeam() {
       return effectedTeam;
    }
@@ -216,17 +167,4 @@ public class Technology {
    public void setTileType(TILE_TYPE tileType) {
       this.tileType = tileType;
    }
-}
-
-abstract class TechnologyEffect {
-   
-   Object effectObjectOne;
-   Object effectObjectTwo;
-   
-   public TechnologyEffect(Object o, Object t) {
-      effectObjectOne = o;
-      effectObjectTwo = t;
-   }
-   
-   public abstract void run();
 }

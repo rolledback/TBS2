@@ -1,7 +1,8 @@
-package com.rolledback.teams;
+package com.rolledback.teams.ai;
 
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
+import com.rolledback.teams.Team;
 import com.rolledback.units.Unit;
 
 public abstract class ComputerTeam extends Team {
