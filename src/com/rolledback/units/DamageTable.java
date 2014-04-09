@@ -76,7 +76,8 @@ public class DamageTable {
     * 
     * @param attacker attacker type of the attacking unit.
     * @param defender defender type of the defending unit.
-    * @param bounds array of two values which contains the lower and upper attacking bounds in that order.
+    * @param bounds array of two values which contains the lower and upper attacking bounds in that
+    *           order.
     */
    public static void setTableValue(UNIT_TYPE attacker, UNIT_TYPE defender, int[] bounds) {
       damageTable.get(attacker).put(defender, bounds);

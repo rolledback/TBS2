@@ -28,8 +28,8 @@ public abstract class Technology {
    
    public enum TECH_NAME {
       APCR("APCR Shells"),
-      GPS("GPS Navigaion"),
-      ART("Artillery Shells"),
+      GPS("GPS Navigation"),
+      ART("Artillery Barrage"),
       CON("Conscription"),
       FORT("Fortifications"),
       MILI("Militia"),
@@ -89,8 +89,6 @@ public abstract class Technology {
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
-         researcher.getTechTree().remove(name);
-         
       }
       else if(name == TECH_NAME.CON) {
          researcher.getResearchedTechs().add(new FactoryTechnology(researcher, UNIT_TYPE.INFANTRY, .50));

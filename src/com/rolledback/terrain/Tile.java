@@ -5,22 +5,44 @@ import java.awt.Image;
 import com.rolledback.framework.World;
 import com.rolledback.units.Unit;
 
+/**
+ * Super class for all tiles. Only contains a constructor and a variety of getters and setters. No
+ * actual functions are performed by tiles besides these.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class Tile {
    
    public enum TILE_TYPE {
-      PLAIN, FOREST, MOUNTAIN, FACTORY, RIVER, BRIDGE, CITY
+      PLAIN,
+      FOREST,
+      MOUNTAIN,
+      FACTORY,
+      RIVER,
+      BRIDGE,
+      CITY
    }
    
    protected boolean infantryPassable, vehiclePassable;
    boolean occupied;
-   int x, y;
+   protected int x, y;
    protected TILE_TYPE type;
    protected TerrainEffect effect;
    private char mapChar;
    protected World world;
-   Unit occupiedBy;
+   private Unit occupiedBy;
    protected Image texture;
    
+   /**
+    * Constructor.
+    * 
+    * @param w world that the tile exists in.
+    * @param x x position of the tile in the world's tile matrix.
+    * @param y y position of the tile in the world's tile matrix.
+    * @param e terrain effect associated with the tile.
+    * @param m character representation of the tile.
+    */
    public Tile(World w, int x, int y, TerrainEffect e, char m) {
       this.x = x;
       this.y = y;
@@ -32,12 +54,6 @@ public class Tile {
       world = w;
       occupiedBy = null;
       texture = null;
-   }
-   
-   public Tile(int x, int y, Image i) {
-      this.x = x;
-      this.y = y;
-      texture = i;
    }
    
    public void setOccupiedBy(Unit u) {
@@ -103,20 +119,20 @@ public class Tile {
    public TILE_TYPE getType() {
       return type;
    }
-
+   
    public Image getTexture() {
       return texture;
    }
-
+   
    public void setTexture(Image texture) {
       this.texture = texture;
    }
-
+   
    public World getWorld() {
       return world;
    }
-
+   
    public void setWorld(World world) {
       this.world = world;
-   }   
+   }
 }

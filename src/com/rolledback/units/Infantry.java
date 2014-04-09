@@ -15,13 +15,13 @@ import com.rolledback.terrain.Tile;
 public class Infantry extends Unit {
    
    /**
-    * Constructor. 
+    * Constructor.
+    * 
     * @param x starting x position of the unit.
     * @param y starting y position of the unit.
     * @param t tile that the unit is to be placed on.
     * @param o team that the unit belongs to.
-    * @param lI left facing image.
-    * @param rI right facing image.
+    * @param i texture for the unit.
     */
    public Infantry(int x, int y, Tile t, Team o, Image i) {
       super(x, y, t, o);

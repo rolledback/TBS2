@@ -21,7 +21,8 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class ComputerTeamD extends ComputerTeam {
    
    public enum BFS_TYPE {
-      CAPTURE, ENEMY;
+      CAPTURE,
+      ENEMY;
    }
    
    final int animationDelay = 500;

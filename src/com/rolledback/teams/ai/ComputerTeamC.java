@@ -115,8 +115,7 @@ public class ComputerTeamC extends ComputerTeam {
       Iterator<Coordinate> moveSetIterator = unit.getMoveSet().iterator();
       while(moveSetIterator.hasNext()) {
          Coordinate moveCoordinate = moveSetIterator.next();
-         int distance = bfsToBestSpot(game.getWorld().getTiles(), closestUnit.getX(), closestUnit.getY(), moveCoordinate.getX(),
-               moveCoordinate.getY(), unit);
+         int distance = bfsToBestSpot(game.getWorld().getTiles(), closestUnit.getX(), closestUnit.getY(), moveCoordinate.getX(), moveCoordinate.getY(), unit);
          moveDistances.put(moveCoordinate, distance);
       }
       
@@ -129,7 +128,7 @@ public class ComputerTeamC extends ComputerTeam {
       return closest;
    }
    
-   public Coordinate moveInfantry(Infantry unit) {      
+   public Coordinate moveInfantry(Infantry unit) {
       // if infantry is on a city, defend the city if needed
       if(game.getWorld().getTiles()[unit.getY()][unit.getX()].getType() == TILE_TYPE.CITY) {
          int[] yDirs = { 0, 0, 1, -1 };
@@ -185,8 +184,7 @@ public class ComputerTeamC extends ComputerTeam {
          while(moveSetIterator.hasNext()) {
             Coordinate currMoveSpot = moveSetIterator.next();
             if(unit.getMoveSet().contains(currMoveSpot)) {
-               int distance = bfsToBestSpot(game.getWorld().getTiles().clone(), currMoveSpot.getX(), currMoveSpot.getY(), closest.getX(),
-                     closest.getY(), unit);
+               int distance = bfsToBestSpot(game.getWorld().getTiles().clone(), currMoveSpot.getX(), currMoveSpot.getY(), closest.getX(), closest.getY(), unit);
                distancesToCity.put(currMoveSpot, distance);
             }
          }
@@ -247,5 +245,5 @@ public class ComputerTeamC extends ComputerTeam {
       }
       world[unit.getY()][unit.getX()].setOccupied(true);
       return distance;
-   }   
+   }
 }

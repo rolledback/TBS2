@@ -6,8 +6,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,8 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
-import com.rolledback.teams.Team;
 import com.rolledback.teams.technology.Technology.TECH_NAME;
+import com.rolledback.terrain.Factory;
 import com.rolledback.units.Unit.UNIT_TYPE;
 
 /**
@@ -34,6 +32,8 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class FactoryOptionPane extends JDialog {
    
    private static final long serialVersionUID = 1L;
+   private Factory caller;
+   
    private JTabbedPane tabbedPane;
    
    private GridLayout unitLayout;
@@ -60,21 +60,23 @@ public class FactoryOptionPane extends JDialog {
    /**
     * Constructor. The pane will is set to visible in the constructor.
     * 
-    * @param caller the team that the options for the pane should come from.
+    * @param c the factory that the options for the pane should come from.
     */
-   public FactoryOptionPane(Team caller) {
+   public FactoryOptionPane(Factory c) {
       setTitle("Factory");
       setSize(225, 150);
       unitChoiceMade = false;
       techChoiceMade = false;
-      numResources = caller.getResources();
+      
+      caller = c;
+      numResources = caller.getOwner().getResources();
       
       JPanel topPanel = new JPanel();
       topPanel.setLayout(new BorderLayout());
       getContentPane().add(topPanel);
       
-      createUnitPage(caller.getProductionList());
-      createTechPage(caller.getTechTree());
+      createUnitPage();
+      createTechPage();
       
       tabbedPane = new JTabbedPane();
       tabbedPane.addTab("Units", unitPanel);
@@ -105,24 +107,17 @@ public class FactoryOptionPane extends JDialog {
     * buttons, and a label of how many resources the caller team currently has. Hitting the ok
     * button will do a check to make sure the caller team has enough resources for the unit.
     * 
-    * @param productionList list of units that the caller team can produce mapped to Integer values
-    *           of how much they will cost in resources.
     */
-   public void createUnitPage(LinkedHashMap<UNIT_TYPE, Integer> productionList) {
+   public void createUnitPage() {
       unitLayout = new GridLayout(0, 1, 5, 5);
       unitPanel = new JPanel(unitLayout);
-      final String[] unitNames = new String[productionList.size()];
-      int counter = 0;
-      for(Map.Entry<UNIT_TYPE, Integer> entry: productionList.entrySet()) {
-         unitNames[counter] = entry.getKey().toString() + ", " + entry.getValue().toString();
-         counter++;
-      }
-      unitList = new JComboBox<String>(unitNames);
+      final String[] unitDialogList = caller.getOwner().dialogBoxProductionList();
+      unitList = new JComboBox<String>(unitDialogList);
       unitList.setSelectedIndex(0);
-      returnedUnit = UNIT_TYPE.stringToType(unitNames[0].split(",")[0]);
+      returnedUnit = UNIT_TYPE.stringToType(unitDialogList[0].split(",")[0]);
       unitList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
-            returnedUnit = UNIT_TYPE.stringToType(unitNames[unitList.getSelectedIndex()].split(",")[0]);
+            returnedUnit = UNIT_TYPE.stringToType(unitDialogList[unitList.getSelectedIndex()].split(",")[0]);
          }
       });
       
@@ -131,7 +126,7 @@ public class FactoryOptionPane extends JDialog {
          public void actionPerformed(ActionEvent arg0) {
             techChoiceMade = false;
             unitChoiceMade = true;
-            if(Integer.parseInt(unitNames[unitList.getSelectedIndex()].substring(unitNames[unitList.getSelectedIndex()].lastIndexOf(" ") + 1)) > numResources)
+            if(Integer.parseInt(unitDialogList[unitList.getSelectedIndex()].substring(unitDialogList[unitList.getSelectedIndex()].lastIndexOf(" ") + 1)) > numResources)
                JOptionPane.showMessageDialog(new JFrame(), "Not enough resources.", "Error", JOptionPane.ERROR_MESSAGE);
             else {
                setVisible(false);
@@ -165,26 +160,17 @@ public class FactoryOptionPane extends JDialog {
     * Hitting the ok button will do a check to make sure the caller team has enough resources for
     * the technology.
     * 
-    * @param techTree list of technologies that the caller team can reduce mapped to Integer values
-    *           of how much the technology cost in resources.
     */
-   public void createTechPage(LinkedHashMap<TECH_NAME, Integer> techTree) {
+   public void createTechPage() {
       techLayout = new GridLayout(0, 1, 5, 5);
       techPanel = new JPanel(techLayout);
-      final String[] techNames;
-      techNames = new String[techTree.size()];
-      int counter = 0;
-      for(Map.Entry<TECH_NAME, Integer> entry: techTree.entrySet()) {
-         techNames[counter] = entry.getKey().toString() + ", " + entry.getValue().toString();
-         counter++;
-      }
-      
-      techList = new JComboBox<String>(techNames);
-      if(techNames.length > 0)
-         returnedTech = TECH_NAME.stringToName(techNames[0].split(",")[0]);
+      final String[] techDialogList = caller.getOwner().dialogBoxTechTree();
+      techList = new JComboBox<String>(techDialogList);
+      if(techDialogList.length > 0)
+         returnedTech = TECH_NAME.stringToName(techDialogList[0].split(",")[0]);
       techList.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent arg0) {
-            returnedTech = TECH_NAME.stringToName(techNames[techList.getSelectedIndex()].split(",")[0]);
+            returnedTech = TECH_NAME.stringToName(techDialogList[techList.getSelectedIndex()].split(",")[0]);
          }
       });
       
@@ -193,9 +179,9 @@ public class FactoryOptionPane extends JDialog {
          public void actionPerformed(ActionEvent arg0) {
             unitChoiceMade = false;
             techChoiceMade = true;
-            if(techNames.length == 0)
+            if(techDialogList.length == 0)
                JOptionPane.showMessageDialog(new JFrame(), "No technologies available.", "Error", JOptionPane.ERROR_MESSAGE);
-            else if(Integer.parseInt(techNames[techList.getSelectedIndex()].substring(techNames[techList.getSelectedIndex()].lastIndexOf(" ") + 1)) > numResources)
+            else if(Integer.parseInt(techDialogList[techList.getSelectedIndex()].substring(techDialogList[techList.getSelectedIndex()].lastIndexOf(" ") + 1)) > numResources)
                JOptionPane.showMessageDialog(new JFrame(), "Not enough resources.", "Error", JOptionPane.ERROR_MESSAGE);
             else {
                setVisible(false);

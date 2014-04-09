@@ -443,7 +443,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner() != null && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
          Logger.consolePrint("factory selected", "game");
-         FactoryOptionPane factoryPane = new FactoryOptionPane(currentTeam);
+         FactoryOptionPane factoryPane = new FactoryOptionPane((Factory)selectedTile);
          if(factoryPane.isUnitChoiceMade()) {
             ((Factory)selectedTile).produceUnit(factoryPane.getReturnedUnit());
             Logger.consolePrint("producing " + factoryPane.getReturnedUnit(), "game");

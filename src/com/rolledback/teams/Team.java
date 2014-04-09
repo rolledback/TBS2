@@ -3,6 +3,7 @@ package com.rolledback.teams;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.teams.technology.Technology.TECH_NAME;
@@ -63,6 +64,37 @@ public class Team {
       techTree.put(TECH_NAME.FIELD, 600);
       techTree.put(TECH_NAME.APCR, 600);
       techTree.put(TECH_NAME.GPS, 300);
+   }
+   
+   /**
+    * Parses the production list into an array of strings for the factory option pane.
+    * 
+    * @return array of strings which contains the production list in format suitable for a drop down
+    *         menu.
+    */
+   public String[] dialogBoxProductionList() {
+      String[] list = new String[productionList.size()];
+      int numEntry = 0;
+      for(Map.Entry<UNIT_TYPE, Integer> entry: productionList.entrySet()) {
+         list[numEntry] = entry.getKey().toString() + ", cost: " + entry.getValue().toString();
+         numEntry++;
+      }
+      return list;
+   }
+   
+   /**
+    * Parses the tech tree into an array of strings for the factory option pane.
+    * 
+    * @return array of strings which contains the tech tree in format suitable for a drop down menu.
+    */
+   public String[] dialogBoxTechTree() {
+      String[] list = new String[techTree.size()];
+      int numEntry = 0;
+      for(Map.Entry<TECH_NAME, Integer> entry: techTree.entrySet()) {
+         list[numEntry] = entry.getKey().toString() + ", cost: " + entry.getValue().toString();
+         numEntry++;
+      }
+      return list;
    }
    
    public void createUnit(Tile t, UNIT_TYPE uType, Image i) {

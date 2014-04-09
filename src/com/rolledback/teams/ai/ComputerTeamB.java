@@ -76,8 +76,7 @@ public class ComputerTeamB extends ComputerTeam {
                Coordinate currentSpot = moveSetIterator.next();
                if(currUnit.getMoveSet().contains(currentSpot)) {
                   // calculate distance from spot to target using a breadth first search
-                  currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), currentSpot.getX(), currentSpot.getY(), targetX, targetY,
-                        currUnit);
+                  currentDistance = bfsToBestSpot(game.getWorld().getTiles().clone(), currentSpot.getX(), currentSpot.getY(), targetX, targetY, currUnit);
                   if(currentDistance < lowestDistance) {
                      moveHere = new Coordinate(currentSpot.getX(), currentSpot.getY());
                      lowestDistance = currentDistance;
@@ -136,8 +135,7 @@ public class ComputerTeamB extends ComputerTeam {
                            set.add(world[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                            queue.offer(world[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                         }
-                        else if(unit.getClassification() == UNIT_CLASS.INFANTRY
-                              && world[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isInfantryPassable()) {
+                        else if(unit.getClassification() == UNIT_CLASS.INFANTRY && world[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isInfantryPassable()) {
                            set.add(world[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                            queue.offer(world[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                         }
@@ -213,8 +211,7 @@ public class ComputerTeamB extends ComputerTeam {
          Unit currOpponent = targetI.next();
          // determine absolute distance to the enemy
          Unit currFriendly = attacker;
-         distanceHash.put(currOpponent,
-               (double)(Math.abs(currFriendly.getX() - currOpponent.getX()) + Math.abs(currFriendly.getY() - currOpponent.getY())));
+         distanceHash.put(currOpponent, (double)(Math.abs(currFriendly.getX() - currOpponent.getX()) + Math.abs(currFriendly.getY() - currOpponent.getY())));
       }
       // find enemy unit with lowest distance to the attacker
       Map.Entry<Unit, Double> minEntry = null;
@@ -269,8 +266,8 @@ public class ComputerTeamB extends ComputerTeam {
          currentMax = 9999.9999;
          for(Map.Entry<Unit, Double> entry: numInRange.entrySet()) {
             if(maxEntry == null
-                  || ((Integer)(entry.getKey().getDefense() + entry.getKey().getCurrentTile().getEffect().getDefenseBonus())).compareTo((Integer)(maxEntry
-                        .getKey().getDefense() + maxEntry.getKey().getCurrentTile().getEffect().getDefenseBonus())) <= 0 && entry.getValue() > 0)
+                  || ((Integer)(entry.getKey().getDefense() + entry.getKey().getCurrentTile().getEffect().getDefenseBonus())).compareTo((Integer)(maxEntry.getKey().getDefense() + maxEntry.getKey()
+                        .getCurrentTile().getEffect().getDefenseBonus())) <= 0 && entry.getValue() > 0)
                maxEntry = entry;
          }
       }

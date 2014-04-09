@@ -215,8 +215,7 @@ public class ComputerTeamA extends ComputerTeam {
          for(int row = 0; row < game.getGameHeight(); row++) {
             for(int col = 0; col < game.getGameWidth(); col++) {
                if(currUnit.getAttackSet().contains(new Coordinate(col, row)))
-                  numInRange.put(game.getWorld().getTiles()[row][col].getOccupiedBy(), numInRange.get(game.getWorld().getTiles()[row][col].getOccupiedBy())
-                        + 0);
+                  numInRange.put(game.getWorld().getTiles()[row][col].getOccupiedBy(), numInRange.get(game.getWorld().getTiles()[row][col].getOccupiedBy()) + 0);
             }
          }
       }
@@ -242,8 +241,7 @@ public class ComputerTeamA extends ComputerTeam {
          maxEntry = null;
          currentMax = 9999.9999;
          for(Map.Entry<Unit, Double> entry: numInRange.entrySet()) {
-            if(maxEntry == null || ((Integer)(entry.getKey().getDefense())).compareTo((Integer)(maxEntry.getKey().getDefense())) <= 0
-                  && entry.getValue() > 0)
+            if(maxEntry == null || ((Integer)(entry.getKey().getDefense())).compareTo((Integer)(maxEntry.getKey().getDefense())) <= 0 && entry.getValue() > 0)
                maxEntry = entry;
          }
       }
