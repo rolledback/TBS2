@@ -33,6 +33,7 @@ public class Launcher {
    /**
     * Fraction of the screen's height to be removed from the screen size.
     */
+   
    static private int winFractionHeight = 10;
    /**
     * Fraction of the screen's width to be removed from the screen size.

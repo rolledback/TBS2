@@ -38,20 +38,30 @@ public class Simulator {
     * Fraction of the screen's height to be removed from the screen size.
     */
    static private int winFractionHeight = 10;
+   
    /**
     * Fraction of the screen's width to be removed from the screen size.
     */
    static private int winFractionWidth = 4;
+   
    /**
     * Whether or not to display graphics. Very much advised to turn logging on for the "simulator"
     * tag at a minimum to make sure the program isn't stuck somewhere.
     */
    static private boolean watchSim = false;
+   
    /**
     * Whether or not to save the click data (of either computer or human players). Will append all x
     * y values sent to game logic upon completion of the game.
     */
    static private boolean printDump = true;
+   
+   /**
+    * Whether or not to save the map upon generation. Saving the current map iteration makes seeing
+    * why something went wrong easier. The simulator will automatically save the latest generated
+    * map in the top level folder as simulator.map.
+    */
+   static private boolean saveMap = false;
    
    /**
     * Starting location for all function calls of the simulator. Presents user with a dialog box
@@ -281,8 +291,15 @@ public class Simulator {
          Logger.consolePrint("Final game panel dimensions: " + gamePanel.getSize(), "simulator");
          Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "simulator");
          
+         if(saveMap) {
+            Logger.consolePrint("Saving this iteration to simulator.map.", "simulator");
+            Cartographer.createMapFile("simulator.map", gamePanel.getWorld().getTiles(), tileSize);
+            Logger.consolePrint("Save complete Moving on.", "simulator");
+         }
+         
          // setup complete, run the game
          Logger.consolePrint("Running game.", "simulator");
+         
          gamePanel.run();
          if(gamePanel.getWinner().equals(gamePanel.getTeamOne()))
             winners[0]++;
