@@ -27,7 +27,13 @@ public abstract class Technology {
    protected Team effectedTeam;
    
    public enum TECH_NAME {
-      APCR("APCR Shells"), GPS("GPS Navigaion"), ART("Artillery Shells"), CON("Conscription"), FORT("Fortifications"), MILI("Militia"), FIELD("Field Repairs");
+      APCR("APCR Shells"),
+      GPS("GPS Navigaion"),
+      ART("Artillery Shells"),
+      CON("Conscription"),
+      FORT("Fortifications"),
+      MILI("Militia"),
+      FIELD("Field Repairs");
       
       private final String name;
       

@@ -7,20 +7,32 @@ import java.util.Random;
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.World;
 import com.rolledback.teams.Team;
-import com.rolledback.teams.ai.ComputerTeam;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 
+/**
+ * Super class for all units. Contains all functions nescesarry for a unit to interact with the
+ * world/game.
+ * 
+ * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
+ * @version 1.0
+ */
 public class Unit {
    
    public enum UNIT_CLASS {
-      ALL, VEHICLE, INFANTRY
+      ALL,
+      VEHICLE,
+      INFANTRY
    }
    
    public enum UNIT_TYPE {
-      ALL("All"), INFANTRY("Infantry"), RPG("RPG Team"), TANK("Tank"), TANK_DEST("Tank Destroyer");
+      ALL("All"),
+      INFANTRY("Infantry"),
+      RPG("RPG Team"),
+      TANK("Tank"),
+      TANK_DEST("Tank Destroyer");
       
       private String name;
       
@@ -49,7 +61,8 @@ public class Unit {
    }
    
    public enum DIRECTION {
-      LEFT, RIGHT
+      LEFT,
+      RIGHT
    }
    
    private HashSet<Coordinate> moveSet;
@@ -74,6 +87,14 @@ public class Unit {
    private DIRECTION dir;
    private Team owner;
    
+   /**
+    * Constructor.
+    * 
+    * @param x starting x position of the unit.
+    * @param y starting y position of the unit.
+    * @param t tile that the unit is to be placed on.
+    * @param o team that the unit belongs to.
+    */
    public Unit(int x, int y, Tile t, Team o) {
       defense = 0;
       attackRange = 0;
@@ -93,6 +114,16 @@ public class Unit {
       captureSet = new HashSet<Coordinate>();
    }
    
+   /**
+    * Sets up the necessary parameters and other actions that need to be done before calling a
+    * separate private helper function, calcMoveSpots helper. Although this function is void, upon
+    * it's completion the unit's moveSet, captureSet, and attackSet will contain coordinates that
+    * the unit can move/capture/attack on.
+    * 
+    * @param atkOnly whether or not the helper function should only examine the tiles adjacent to
+    *           the unit for enemy units. In simpler terms, true when a unit has moved but not yet
+    *           attacked.
+    */
    public void calcMoveSpots(boolean atkOnly) {
       World world = this.currentTile.getWorld();
       int techBonus = 0;
@@ -114,7 +145,17 @@ public class Unit {
       moveSet.remove(new Coordinate(x, y));
    }
    
-   public void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
+   /**
+    * Called by calcMoveSpots. Performs a DFS around the unit finding all spots that the unit can
+    * move to. Each move deducts one from range. Units are allowed to move through friendly units.
+    * 
+    * @param world the world that the unit will be traversing.
+    * @param x the current x value of the DFS.
+    * @param y the current y value of the DFS.
+    * @param range the remaining move range for the unit.
+    * @param movedThrough whether or not the unit just came through a friendly unit.
+    */
+   private void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
       Coordinate thisCoord = new Coordinate(x, y);
       Tile tiles[][] = world.getTiles();
       int height = world.getHeight();
@@ -151,6 +192,12 @@ public class Unit {
          return;
    }
    
+   /**
+    * Determines if the unit can traverse the given tile.
+    * 
+    * @param tile tile to be tested against.
+    * @return whether or not the unit can traverse the tile.
+    */
    public boolean canTraverse(Tile tile) {
       if(tile.getType() == TILE_TYPE.RIVER)
          return false;
@@ -159,6 +206,12 @@ public class Unit {
       return true;
    }
    
+   /**
+    * Determines if the unit can capture the given tile.
+    * 
+    * @param tile tile to be tested against.
+    * @return whether or not the unit can capture the tile.
+    */
    public boolean canCapture(Tile tile) {
       if(!(tile instanceof CapturableTile))
          return false;
@@ -167,9 +220,15 @@ public class Unit {
       return ((CapturableTile)tile).getOwner() == null || !owner.equals(((CapturableTile)tile).getOwner());
    }
    
+   /**
+    * Moves the unit from its current tile to the provided tile. First determines if the move
+    * results in a change of image direction. Then sets the current tile to no longer be occupied.
+    * And then finally changes the unit's coordinates, and sets the new tile as occupied and sets
+    * its occupiedBy pointer to point to this unit.
+    * 
+    * @param tile tile that the unit is being moved to.
+    */
    public void move(Tile tile) {
-      if(tile.getType() == TILE_TYPE.RIVER)
-         ((ComputerTeam)owner).delay(100000);
       if(x < tile.getX())
          setDir(DIRECTION.RIGHT);
       if(x > tile.getX())
@@ -183,6 +242,12 @@ public class Unit {
       tile.setOccupiedBy(this);
    }
    
+   /**
+    * Does all the calculations needed for this unit to attack a target.
+    * 
+    * @param target unit that this unit is attacking.
+    * @param isRetaliation whether or not the attack is in retaliation to another attack.
+    */
    public void attack(Unit target, boolean isRetaliation) {
       Random random = new Random();
       int techBonus = 0;
@@ -200,6 +265,12 @@ public class Unit {
       target.takeDamage(attackNum);
    }
    
+   /**
+    * Given an amount of damage to take, calculates the amount of actual damage to be taken by the
+    * unit.
+    * 
+    * @param amount amount of damage done by whoever is attacking this unit.
+    */
    public void takeDamage(int amount) {
       Random random = new Random();
       int techBonus = 0;
