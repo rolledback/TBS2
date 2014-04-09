@@ -73,8 +73,8 @@ public abstract class Technology {
             public void run() {
                for(City c: ((Team)effectObjectOne).getCities())
                   if(!c.isOccupied()) {
-                     Image[] textures = GraphicsManager.typetoImage(UNIT_TYPE.INFANTRY, ((Team)effectObjectOne).getTeamNumber());
-                     ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY, textures[0], textures[1]);
+                     Image texture = GraphicsManager.typetoImage(UNIT_TYPE.INFANTRY, ((Team)effectObjectOne).getTeamNumber());
+                     ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY, texture);
                   }
             }
          }));

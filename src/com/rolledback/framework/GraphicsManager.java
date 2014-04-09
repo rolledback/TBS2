@@ -66,28 +66,18 @@ public class GraphicsManager {
    }
    
    static {
-      unitImages = new Image[16];
+      unitImages = new Image[8];
       try {
          Logger.consolePrint("loading unit images", "manager");
-         unitImages[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryRed_left.png"));
-         unitImages[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgRed_left.png"));
-         unitImages[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankRed_left.png"));
-         unitImages[3] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerRed_left.png"));
+         unitImages[0] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryRed.png"));
+         unitImages[1] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgRed.png"));
+         unitImages[2] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankRed.png"));
+         unitImages[3] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerRed.png"));
          
-         unitImages[4] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryRed_right.png"));
-         unitImages[5] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgRed_right.png"));
-         unitImages[6] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankRed_right.png"));
-         unitImages[7] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerRed_right.png"));
-         
-         unitImages[8] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryBlue_left.png"));
-         unitImages[9] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgBlue_left.png"));
-         unitImages[10] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankBlue_left.png"));
-         unitImages[11] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerBlue_left.png"));
-         
-         unitImages[12] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryBlue_right.png"));
-         unitImages[13] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgBlue_right.png"));
-         unitImages[14] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankBlue_right.png"));
-         unitImages[15] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerBlue_right.png"));
+         unitImages[4] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("infantryBlue.png"));
+         unitImages[5] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("rpgBlue.png"));
+         unitImages[6] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankBlue.png"));
+         unitImages[7] = ImageIO.read(GraphicsManager.class.getClassLoader().getResource("tankDestroyerBlue.png"));
       }
       catch(IOException e) {
          Logger.consolePrint("ERROR loading image. " + e.toString(), "manager");
@@ -103,49 +93,40 @@ public class GraphicsManager {
     * @param team represents what color of unit is wanted, 1 for red, 2 for blue
     * @return array of images corresponding to type and team
     */
-   public static Image[] typetoImage(UNIT_TYPE type, int team) {
-      Image[] ret = new Image[2];
+   public static Image typetoImage(UNIT_TYPE type, int team) {
       if(type == UNIT_TYPE.INFANTRY) {
          if(team == 1) {
-            ret[0] = unitImages[0];
-            ret[1] = unitImages[4];
+            return unitImages[0];
          }
          else {
-            ret[0] = unitImages[8];
-            ret[1] = unitImages[12];
+            return unitImages[4];
          }
       }
       if(type == UNIT_TYPE.RPG) {
          if(team == 1) {
-            ret[0] = unitImages[1];
-            ret[1] = unitImages[5];
+            return unitImages[1];
          }
          else {
-            ret[0] = unitImages[9];
-            ret[1] = unitImages[13];
+            return unitImages[5];
          }
       }
       if(type == UNIT_TYPE.TANK) {
          if(team == 1) {
-            ret[0] = unitImages[2];
-            ret[1] = unitImages[6];
+            return unitImages[2];
          }
          else {
-            ret[0] = unitImages[10];
-            ret[1] = unitImages[14];
+            return unitImages[6];
          }
       }
       if(type == UNIT_TYPE.TANK_DEST) {
          if(team == 1) {
-            ret[0] = unitImages[3];
-            ret[1] = unitImages[7];
+            return unitImages[3];
          }
          else {
-            ret[0] = unitImages[11];
-            ret[1] = unitImages[15];
+            return unitImages[7];
          }
       }
-      return ret;
+      return null;
    }
    
    /**

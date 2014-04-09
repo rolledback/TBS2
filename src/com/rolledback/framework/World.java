@@ -695,14 +695,14 @@ public class World {
          }
          if(x == team.getTeamSize() - 1) {
             if(team.equals(teamOne))
-               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryRed_left"), GraphicsManager.getTileTextures().get("infantryRed_right"));
+               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryRed"));
             else if(team.equals(teamOne))
-               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryBlue_left"), GraphicsManager.getTileTextures().get("infantryBlue_right"));
+               team.createUnit(tiles[row][col], UNIT_TYPE.INFANTRY, GraphicsManager.getTileTextures().get("infantryBlue"));
          }
          else {
             UNIT_TYPE rand = randUnitType();
-            Image[] textures = GraphicsManager.typetoImage(rand, team.getTeamNumber());
-            team.createUnit(tiles[row][col], rand, textures[0], textures[1]);
+            Image texture = GraphicsManager.typetoImage(rand, team.getTeamNumber());
+            team.createUnit(tiles[row][col], rand, texture);
          }
          if(team.equals(teamTwo))
             team.getUnits().get(x).setDir(DIRECTION.LEFT);

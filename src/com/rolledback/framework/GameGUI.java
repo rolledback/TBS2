@@ -313,7 +313,7 @@ public class GameGUI extends JPanel {
          unitHealth.setText("Health: " + unit.getHealth() + "/" + unit.getMaxHealth());
          unitDefense.setText("Def: " + Integer.toString(unit.getDefense()));
          unitMove.setText("Move Range: " + Integer.toString(unit.getMoveRange()));
-         uImage = unit.getRightTexture();
+         uImage = unit.getTexture();
       }
       else {
          unitName.setText("Type: ");

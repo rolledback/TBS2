@@ -39,10 +39,10 @@ public class UnitAttackAnalysis {
    
    static ArrayList<Unit> unitList = new ArrayList<Unit>();
    static {
-      unitList.add(new Infantry(0, 0, null, null, null, null));
-      unitList.add(new RPGTeam(0, 0, null, null, null, null));
-      unitList.add(new Tank(0, 0, null, null, null, null));
-      unitList.add(new TankDestroyer(0, 0, null, null, null, null));
+      unitList.add(new Infantry(0, 0, null, null, null));
+      unitList.add(new RPGTeam(0, 0, null, null, null));
+      unitList.add(new Tank(0, 0, null, null, null));
+      unitList.add(new TankDestroyer(0, 0, null, null, null));
    }
    
    public static void printSpaces(int n) {

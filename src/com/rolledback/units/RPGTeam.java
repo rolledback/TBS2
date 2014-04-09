@@ -24,14 +24,13 @@ public class RPGTeam extends Unit {
     * @param lI left facing image.
     * @param rI right facing image.
     */
-   public RPGTeam(int x, int y, Tile t, Team o, Image lI, Image rI) {
+   public RPGTeam(int x, int y, Tile t, Team o, Image i) {
       super(x, y, t, o);
       classification = UNIT_CLASS.INFANTRY;
       defense = 10;
       moveRange = 2;
       type = UNIT_TYPE.RPG;
-      leftTexture = lI;
-      rightTexture = rI;
+      texture = i;
    }
    
 }

@@ -23,14 +23,13 @@ public class Infantry extends Unit {
     * @param lI left facing image.
     * @param rI right facing image.
     */
-   public Infantry(int x, int y, Tile t, Team o, Image lI, Image rI) {
+   public Infantry(int x, int y, Tile t, Team o, Image i) {
       super(x, y, t, o);
       classification = UNIT_CLASS.INFANTRY;
       defense = 10;
       moveRange = 3;
       type = UNIT_TYPE.INFANTRY;
-      leftTexture = lI;
-      rightTexture = rI;
+      texture = i;
    }
    
 }

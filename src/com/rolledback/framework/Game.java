@@ -9,6 +9,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +47,11 @@ import com.rolledback.units.Unit.DIRECTION;
 public class Game extends JPanel implements MouseListener, KeyListener {
    
    public enum GAME_STATE {
-      NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
+      NORMAL,
+      DISPLAY_MOVE,
+      UPDATE,
+      SWITCH_TEAMS,
+      END_GAME
    }
    
    private ArrayList<Coordinate> clickHistory = new ArrayList<Coordinate>();
@@ -301,10 +308,16 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       for(Unit temp: teamOne.getUnits()) {
          int xCorner = tileSize * temp.getX() + offsetHorizontal;
          int yCorner = tileSize * temp.getY() + offsetVertical;
-         if(temp.getDir() == DIRECTION.LEFT)
-            g.drawImage(temp.getLeftTexture(), xCorner, yCorner, tileSize, tileSize, this);
-         else
-            g.drawImage(temp.getRightTexture(), xCorner, yCorner, tileSize, tileSize, this);
+         BufferedImage unitImage = (BufferedImage)temp.getTexture();
+         if(temp.getDir() == DIRECTION.RIGHT)
+            g.drawImage(unitImage, xCorner, yCorner, tileSize, tileSize, this);
+         else {
+            AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+            tx.translate(-unitImage.getWidth(null), 0);
+            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            unitImage = op.filter(unitImage, null);
+            g.drawImage(unitImage, xCorner, yCorner, tileSize, tileSize, this);
+         }
          if(temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
@@ -318,15 +331,21 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       for(Unit temp: teamTwo.getUnits()) {
          int xCorner = tileSize * temp.getX() + offsetHorizontal;
          int yCorner = tileSize * temp.getY() + offsetVertical;
-         if(temp.getDir() == DIRECTION.LEFT)
-            g.drawImage(temp.getLeftTexture(), xCorner, yCorner, tileSize, tileSize, this);
-         else
-            g.drawImage(temp.getRightTexture(), xCorner, yCorner, tileSize, tileSize, this);
-         if(temp.hasMoved() && teamTwo.equals(currentTeam)) {
+         BufferedImage unitImage = (BufferedImage)temp.getTexture();
+         if(temp.getDir() == DIRECTION.RIGHT)
+            g.drawImage(unitImage, xCorner, yCorner, tileSize, tileSize, this);
+         else {
+            AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+            tx.translate(-unitImage.getWidth(null), 0);
+            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            unitImage = op.filter(unitImage, null);
+            g.drawImage(unitImage, xCorner, yCorner, tileSize, tileSize, this);
+         }
+         if(temp.hasMoved() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
-         if(temp.hasAttacked() && teamTwo.equals(currentTeam)) {
+         if(temp.hasAttacked() && teamOne.equals(currentTeam)) {
             g.setColor(new Color(212, 212, 212, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }

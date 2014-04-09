@@ -65,15 +65,15 @@ public class Team {
       techTree.put(TECH_NAME.GPS, 300);
    }
    
-   public void createUnit(Tile t, UNIT_TYPE uType, Image lI, Image rI) {
+   public void createUnit(Tile t, UNIT_TYPE uType, Image i) {
       if(uType == UNIT_TYPE.TANK)
-         units.add(new Tank(t.getX(), t.getY(), t, this, lI, rI));
+         units.add(new Tank(t.getX(), t.getY(), t, this, i));
       else if(uType == UNIT_TYPE.TANK_DEST)
-         units.add(new TankDestroyer(t.getX(), t.getY(), t, this, lI, rI));
+         units.add(new TankDestroyer(t.getX(), t.getY(), t, this, i));
       else if(uType == UNIT_TYPE.INFANTRY)
-         units.add(new Infantry(t.getX(), t.getY(), t, this, lI, rI));
+         units.add(new Infantry(t.getX(), t.getY(), t, this, i));
       else if(uType == UNIT_TYPE.RPG)
-         units.add(new RPGTeam(t.getX(), t.getY(), t, this, lI, rI));
+         units.add(new RPGTeam(t.getX(), t.getY(), t, this, i));
       else
          return;
       t.setOccupied(true);

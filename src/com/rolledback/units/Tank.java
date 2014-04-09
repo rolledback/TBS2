@@ -24,14 +24,13 @@ public class Tank extends Unit {
     * @param lI left facing image.
     * @param rI right facing image.
     */
-   public Tank(int x, int y, Tile t, Team o, Image lI, Image rI) {
+   public Tank(int x, int y, Tile t, Team o, Image i) {
       super(x, y, t, o);
       classification = UNIT_CLASS.VEHICLE;
       defense = 20;
       moveRange = 5;
       type = UNIT_TYPE.TANK;
-      leftTexture = lI;
-      rightTexture = rI;
+      texture = i;
    }
    
 }

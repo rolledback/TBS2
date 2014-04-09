@@ -81,8 +81,7 @@ public class Unit {
    protected UNIT_CLASS classification;
    protected UNIT_TYPE type;
    
-   protected Image leftTexture;
-   protected Image rightTexture;
+   protected Image texture;
    
    private DIRECTION dir;
    private Team owner;
@@ -427,19 +426,12 @@ public class Unit {
       this.maxHealth = maxHealth;
    }
    
-   public Image getLeftTexture() {
-      return leftTexture;
+   public Image getTexture() {
+      return texture;
    }
    
-   public void setLeftTexture(Image leftTexture) {
-      this.leftTexture = leftTexture;
+   public void setTexture(Image texture) {
+      this.texture = texture;
    }
    
-   public Image getRightTexture() {
-      return rightTexture;
-   }
-   
-   public void setRightTexture(Image rightTexture) {
-      this.rightTexture = rightTexture;
-   }
 }

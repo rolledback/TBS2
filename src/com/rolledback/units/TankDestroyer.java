@@ -24,14 +24,13 @@ public class TankDestroyer extends Unit {
     * @param lI left facing image.
     * @param rI right facing image.
     */
-   public TankDestroyer(int x, int y, Tile t, Team o, Image lI, Image rI) {
+   public TankDestroyer(int x, int y, Tile t, Team o, Image i) {
       super(x, y, t, o);
       classification = UNIT_CLASS.VEHICLE;
       defense = 15;
       moveRange = 4;
       type = UNIT_TYPE.TANK_DEST;
-      leftTexture = lI;
-      rightTexture = rI;
+      texture = i;
    }
    
 }
