@@ -206,7 +206,8 @@ public class Unit {
    }
    
    /**
-    * Determines if the unit can capture the given tile.
+    * Determines if the unit can capture the given tile. Will return true even if the tile is
+    * occupied.
     * 
     * @param tile tile to be tested against.
     * @return whether or not the unit can capture the tile.
@@ -217,6 +218,21 @@ public class Unit {
       if(classification != UNIT_CLASS.INFANTRY)
          return false;
       return ((CapturableTile)tile).getOwner() == null || !owner.equals(((CapturableTile)tile).getOwner());
+   }
+   
+   /**
+    * Determines if the unit can attack the unit on the given tile. Checks to see if there is a unit
+    * on the tile in the first place.
+    * 
+    * @param tile tile to be tested against.
+    * @return whether or not the unit can attack at that tile.
+    */
+   public boolean canAttack(Tile tile) {
+      if(!tile.isOccupied())
+         return false;
+      if(tile.getOccupiedBy().getOwner().equals(owner))
+         return false;
+      return true;
    }
    
    /**

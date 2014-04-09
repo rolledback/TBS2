@@ -80,6 +80,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    private int numTurns;
    private ReentrantLock logicLock;
    
+
    /**
     * Constructor.
     * 
@@ -341,11 +342,11 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             unitImage = op.filter(unitImage, null);
             g.drawImage(unitImage, xCorner, yCorner, tileSize, tileSize, this);
          }
-         if(temp.hasMoved() && teamOne.equals(currentTeam)) {
+         if(temp.hasMoved() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(192, 192, 192, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }
-         if(temp.hasAttacked() && teamOne.equals(currentTeam)) {
+         if(temp.hasAttacked() && teamTwo.equals(currentTeam)) {
             g.setColor(new Color(212, 212, 212, 135));
             g.fillRect(xCorner, yCorner, tileSize, tileSize);
          }

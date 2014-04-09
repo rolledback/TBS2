@@ -20,11 +20,6 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    
-   public enum BFS_TYPE {
-      CAPTURE,
-      ENEMY;
-   }
-   
    final int animationDelay = 500;
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
@@ -78,15 +73,15 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public Coordinate simpleMove(Unit u) {
-      Object[] closestEnemyTuple;
-      if(u.getClassification() != UNIT_CLASS.INFANTRY)
-         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.ENEMY, opponent);
-      else
-         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, BFS_TYPE.CAPTURE, opponent);
+      Object[] closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent);
       
       int closestEnemyDistance = (int)closestEnemyTuple[0];
-      if(closestEnemyDistance == Integer.MAX_VALUE)
-         return null;
+      if(closestEnemyDistance == Integer.MAX_VALUE) {
+         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent);         
+         closestEnemyDistance = (int)closestEnemyTuple[0];
+         if(closestEnemyDistance == Integer.MAX_VALUE) 
+            return null;
+      }
       CoordinateNode bestMoveSpotNode = (CoordinateNode)closestEnemyTuple[2];
       
       Coordinate bestMoveSpot = new Coordinate(bestMoveSpotNode.getX(), bestMoveSpotNode.getY());
@@ -173,7 +168,7 @@ public class ComputerTeamD extends ComputerTeam {
       return ((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2));
    }
    
-   public Object[] closestObject(Tile[][] world, Unit unit, BFS_TYPE mission, Team targetOwner) {
+   public Object[] closestObject(Tile[][] world, Unit unit, Team targetOwner) {
       Object[] resultsTuple = new Object[3];
       
       LinkedList<CoordinateNode> queue = new LinkedList<CoordinateNode>();
@@ -194,22 +189,8 @@ public class ComputerTeamD extends ComputerTeam {
             continue;
          }
          Tile t = world[n.getY()][n.getX()];
-         if(mission == BFS_TYPE.CAPTURE && (unit.canCapture(t) || (t.isOccupied() && t.getOccupiedBy().getOwner().equals(targetOwner)))) {
+         if(unit.canCapture(t) || unit.canAttack(t)) {
             world[unit.getY()][unit.getX()].setOccupied(true);
-            
-            CoordinateNode moveNode = n;
-            while(moveNode != null && !moveNode.isReachable()) {
-               moveNode = moveNode.getPrev();
-            }
-            resultsTuple[0] = distance;
-            resultsTuple[1] = new Coordinate(t.getX(), t.getY());
-            resultsTuple[2] = moveNode;
-            
-            return resultsTuple;
-         }
-         else if(mission == BFS_TYPE.ENEMY && t.isOccupied() && t.getOccupiedBy().getOwner().equals(targetOwner)) {
-            world[unit.getY()][unit.getX()].setOccupied(true);
-            
             CoordinateNode moveNode = n;
             while(moveNode != null && !moveNode.isReachable()) {
                moveNode = moveNode.getPrev();
@@ -228,17 +209,10 @@ public class ComputerTeamD extends ComputerTeam {
                   int r = t.getY() + yDirs[i];
                   int c = t.getX() + xDirs[i];
                   CoordinateNode temp = new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), n, c, r);
-                  if(!set.contains(temp)) {
-                     // if you are looking for an enemy then you can offer anything on to the queue
-                     // if you are looking for a city, you only want to offer passable tiles onto
-                     // the queue
-                     // if(!world[r][c].isOccupied() || (world[r][c].isOccupied() &&
-                     // world[r][c].getOccupiedBy().getOwner().equals(this)) || mission ==
-                     // BFS_TYPE.ENEMY || true)
-                     if(unit.canTraverse(world[r][c])) {
-                        queue.offer(temp);
-                        set.add(temp);
-                     }
+                  Tile tempTile = world[r][c];
+                  if(!set.contains(temp) && unit.canTraverse(tempTile)) {
+                     queue.offer(temp);
+                     set.add(temp);
                   }
                }
                catch(Exception e) {
