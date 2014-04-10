@@ -58,7 +58,7 @@ public class World {
          while(!accept) {
             accept = buildMap();
             if(!accept) {
-               Logger.consolePrint("Map rejected.", "temp");
+               Logger.consolePrint("Map rejected.", "map");
                resetMap();
             }
          }
@@ -186,9 +186,12 @@ public class World {
       initialTerrain();
       createHeightMap();
       generateRivers();
-      placeFactories(teamOne, 0, width / 5);
-      placeFactories(teamTwo, width - (width / 5), width);
-      placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5)));
+      if(!placeFactories(teamOne, 0, width / 5))
+         return false;
+      if(!placeFactories(teamTwo, width - (width / 5), width))
+         return false;
+      if(!placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5))))
+         return false;
       long end = System.currentTimeMillis();
       Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)", "map");
       return validMap();
@@ -213,6 +216,7 @@ public class World {
     * @return false if the map is not valid as defined by the method description.
     */
    public boolean validMap() {
+      int factoriesFound = 0;
       HashSet<Coordinate> notVisited = new HashSet<Coordinate>();
       for(int r = 0; r < height; r++)
          for(int c = 0; c < width; c++)
@@ -240,6 +244,8 @@ public class World {
                      if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isVehiclePassable()) {
                         // the previous if statement should be both veh and inf, but AI updates are
                         // needed before this can happen
+                        if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].getType() == TILE_TYPE.FACTORY)
+                           factoriesFound++;
                         set.add(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                         notVisited.remove(new Coordinate(t.getX() + xDirs[i], t.getY() + yDirs[i]));
                         queue.offer(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
@@ -250,10 +256,13 @@ public class World {
                // out of bounds
             }
       }
-      
       for(Coordinate c: notVisited)
-         if(tiles[c.getY()][c.getX()].getType() != TILE_TYPE.RIVER && tiles[c.getY()][c.getX()].getType() != TILE_TYPE.MOUNTAIN)
-            return false;
+         if(tiles[c.getY()][c.getX()].getType() != TILE_TYPE.RIVER && tiles[c.getY()][c.getX()].getType() != TILE_TYPE.MOUNTAIN) {
+            if(factoriesFound != teamOne.getFactories().size() + teamTwo.getFactories().size())
+               return false;
+            else
+               return true;
+         }
       
       return true;
    }
@@ -618,23 +627,27 @@ public class World {
     * @param min the lowest numbered column the cities can be placed on.
     * @param max the highest numbered column the cities can be placed on.
     */
-   public void placeCities(int numCities, int min, int max) {
+   public boolean placeCities(int numCities, int min, int max) {
       Logger.consolePrint("placing " + numCities + " cities", "map");
       for(int x = 0; x < numCities; x++) {
          Random rand = new Random();
          int col = rand.nextInt(max - min) + min;
          int row = rand.nextInt(height - 1) + 1;
          int nc = 0;
+         int attempts = width * height;
          while(nc < 2) {
-            while(tiles[row][col].getType() != TILE_TYPE.PLAIN) {
+            while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
                col = rand.nextInt(max - min) + min;
                row = rand.nextInt(height - 1) + 1;
+               attempts--;
+               if(attempts == 0)
+                  return false;
             }
             tiles[row][col] = new City(this, col, row, null, GraphicsManager.getTileTextures().get("cityGrey.png"));
             nc++;
          }
       }
-      
+      return true;
    }
    
    /**
@@ -642,13 +655,18 @@ public class World {
     * 
     * @param min the lowest numbered column the cities can be placed on.
     * @param max the highest numbered column the cities can be placed on.
+    * @return whether or not the function was able to place all of the factories
     */
-   public void placeFactories(Team team, int min, int max) {
+   public boolean placeFactories(Team team, int min, int max) {
       Logger.consolePrint("placing factories for " + team.getName(), "map");
       for(int col = min; col < max; col += 2) {
          int row = (int)(Math.random() * height);
-         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.MOUNTAIN || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+         int attempts = width * height;
+         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
             row = (int)(Math.random() * height);
+            attempts--;
+            if(attempts == 0)
+               return false;
          }
          if(team.equals(teamOne))
             tiles[row][col] = new Factory(this, col, row, team, GraphicsManager.getTileTextures().get("factoryRed.png"));
@@ -656,6 +674,7 @@ public class World {
             tiles[row][col] = new Factory(this, col, row, team, GraphicsManager.getTileTextures().get("factoryBlue.png"));
          team.getFactories().add((Factory)tiles[row][col]);
       }
+      return true;
    }
    
    /**

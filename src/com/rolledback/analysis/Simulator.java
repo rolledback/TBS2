@@ -299,8 +299,10 @@ public class Simulator {
          
          // setup complete, run the game
          Logger.consolePrint("Running game.", "simulator");
-         
+         long start = System.currentTimeMillis();
          gamePanel.run();
+         long end = System.currentTimeMillis();
+         Logger.consolePrint("Game finished in " + gamePanel.getNumTurns() + " turns and " + (end - start) + " milliseconds.", "simulator");
          if(gamePanel.getWinner().equals(gamePanel.getTeamOne()))
             winners[0]++;
          else

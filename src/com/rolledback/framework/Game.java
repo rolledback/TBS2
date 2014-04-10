@@ -160,7 +160,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             else {
                if(currentTeam.isFirstTurn())
                   currentTeam.setFirstTurn(false);
-               setNumTurns(getNumTurns() + 1);
+               numTurns += 1;
                switchTeams();
             }
          }
