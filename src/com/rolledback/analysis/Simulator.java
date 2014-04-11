@@ -214,7 +214,7 @@ public class Simulator {
     */
    public static void init(int x, int y, String fileName) {
       int[] winners = new int[2];
-      for(int i = 0; i < 100000; i++) {
+      for(int i = 0; i < Integer.MAX_VALUE; i++) {
          Logger.consolePrint("Init'ing with (" + x + ", " + y + ").", "simulator");
          
          // get the size of the screen

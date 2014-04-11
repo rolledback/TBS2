@@ -1,5 +1,6 @@
 package com.rolledback.teams.ai;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Random;
 import com.rolledback.framework.Coordinate;
 import com.rolledback.framework.Game;
 import com.rolledback.teams.Team;
+import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
@@ -21,18 +23,37 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 public class ComputerTeamD extends ComputerTeam {
    
    final int animationDelay = 500;
+   private ArrayList<CapturableTile> captureSpots;
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
    }
    
+   public void findCaptureSpots() {
+      captureSpots = new ArrayList<CapturableTile>();
+      Tile[][] world = game.getWorld().getTiles();
+      for(int r = 0; r < world.length; r++)
+         for(int c = 0; c < world[r].length; c++)
+            if(world[r][c] instanceof CapturableTile)
+               captureSpots.add((CapturableTile)world[r][c]);
+   }
+   
    public void executeTurn() {
+      boolean capPriority = false;
+      if(captureSpots == null)
+         findCaptureSpots();
+      else {
+         if(cities.size() + factories.size() <= opponent.getCities().size() + opponent.getFactories().size())
+            capPriority = true;
+         else if(cities.size() + factories.size() + opponent.getCities().size() + opponent.getFactories().size() < captureSpots.size())
+            capPriority = true;
+      }
       sortUnits();
       for(int i = 0; i < units.size(); i++) {
          if(opponent.getUnits().size() == 0)
             return;
          Unit u = units.get(i);
-         Coordinate moveSpot = moveUnit(u);
+         Coordinate moveSpot = moveUnit(u, capPriority);
          if(moveSpot != null) {
             game.gameLogic(u.getX(), u.getY());
             game.repaint();
@@ -61,27 +82,24 @@ public class ComputerTeamD extends ComputerTeam {
       game.getLogicLock().unlock();
    }
    
-   public Coordinate moveUnit(Unit u) {
+   public Coordinate moveUnit(Unit u, boolean capPriority) {
       u.calcMoveSpots(false);
       if(u.getCaptureSet().size() != 0)
          return captureMove(u);
       else if(u.getAttackSet().size() != 0)
          return attackMove(u);
       else if(u.getMoveSet().size() != 0)
-         return simpleMove(u);
+         return simpleMove(u, capPriority);
       return null;
    }
    
-   public Coordinate simpleMove(Unit u) {
-      Object[] closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent);
+   public Coordinate simpleMove(Unit u, boolean capPriority) {
+      capPriority = (capPriority && (u.getClassification() == UNIT_CLASS.INFANTRY));
+      Object[] closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent, capPriority);
       
       int closestEnemyDistance = (int)closestEnemyTuple[0];
-      if(closestEnemyDistance == Integer.MAX_VALUE) {
-         closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent);         
-         closestEnemyDistance = (int)closestEnemyTuple[0];
-         if(closestEnemyDistance == Integer.MAX_VALUE) 
-            return null;
-      }
+      if(closestEnemyDistance == Integer.MAX_VALUE)
+         return null;
       CoordinateNode bestMoveSpotNode = (CoordinateNode)closestEnemyTuple[2];
       
       Coordinate bestMoveSpot = new Coordinate(bestMoveSpotNode.getX(), bestMoveSpotNode.getY());
@@ -129,22 +147,22 @@ public class ComputerTeamD extends ComputerTeam {
          u.calcMoveSpots(false);
       }
       
-      int avgX = 0;
-      int avgY = 0;
+      int sumX = 0;
+      int sumY = 0;
       for(Unit u: opponent.getUnits()) {
-         avgX += u.getX();
-         avgY += u.getY();
+         sumX += u.getX();
+         sumY += u.getY();
       }
       
-      final int trueAvgX;
-      final int trueAvgY;
+      final int avgX;
+      final int avgY;
       if(opponent.getUnits().size() > 0) {
-         trueAvgX = avgX / opponent.getUnits().size();
-         trueAvgY = avgY / opponent.getUnits().size();
+         avgX = sumX / opponent.getUnits().size();
+         avgY = sumY / opponent.getUnits().size();
       }
       else {
-         trueAvgX = 0;
-         trueAvgY = 0;
+         avgX = 0;
+         avgY = 0;
       }
       
       Collections.sort(units, new Comparator<Unit>() {
@@ -155,8 +173,8 @@ public class ComputerTeamD extends ComputerTeam {
             if(u1.getAttackSet().size() != u2.getAttackSet().size()) {
                return u2.getAttackSet().size() - u1.getAttackSet().size();
             }
-            if(distanceForumula(u1.getX(), u1.getY(), trueAvgX, trueAvgY) != distanceForumula(u2.getX(), u2.getY(), trueAvgX, trueAvgY)) {
-               return distanceForumula(u1.getX(), u1.getY(), trueAvgX, trueAvgY) - distanceForumula(u2.getX(), u2.getY(), trueAvgX, trueAvgY);
+            if(distanceForumula(u1.getX(), u1.getY(), avgX, avgY) != distanceForumula(u2.getX(), u2.getY(), avgX, avgY)) {
+               return distanceForumula(u1.getX(), u1.getY(), avgX, avgY) - distanceForumula(u2.getX(), u2.getY(), avgX, avgY);
             }
             else
                return u2.getMoveSet().size() - u1.getMoveSet().size();
@@ -165,10 +183,10 @@ public class ComputerTeamD extends ComputerTeam {
    }
    
    public int distanceForumula(int x1, int y1, int x2, int y2) {
-      return ((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2));
+      return ((x1 - x2) + (y1 - y2));
    }
    
-   public Object[] closestObject(Tile[][] world, Unit unit, Team targetOwner) {
+   public Object[] closestObject(Tile[][] world, Unit unit, Team targetOwner, boolean capPriority) {
       Object[] resultsTuple = new Object[3];
       
       LinkedList<CoordinateNode> queue = new LinkedList<CoordinateNode>();
@@ -189,7 +207,7 @@ public class ComputerTeamD extends ComputerTeam {
             continue;
          }
          Tile t = world[n.getY()][n.getX()];
-         if(unit.canCapture(t) || unit.canAttack(t)) {
+         if(unit.canCapture(t) || (!capPriority && unit.canAttack(t))) {
             world[unit.getY()][unit.getX()].setOccupied(true);
             CoordinateNode moveNode = n;
             while(moveNode != null && !moveNode.isReachable()) {
