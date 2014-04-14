@@ -61,7 +61,7 @@ public class Simulator {
     * why something went wrong easier. The simulator will automatically save the latest generated
     * map in the top level folder as simulator.map.
     */
-   static private boolean saveMap = false;
+   static private boolean saveMap = true;
    
    /**
     * Starting location for all function calls of the simulator. Presents user with a dialog box

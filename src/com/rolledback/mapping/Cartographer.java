@@ -118,8 +118,15 @@ public class Cartographer {
       
       BufferedOutputStream mapWriter;
       try {
-         
          Logger.consolePrint("Writing bytes to file.", "cartographer");
+         int fileNameStart = fileName.lastIndexOf("\\");
+         if(fileNameStart != -1) {
+            Logger.consolePrint("Found a path before the file. Will make sure path exists using mkdirs.", "cartographer");
+            String dirPath = fileName.substring(0, fileNameStart);
+            Logger.consolePrint("Path: " + dirPath, "cartographer");
+            File mapFile = new File(dirPath);
+            mapFile.mkdirs();
+         }
          mapWriter = new BufferedOutputStream(new FileOutputStream(fileName));
          mapWriter.write(map);
          mapWriter.close();

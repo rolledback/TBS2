@@ -27,7 +27,7 @@ public class Logger {
    // temporary comments = temp
    
    private static boolean consolePrintingOn = true;
-   private static List<String> validTags = asList("simulator");
+   private static List<String> validTags = asList("simulator", "game", "map", "cartographer", "analysis");
    private static int tagLength = 3;
    
    /**

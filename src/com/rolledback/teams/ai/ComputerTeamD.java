@@ -1,6 +1,6 @@
 package com.rolledback.teams.ai;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,20 +22,22 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    
-   final int animationDelay = 500;
-   private ArrayList<CapturableTile> captureSpots;
+   final int animationDelay = 0;
+   private HashMap<CapturableTile, HashSet<Unit>> captureSpots;
+   private int operationSizeLimit;
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
    }
    
    public void findCaptureSpots() {
-      captureSpots = new ArrayList<CapturableTile>();
+      captureSpots = new HashMap<CapturableTile, HashSet<Unit>>();
+      operationSizeLimit = 3;
       Tile[][] world = game.getWorld().getTiles();
       for(int r = 0; r < world.length; r++)
          for(int c = 0; c < world[r].length; c++)
             if(world[r][c] instanceof CapturableTile)
-               captureSpots.add((CapturableTile)world[r][c]);
+               captureSpots.put((CapturableTile)world[r][c], new HashSet<Unit>(4));
    }
    
    public void executeTurn() {
@@ -47,6 +49,18 @@ public class ComputerTeamD extends ComputerTeam {
             capPriority = true;
          else if(cities.size() + factories.size() + opponent.getCities().size() + opponent.getFactories().size() < captureSpots.size())
             capPriority = true;
+         if(capPriority) {
+            int availOperations = 0;
+            for(Map.Entry<CapturableTile, HashSet<Unit>> temp: captureSpots.entrySet()) {
+               if(temp.getKey().getOwner() == null || !temp.getKey().getOwner().equals(this))
+                  availOperations++;
+               if(temp.getValue().size() == operationSizeLimit)
+                  availOperations--;
+            }
+            if(availOperations == 0)
+               operationSizeLimit++;
+         }
+         
       }
       sortUnits();
       for(int i = 0; i < units.size(); i++) {
@@ -65,7 +79,6 @@ public class ComputerTeamD extends ComputerTeam {
                i--;
          }
       }
-      
       game.getLogicLock().lock();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
@@ -80,6 +93,7 @@ public class ComputerTeamD extends ComputerTeam {
          while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts < 32);
       }
       game.getLogicLock().unlock();
+      
    }
    
    public Coordinate moveUnit(Unit u, boolean capPriority) {
@@ -98,8 +112,11 @@ public class ComputerTeamD extends ComputerTeam {
       Object[] closestEnemyTuple = closestObject(game.getWorld().getTiles(), u, opponent, capPriority);
       
       int closestEnemyDistance = (int)closestEnemyTuple[0];
-      if(closestEnemyDistance == Integer.MAX_VALUE)
+      if(closestEnemyDistance == Integer.MAX_VALUE) {
+         if(capPriority)
+            return simpleMove(u, false);
          return null;
+      }
       CoordinateNode bestMoveSpotNode = (CoordinateNode)closestEnemyTuple[2];
       
       Coordinate bestMoveSpot = new Coordinate(bestMoveSpotNode.getX(), bestMoveSpotNode.getY());
@@ -110,7 +127,7 @@ public class ComputerTeamD extends ComputerTeam {
       HashMap<Coordinate, Integer> attackDistances = new HashMap<Coordinate, Integer>();
       for(Coordinate c: u.getAttackSet()) {
          attackDistances.put(c, Integer.MAX_VALUE);
-         int d = distance(game.getWorld().getTiles(), u.getX(), u.getY(), c.getX(), c.getY(), u);
+         int d = distanceFormula(u.getX(), u.getY(), c.getX(), c.getY());
          if(d < attackDistances.get(c))
             attackDistances.put(c, d);
       }
@@ -128,7 +145,7 @@ public class ComputerTeamD extends ComputerTeam {
       HashMap<Coordinate, Integer> captureDistances = new HashMap<Coordinate, Integer>();
       for(Coordinate c: u.getCaptureSet()) {
          captureDistances.put(c, Integer.MAX_VALUE);
-         int d = distance(game.getWorld().getTiles(), u.getX(), u.getY(), c.getX(), c.getY(), u);
+         int d = distanceFormula(u.getX(), u.getY(), c.getX(), c.getY());
          if(d < captureDistances.get(c))
             captureDistances.put(c, d);
       }
@@ -137,8 +154,11 @@ public class ComputerTeamD extends ComputerTeam {
       for(Map.Entry<Coordinate, Integer> entry: captureDistances.entrySet())
          if(minEntry == null || entry.getValue().compareTo(minEntry.getValue()) < 0)
             minEntry = entry;
-      if(minEntry != null)
+      if(minEntry != null) {
+         CapturableTile temp = (CapturableTile)game.getWorld().getTiles()[minEntry.getKey().getY()][minEntry.getKey().getX()];
+         captureSpots.put(temp, new HashSet<Unit>(4));
          return minEntry.getKey();
+      }
       return null;
    }
    
@@ -173,8 +193,8 @@ public class ComputerTeamD extends ComputerTeam {
             if(u1.getAttackSet().size() != u2.getAttackSet().size()) {
                return u2.getAttackSet().size() - u1.getAttackSet().size();
             }
-            if(distanceForumula(u1.getX(), u1.getY(), avgX, avgY) != distanceForumula(u2.getX(), u2.getY(), avgX, avgY)) {
-               return distanceForumula(u1.getX(), u1.getY(), avgX, avgY) - distanceForumula(u2.getX(), u2.getY(), avgX, avgY);
+            if(distanceFormula(u1.getX(), u1.getY(), avgX, avgY) != distanceFormula(u2.getX(), u2.getY(), avgX, avgY)) {
+               return distanceFormula(u1.getX(), u1.getY(), avgX, avgY) - distanceFormula(u2.getX(), u2.getY(), avgX, avgY);
             }
             else
                return u2.getMoveSet().size() - u1.getMoveSet().size();
@@ -182,8 +202,8 @@ public class ComputerTeamD extends ComputerTeam {
       });
    }
    
-   public int distanceForumula(int x1, int y1, int x2, int y2) {
-      return ((x1 - x2) + (y1 - y2));
+   public int distanceFormula(int x1, int y1, int x2, int y2) {
+      return ((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2));
    }
    
    public Object[] closestObject(Tile[][] world, Unit unit, Team targetOwner, boolean capPriority) {
@@ -207,7 +227,10 @@ public class ComputerTeamD extends ComputerTeam {
             continue;
          }
          Tile t = world[n.getY()][n.getX()];
-         if(unit.canCapture(t) || (!capPriority && unit.canAttack(t))) {
+         if((unit.canCapture(t) && (captureSpots.get(t).size() <= operationSizeLimit - 1 || captureSpots.get(t).contains(unit))) || (!capPriority && unit.canAttack(t))) {
+            if(capPriority) {
+               captureSpots.get(t).add(unit);
+            }
             world[unit.getY()][unit.getX()].setOccupied(true);
             CoordinateNode moveNode = n;
             while(moveNode != null && !moveNode.isReachable()) {
@@ -222,10 +245,12 @@ public class ComputerTeamD extends ComputerTeam {
          else {
             int[] yDirs = { 0, 0, 1, -1 };
             int[] xDirs = { 1, -1, 0, 0 };
-            for(int i = 0; i < xDirs.length; i++)
+            Integer[] index = new Integer[] { 0, 1, 2, 3};
+            Collections.shuffle(Arrays.asList(index));
+            for(int i = 0; i < index.length; i++)
                try {
-                  int r = t.getY() + yDirs[i];
-                  int c = t.getX() + xDirs[i];
+                  int r = t.getY() + yDirs[index[i]];
+                  int c = t.getX() + xDirs[index[i]];
                   CoordinateNode temp = new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), n, c, r);
                   Tile tempTile = world[r][c];
                   if(!set.contains(temp) && unit.canTraverse(tempTile)) {

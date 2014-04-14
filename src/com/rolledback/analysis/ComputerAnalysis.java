@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.rolledback.framework.Coordinate;
+import com.rolledback.framework.Logger;
 
 /**
  * Used to analyze dump files of click histories. Uses a gradient to display the frequency of the
@@ -30,6 +31,7 @@ public class ComputerAnalysis {
     * @param args
     */
    public static void main(String args[]) {
+      Logger.consolePrint("Analyzing click data.", "analysis");
       File coordinateDump = new File("dump.txt");
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
@@ -53,6 +55,7 @@ public class ComputerAnalysis {
             }
          }
          dumpReader.close();
+         Logger.consolePrint("Done parsing the lines.", "analysis");
       }
       catch(FileNotFoundException e) {
          e.toString();
@@ -62,7 +65,7 @@ public class ComputerAnalysis {
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
       frame.setSize((width * size) + frame.getInsets().right + frame.getInsets().left, (height * size) + frame.getInsets().top + frame.getInsets().bottom);
-      AnalysisDisplay display = new AnalysisDisplay(coordHash, maxValue);
+      AnalysisDisplay display = new AnalysisDisplay(coordHash, maxValue, size);
       display.setSize(width * size, height * size);
       frame.add(display);
       display.setVisible(true);
@@ -98,7 +101,7 @@ class AnalysisDisplay extends JPanel {
    
    LinkedHashMap<Coordinate, Double> values;
    int maxValue;
-   int size = 8;
+   int size;
    
    private static final long serialVersionUID = 1L;
    Color[] gradient = {
@@ -135,10 +138,10 @@ class AnalysisDisplay extends JPanel {
     * @param v Map containing values for all possible grid coordinates.
     * @param mV The highest value in the map. Pre computed during parsing to save time.
     */
-   public AnalysisDisplay(LinkedHashMap<Coordinate, Double> v, int mV) {
+   public AnalysisDisplay(LinkedHashMap<Coordinate, Double> v, int mV, int ts) {
       values = v;
       maxValue = mV;
-      System.out.println(maxValue);
+      size = ts;
    }
    
    public void paintComponent(Graphics g) {
