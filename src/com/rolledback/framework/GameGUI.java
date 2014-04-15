@@ -327,7 +327,7 @@ public class GameGUI extends JPanel {
          terrainName.setText("Type: " + tile.getType().toString());
          attackBonus.setText("Atk Bonus: " + Integer.toString(tile.getEffect().getAttackBonus()));
          defenseBonus.setText("Def Bonus: " + Integer.toString(tile.getEffect().getDefenseBonus()));
-         moveBonus.setText("Move Bonus: " + Integer.toString(tile.getEffect().getMoveBonus()));
+         moveBonus.setText("Move Cost: " + Integer.toString(tile.getEffect().getMoveCost()));
          tImage = tile.getTexture();
       }
       else {

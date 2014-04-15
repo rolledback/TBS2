@@ -29,7 +29,7 @@ public class City extends CapturableTile {
     * @param t image texture for the tile.
     */
    public City(World w, int x, int y, Team o, Image t) {
-      super(w, x, y, new TerrainEffect(0, 20, 0), 'c', o);
+      super(w, x, y, new TerrainEffect(0, 20, 1), 'c', o);
       type = TILE_TYPE.CITY;
       texture = t;
    }

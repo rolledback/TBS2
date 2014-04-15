@@ -21,7 +21,7 @@ public class Forest extends Tile {
     *           constructor.
     */
    public Forest(World w, int x, int y) {
-      super(w, x, y, new TerrainEffect(0, 10, -1), 'f');
+      super(w, x, y, new TerrainEffect(0, 10, 2), 'f');
       type = TILE_TYPE.FOREST;
       texture = GraphicsManager.getTileTextures().get("forest.png");
    }

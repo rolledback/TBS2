@@ -22,17 +22,11 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 public class Unit {
    
    public enum UNIT_CLASS {
-      ALL,
-      VEHICLE,
-      INFANTRY
+      ALL, VEHICLE, INFANTRY
    }
    
    public enum UNIT_TYPE {
-      ALL("All"),
-      INFANTRY("Infantry"),
-      RPG("RPG Team"),
-      TANK("Tank"),
-      TANK_DEST("Tank Destroyer");
+      ALL("All"), INFANTRY("Infantry"), RPG("RPG Team"), TANK("Tank"), TANK_DEST("Tank Destroyer");
       
       private String name;
       
@@ -61,8 +55,7 @@ public class Unit {
    }
    
    public enum DIRECTION {
-      LEFT,
-      RIGHT
+      LEFT, RIGHT
    }
    
    private HashSet<Coordinate> moveSet;
@@ -132,7 +125,7 @@ public class Unit {
          if(t.getTileType() == currentTile.getType())
             techBonus += t.getMoveValue();
       }
-      int adHocRange = (atkOnly) ? 0 : moveRange + currentTile.getEffect().getMoveBonus() + techBonus;
+      int adHocRange = (atkOnly) ? 0 : moveRange + techBonus;
       if(adHocRange <= 0 && !atkOnly)
          adHocRange = 1;
       currentTile.setOccupied(false);
@@ -161,7 +154,7 @@ public class Unit {
       int width = world.getWidth();
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
-      else if(range <= 0) {
+      if(range <= 0) {
          if(tiles[y][x].isOccupied() && !owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
             attackSet.add(thisCoord);
          return;
@@ -179,7 +172,7 @@ public class Unit {
       else if(canTraverse(tiles[y][x])) {
          moveSet.add(thisCoord);
       }
-      range--;
+      range -= tiles[y][x].getEffect().getMoveCost();
       boolean mT = tiles[y][x].isOccupied() && owner.equals(tiles[y][x].getOccupiedBy().getOwner());
       if(captureSet.contains(thisCoord) || moveSet.contains(thisCoord) || mT) {
          calcMoveSpotsHelper(world, x + 1, y, range, mT);

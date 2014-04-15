@@ -34,7 +34,7 @@ public class Factory extends CapturableTile {
     * @param t image texture for the tile.
     */
    public Factory(World w, int x, int y, Team o, Image t) {
-      super(w, x, y, new TerrainEffect(0, 10, 0), 'F', o);
+      super(w, x, y, new TerrainEffect(0, 10, 1), 'F', o);
       productionList = new LinkedHashMap<UNIT_TYPE, Integer>();
       type = TILE_TYPE.FACTORY;
       texture = t;

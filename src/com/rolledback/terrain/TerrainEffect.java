@@ -11,23 +11,23 @@ public class TerrainEffect {
    
    private int attackBonus;
    private int defenseBonus;
-   private int moveBonus;
+   private int moveCost;
    
    /**
     * Constructor.
     * 
     * @param a attack bonus.
     * @param d defense bonus.
-    * @param m move bonus.
+    * @param m move cost.
     */
    public TerrainEffect(int a, int d, int m) {
       attackBonus = a;
       defenseBonus = d;
-      moveBonus = m;
+      moveCost = m;
    }
    
    public String toString() {
-      return "Attack Bonus: " + attackBonus + " Defense Bonus: " + defenseBonus + " Move Bonus: " + moveBonus;
+      return "Attack Bonus: " + attackBonus + " Defense Bonus: " + defenseBonus + " Move Bonus: " + moveCost;
    }
    
    /**
@@ -39,7 +39,7 @@ public class TerrainEffect {
       String[] retArray = new String[3];
       retArray[0] = "Attack Bonus: " + attackBonus;
       retArray[1] = "Defense Bonus: " + defenseBonus;
-      retArray[2] = "Move Bonus: " + moveBonus;
+      retArray[2] = "Move Bonus: " + moveCost;
       return retArray;
    }
    
@@ -59,12 +59,12 @@ public class TerrainEffect {
       this.defenseBonus = defenseBonus;
    }
    
-   public int getMoveBonus() {
-      return moveBonus;
+   public int getMoveCost() {
+      return moveCost;
    }
    
-   public void setMoveBonus(int moveBonus) {
-      this.moveBonus = moveBonus;
+   public void setMoveCost(int moveCost) {
+      this.moveCost = moveCost;
    }
    
 }
