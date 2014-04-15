@@ -56,7 +56,7 @@ public class World {
       if(fileToLoad.equals("")) {
          boolean accept = false;
          while(!accept) {
-            accept = buildMap();
+            accept = buildMap(true);
             if(!accept) {
                Logger.consolePrint("Map rejected.", "map");
                resetMap();
@@ -82,16 +82,14 @@ public class World {
     * @param h
     * @param rivers
     */
-   public World(int w, int h, boolean rivers) {
-      if(rivers) {
-         width = w;
-         height = h;
-      }
+   public World(int w, int h, boolean allGen) {
+      width = w;
+      height = h;
       tiles = new Tile[h][w];
       heightMap = new int[h][w];
       teamOne = new Team("", 0, 0, 1);
       teamTwo = new Team("", 0, 0, 2);
-      buildMap();
+      buildMap(allGen);
    }
    
    /**
@@ -177,21 +175,26 @@ public class World {
     * terrain. Then a height map based on that terrain. After that rivers, factories, and cities are
     * placed in that order.
     * 
+    * @param allGen whether or not to generate rivers.
+    * 
     * @return whether or not the map is considered valid, based on the result of a call to validMap
     */
-   public boolean buildMap() {
+   public boolean buildMap(boolean allGen) {
       long start = System.currentTimeMillis();
       Logger.consolePrint("building map", "map");
       Logger.consolePrint("dimensions: " + width + ", " + height, "map");
       initialTerrain();
-      createHeightMap();
-      generateRivers();
-      if(!placeFactories(teamOne, 0, width / 5))
-         return false;
-      if(!placeFactories(teamTwo, width - (width / 5), width))
-         return false;
-      if(!placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5))))
-         return false;
+      if(allGen) {
+         createHeightMap();
+         generateRivers();
+         if(!placeFactories(teamOne, 0, width / 5))
+            return false;
+         if(!placeFactories(teamTwo, width - (width / 5), width))
+            return false;
+         if(!placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5))))
+            return false;
+      }
+      
       long end = System.currentTimeMillis();
       Logger.consolePrint("map building complete (" + (end - start) + " milliseconds)", "map");
       return validMap();

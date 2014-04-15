@@ -132,7 +132,7 @@ public class Unit {
       attackSet.clear();
       moveSet.clear();
       captureSet.clear();
-      calcMoveSpotsHelper(world, x, y, adHocRange + 1, false);
+      calcMoveSpotsHelper(world, x, y, adHocRange + 1, false, true);
       currentTile.setOccupied(true);
       moveSet.remove(new Coordinate(x, y));
    }
@@ -147,7 +147,7 @@ public class Unit {
     * @param range the remaining move range for the unit.
     * @param movedThrough whether or not the unit just came through a friendly unit.
     */
-   private void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough) {
+   private void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough, boolean firstMove) {
       Coordinate thisCoord = new Coordinate(x, y);
       Tile tiles[][] = world.getTiles();
       int height = world.getHeight();
@@ -173,12 +173,14 @@ public class Unit {
          moveSet.add(thisCoord);
       }
       range -= tiles[y][x].getEffect().getMoveCost();
+      if(range <= 0 && firstMove)
+         range = 1;
       boolean mT = tiles[y][x].isOccupied() && owner.equals(tiles[y][x].getOccupiedBy().getOwner());
       if(captureSet.contains(thisCoord) || moveSet.contains(thisCoord) || mT) {
-         calcMoveSpotsHelper(world, x + 1, y, range, mT);
-         calcMoveSpotsHelper(world, x - 1, y, range, mT);
-         calcMoveSpotsHelper(world, x, y + 1, range, mT);
-         calcMoveSpotsHelper(world, x, y - 1, range, mT);
+         calcMoveSpotsHelper(world, x + 1, y, range, mT, false);
+         calcMoveSpotsHelper(world, x - 1, y, range, mT, false);
+         calcMoveSpotsHelper(world, x, y + 1, range, mT, false);
+         calcMoveSpotsHelper(world, x, y - 1, range, mT, false);
       }
       else
          return;
