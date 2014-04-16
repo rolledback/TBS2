@@ -160,15 +160,13 @@ public class Unit {
          return;
       }
       else if(tiles[y][x].isOccupied()) {
-         if(!owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
+         if(canAttack(tiles[y][x]) && !movedThrough)
             attackSet.add(thisCoord);
       }
       else if(!canTraverse(tiles[y][x]))
          return;
       else if(canCapture(tiles[y][x]))
          captureSet.add(thisCoord);
-      else if(tiles[y][x].getType() == TILE_TYPE.CITY)
-         moveSet.add(thisCoord);
       else if(canTraverse(tiles[y][x])) {
          moveSet.add(thisCoord);
       }

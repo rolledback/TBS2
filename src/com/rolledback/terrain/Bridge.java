@@ -23,7 +23,7 @@ public class Bridge extends Tile {
     * @param t image texture for the tile.
     */
    public Bridge(World w, int x, int y, Image t) {
-      super(w, x, y, new TerrainEffect(0, -5, 0), 'b');
+      super(w, x, y, new TerrainEffect(0, -5, 1), 'b');
       type = TILE_TYPE.BRIDGE;
       vehiclePassable = true;
       infantryPassable = true;

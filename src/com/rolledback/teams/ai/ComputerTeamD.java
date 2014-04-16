@@ -68,7 +68,7 @@ public class ComputerTeamD extends ComputerTeam {
             return;
          Unit u = units.get(i);
          Coordinate moveSpot = moveUnit(u, capPriority);
-         if(moveSpot != null) {
+         if(moveSpot != null && !(moveSpot.getX() == u.getX() && moveSpot.getY() == u.getY())) {
             game.gameLogic(u.getX(), u.getY());
             game.repaint();
             delay(animationDelay);
@@ -80,6 +80,7 @@ public class ComputerTeamD extends ComputerTeam {
          }
       }
       game.getLogicLock().lock();
+      sortFactories();
       Iterator<Factory> factoryIterator = factories.iterator();
       while(factoryIterator.hasNext()) {
          Factory currentFactory = factoryIterator.next();
@@ -162,7 +163,7 @@ public class ComputerTeamD extends ComputerTeam {
       return null;
    }
    
-   public void sortUnits() {
+   public Coordinate avgEnemyCoordinate() {
       for(Unit u: units) {
          u.calcMoveSpots(false);
       }
@@ -174,8 +175,8 @@ public class ComputerTeamD extends ComputerTeam {
          sumY += u.getY();
       }
       
-      final int avgX;
-      final int avgY;
+      int avgX;
+      int avgY;
       if(opponent.getUnits().size() > 0) {
          avgX = sumX / opponent.getUnits().size();
          avgY = sumY / opponent.getUnits().size();
@@ -184,6 +185,25 @@ public class ComputerTeamD extends ComputerTeam {
          avgX = 0;
          avgY = 0;
       }
+      return new Coordinate(avgX, avgY);
+   }
+   
+   public void sortFactories() {
+      Coordinate avgEnemySpot = avgEnemyCoordinate();
+      final int avgX = avgEnemySpot.getX();
+      final int avgY = avgEnemySpot.getY();
+      
+      Collections.sort(factories, new Comparator<Factory>() {
+         public int compare(Factory f1, Factory f2) {
+            return distanceFormula(f1.getX(), f1.getY(), avgX, avgY) - distanceFormula(f2.getX(), f2.getY(), avgX, avgY);
+         }
+      });
+   }
+   
+   public void sortUnits() {
+      Coordinate avgEnemySpot = avgEnemyCoordinate();
+      final int avgX = avgEnemySpot.getX();
+      final int avgY = avgEnemySpot.getY();
       
       Collections.sort(units, new Comparator<Unit>() {
          public int compare(Unit u1, Unit u2) {
@@ -245,7 +265,7 @@ public class ComputerTeamD extends ComputerTeam {
          else {
             int[] yDirs = { 0, 0, 1, -1 };
             int[] xDirs = { 1, -1, 0, 0 };
-            Integer[] index = new Integer[] { 0, 1, 2, 3};
+            Integer[] index = new Integer[] { 0, 1, 2, 3 };
             Collections.shuffle(Arrays.asList(index));
             for(int i = 0; i < index.length; i++)
                try {
@@ -268,53 +288,6 @@ public class ComputerTeamD extends ComputerTeam {
       resultsTuple[1] = null;
       resultsTuple[2] = null;
       return resultsTuple;
-   }
-   
-   // find shortest path btw spots for a given unit
-   public int distance(Tile[][] world, int col, int row, int targetX, int targetY, Unit unit) {
-      LinkedList<Tile> queue = new LinkedList<Tile>();
-      HashSet<Tile> set = new HashSet<Tile>();
-      queue.offer(world[targetY][targetX]);
-      queue.offer(null);
-      world[unit.getY()][unit.getX()].setOccupied(false);
-      int distance = 0;
-      
-      while(queue.size() > 1) {
-         Tile t = queue.poll();
-         if(t == null) {
-            distance++;
-            queue.offer(null);
-         }
-         else if(t.equals(world[row][col])) {
-            world[unit.getY()][unit.getX()].setOccupied(true);
-            return distance;
-         }
-         else {
-            int[] yDirs = { 0, 0, 1, -1 };
-            int[] xDirs = { 1, -1, 0, 0 };
-            for(int i = 0; i < 4; i++)
-               try {
-                  int r = t.getY() + yDirs[i];
-                  int c = t.getX() + xDirs[i];
-                  if(!set.contains(world[r][c])) {
-                     if(!world[r][c].isOccupied() || (world[r][c].isOccupied() && world[r][c].getOccupiedBy().getOwner().equals(this)))
-                        if(unit.getClassification() == UNIT_CLASS.VEHICLE && world[r][c].isVehiclePassable()) {
-                           set.add(world[r][c]);
-                           queue.offer(world[r][c]);
-                        }
-                        else if(unit.getClassification() == UNIT_CLASS.INFANTRY && world[r][c].isInfantryPassable()) {
-                           set.add(world[r][c]);
-                           queue.offer(world[r][c]);
-                        }
-                  }
-               }
-               catch(Exception e) {
-                  // out of bounds
-               }
-         }
-      }
-      world[unit.getY()][unit.getX()].setOccupied(true);
-      return distance;
    }
 }
 

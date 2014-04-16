@@ -58,12 +58,12 @@ public class Team {
    public void initTechTree() {
       techTree = new LinkedHashMap<TECH_NAME, Integer>();
       techTree.put(TECH_NAME.CON, 1000);
-      techTree.put(TECH_NAME.ART, 800);
+      techTree.put(TECH_NAME.GPS, 1000);
       techTree.put(TECH_NAME.FORT, 800);
       techTree.put(TECH_NAME.MILI, 700);
       techTree.put(TECH_NAME.FIELD, 600);
       techTree.put(TECH_NAME.APCR, 600);
-      techTree.put(TECH_NAME.GPS, 300);
+      techTree.put(TECH_NAME.ART, 600);
    }
    
    /**

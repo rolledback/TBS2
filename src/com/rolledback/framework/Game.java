@@ -47,11 +47,7 @@ import com.rolledback.units.Unit.DIRECTION;
 public class Game extends JPanel implements MouseListener, KeyListener {
    
    public enum GAME_STATE {
-      NORMAL,
-      DISPLAY_MOVE,
-      UPDATE,
-      SWITCH_TEAMS,
-      END_GAME
+      NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
    }
    
    private ArrayList<Coordinate> clickHistory = new ArrayList<Coordinate>();
@@ -80,7 +76,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    private int numTurns;
    private ReentrantLock logicLock;
    
-
    /**
     * Constructor.
     * 
@@ -394,7 +389,18 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       clickHistory.add(new Coordinate(x, y));
       
       if(unitSelected) {
-         if(!selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
+         if(selectedTile.isOccupied() && selectedTile.getOccupiedBy().getOwner().equals(selectedUnit.getOwner())) {
+            System.out.println("wat");
+            selectedUnit = selectedTile.getOccupiedBy();
+            unitSelected = true;
+            if(selectedUnit.getOwner().equals(currentTeam)) {
+               selectedUnit.calcMoveSpots(selectedUnit.hasMoved() && !selectedUnit.hasAttacked());
+               if(!selectedUnit.hasMoved() || (selectedUnit.hasMoved() && !selectedUnit.hasAttacked()))
+                  state = GAME_STATE.DISPLAY_MOVE;
+            }
+            return;
+         }            
+         else if(!selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
             Logger.consolePrint("selected unit attacking: " + targetUnit, "game");
             attackMove(x, y);
@@ -409,25 +415,26 @@ public class Game extends JPanel implements MouseListener, KeyListener {
                if(!selectedUnit.isAlive()) {
                   world.destroyUnit(selectedUnit);
                   Logger.consolePrint("unit destroyed", "game");
-                  state = GAME_STATE.UPDATE;
                }
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
-         if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
+         else if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
             Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
+            selectedUnit.setAttacked(true);
             if(((CapturableTile)selectedTile).getOwner() == null || !((CapturableTile)selectedTile).getOwner().equals(currentTeam)) {
                ((CapturableTile)selectedTile).capture(selectedUnit);
             }
          }
-         if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
+         else if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
             Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
+         selectedUnit = null;
          unitSelected = false;
          state = GAME_STATE.UPDATE;
       }
@@ -471,19 +478,20 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       Color moveColor = new Color(0, 128, 128, 135);
       Color attackColor = new Color(255, 0, 0, 135);
       Color captureColor = new Color(255, 225, 0, 135);
-      g.setColor(moveColor);
       
-      for(Coordinate c: selectedUnit.getMoveSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-      
-      g.setColor(attackColor);
-      for(Coordinate c: selectedUnit.getAttackSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-      
-      g.setColor(captureColor);
-      for(Coordinate c: selectedUnit.getCaptureSet())
-         g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
-      
+      if(!selectedUnit.hasAttacked()) {
+         g.setColor(attackColor);
+         for(Coordinate c: selectedUnit.getAttackSet())
+            g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      }
+      if(!selectedUnit.hasMoved()) {
+         g.setColor(moveColor);
+         for(Coordinate c: selectedUnit.getMoveSet())
+            g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+         g.setColor(captureColor);
+         for(Coordinate c: selectedUnit.getCaptureSet())
+            g.fillRect((c.getX() * tileSize) + offsetHorizontal, (c.getY() * tileSize) + offsetVertical, tileSize, tileSize);
+      }
    }
    
    /**
