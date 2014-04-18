@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeam;
+import com.rolledback.teams.ai.ComputerTeamB;
 import com.rolledback.teams.ai.ComputerTeamD;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
@@ -47,7 +48,11 @@ import com.rolledback.units.Unit.DIRECTION;
 public class Game extends JPanel implements MouseListener, KeyListener {
    
    public enum GAME_STATE {
-      NORMAL, DISPLAY_MOVE, UPDATE, SWITCH_TEAMS, END_GAME
+      NORMAL,
+      DISPLAY_MOVE,
+      UPDATE,
+      SWITCH_TEAMS,
+      END_GAME
    }
    
    private ArrayList<Coordinate> clickHistory = new ArrayList<Coordinate>();
@@ -95,7 +100,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
-      teamOne = new Team("team one", 50, 100, 1);
+      teamOne = new ComputerTeamD("team one", 50, 100, this, 1);
       teamTwo = new ComputerTeamD("team two", 50, 100, this, 2);
       
       currentTeam = teamOne;
@@ -142,7 +147,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             state = GAME_STATE.SWITCH_TEAMS;
          }
          if(state == GAME_STATE.UPDATE || state == GAME_STATE.DISPLAY_MOVE)
-            repaint();
+               repaint();
          if(state == GAME_STATE.SWITCH_TEAMS) {
             if(!teamOne.isFirstTurn() && teamOne.getUnits().size() == 0) {
                winner = teamTwo;
@@ -182,7 +187,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
          selectedUnit = null;
          unitSelected = false;
       }
-      // drawGui(g);
       logicLock.unlock();
    }
    
@@ -227,7 +231,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
     * Switches teams, teamOne -> teamTwo or teamTwo -> teamOne.
     */
    public void switchTeams() {
-      Logger.consolePrint("switching teams", "game");
+      Logger.consolePrint("Switching teams.", "game");
       infoBox.updateInfo(teamOne, teamTwo);
       unitSelected = false;
       selectedUnit = null;
@@ -390,7 +394,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       
       if(unitSelected) {
          if(selectedTile.isOccupied() && selectedTile.getOccupiedBy().getOwner().equals(selectedUnit.getOwner())) {
-            System.out.println("wat");
             selectedUnit = selectedTile.getOccupiedBy();
             unitSelected = true;
             if(selectedUnit.getOwner().equals(currentTeam)) {
@@ -398,30 +401,31 @@ public class Game extends JPanel implements MouseListener, KeyListener {
                if(!selectedUnit.hasMoved() || (selectedUnit.hasMoved() && !selectedUnit.hasAttacked()))
                   state = GAME_STATE.DISPLAY_MOVE;
             }
+            logicLock.unlock();
             return;
-         }            
+         }
          else if(!selectedUnit.hasAttacked() && selectedUnit.getAttackSet().contains(new Coordinate(x, y))) {
             targetUnit = world.getTiles()[y][x].getOccupiedBy();
-            Logger.consolePrint("selected unit attacking: " + targetUnit, "game");
+            Logger.consolePrint("Selected unit attacking: " + targetUnit, "game");
             attackMove(x, y);
             selectedUnit.attack(targetUnit, false);
             if(!targetUnit.isAlive()) {
                world.destroyUnit(targetUnit);
-               Logger.consolePrint("target destroyed", "game");
+               Logger.consolePrint("Target destroyed", "game");
                state = GAME_STATE.UPDATE;
             }
             else {
                targetUnit.attack(selectedUnit, true);
                if(!selectedUnit.isAlive()) {
                   world.destroyUnit(selectedUnit);
-                  Logger.consolePrint("unit destroyed", "game");
+                  Logger.consolePrint("Unit destroyed", "game");
                }
             }
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
          }
          else if(!selectedUnit.hasMoved() && selectedUnit.getCaptureSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint("capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
+            Logger.consolePrint("Capturing city at: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
             selectedUnit.setAttacked(true);
@@ -430,7 +434,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             }
          }
          else if(!selectedUnit.hasMoved() && selectedUnit.getMoveSet().contains(new Coordinate(x, y))) {
-            Logger.consolePrint("moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
+            Logger.consolePrint("Moving selected unit to: (" + selectedTile.getX() + ", " + selectedTile.getY() + ")", "game");
             selectedUnit.move(selectedTile);
             selectedUnit.setMoved(true);
          }
@@ -450,11 +454,11 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       }
       else if(selectedTile.getType() == TILE_TYPE.FACTORY && ((Factory)selectedTile).getOwner() != null && ((Factory)selectedTile).getOwner().equals(currentTeam)) {
          unitSelected = false;
-         Logger.consolePrint("factory selected", "game");
+         Logger.consolePrint("Factory selected", "game");
          FactoryOptionPane factoryPane = new FactoryOptionPane((Factory)selectedTile);
          if(factoryPane.isUnitChoiceMade()) {
             ((Factory)selectedTile).produceUnit(factoryPane.getReturnedUnit());
-            Logger.consolePrint("producing " + factoryPane.getReturnedUnit(), "game");
+            Logger.consolePrint("Producing " + factoryPane.getReturnedUnit(), "game");
          }
          else if(factoryPane.isTechChoiceMade()) {
             Technology.researchTech(currentTeam, factoryPane.getReturnedTech());
@@ -535,6 +539,19 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    }
    
    /**
+    * Draws a rectangle of the given color over the tile at the given position.
+    * 
+    * @param x x coordinate of the target in the tiles matrix.
+    * @param y y coordinate of the target in the tiles matrix.
+    * @param c color of the rectangle.
+    */
+   public void highLightTile(int x, int y, Color c) {
+      Graphics g = this.getGraphics();
+      g.setColor(c);
+      g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+   }
+   
+   /**
     * Produces a small output to the console. DOES NOT use the Logger class. This will always output
     * no matter what.
     */
@@ -599,7 +616,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
     */
    @Override
    public void mousePressed(MouseEvent arg0) {
-      if(SwingUtilities.isLeftMouseButton(arg0)) {
+      if(SwingUtilities.isLeftMouseButton(arg0) && currentTeam.getClass().equals(Team.class)) {
          int row = (arg0.getY() - offsetVertical) / tileSize;
          int col = (arg0.getX() - offsetHorizontal) / tileSize;
          if(row >= gameHeight || col >= gameWidth || row < 0 || col < 0)
@@ -609,7 +626,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
          infoBox.updateInfo(world.getTiles()[row][col].getOccupiedBy(), world.getTiles()[row][col], teamOne, teamTwo);
          return;
       }
-      else
+      else if(currentTeam.getClass().equals(Team.class))
          state = GAME_STATE.SWITCH_TEAMS;
    }
    
@@ -703,6 +720,14 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    
    public void setNumTurns(int numTurns) {
       this.numTurns = numTurns;
+   }
+   
+   public GAME_STATE getState() {
+      return state;
+   }
+   
+   public void setState(GAME_STATE state) {
+      this.state = state;
    }
    
 }

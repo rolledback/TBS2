@@ -125,14 +125,14 @@ public class Unit {
          if(t.getTileType() == currentTile.getType())
             techBonus += t.getMoveValue();
       }
-      int adHocRange = (atkOnly) ? 0 : moveRange + techBonus;
+      int adHocRange = (atkOnly) ? 1 : moveRange + techBonus + 1;
       if(adHocRange <= 0 && !atkOnly)
          adHocRange = 1;
       currentTile.setOccupied(false);
       attackSet.clear();
       moveSet.clear();
       captureSet.clear();
-      calcMoveSpotsHelper(world, x, y, adHocRange + 1, false, true);
+      calcMoveSpotsHelper(world, x, y, adHocRange, false, true, atkOnly);
       currentTile.setOccupied(true);
       moveSet.remove(new Coordinate(x, y));
    }
@@ -147,7 +147,7 @@ public class Unit {
     * @param range the remaining move range for the unit.
     * @param movedThrough whether or not the unit just came through a friendly unit.
     */
-   private void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough, boolean firstMove) {
+   private void calcMoveSpotsHelper(World world, int x, int y, int range, boolean movedThrough, boolean firstMove, boolean atkOnly) {
       Coordinate thisCoord = new Coordinate(x, y);
       Tile tiles[][] = world.getTiles();
       int height = world.getHeight();
@@ -171,14 +171,14 @@ public class Unit {
          moveSet.add(thisCoord);
       }
       range -= tiles[y][x].getEffect().getMoveCost();
-      if(range <= 0 && firstMove)
+      if(range <= 0 && firstMove && !atkOnly)
          range = 1;
       boolean mT = tiles[y][x].isOccupied() && owner.equals(tiles[y][x].getOccupiedBy().getOwner());
       if(captureSet.contains(thisCoord) || moveSet.contains(thisCoord) || mT) {
-         calcMoveSpotsHelper(world, x + 1, y, range, mT, false);
-         calcMoveSpotsHelper(world, x - 1, y, range, mT, false);
-         calcMoveSpotsHelper(world, x, y + 1, range, mT, false);
-         calcMoveSpotsHelper(world, x, y - 1, range, mT, false);
+         calcMoveSpotsHelper(world, x + 1, y, range, mT, false, atkOnly);
+         calcMoveSpotsHelper(world, x - 1, y, range, mT, false, atkOnly);
+         calcMoveSpotsHelper(world, x, y + 1, range, mT, false, atkOnly);
+         calcMoveSpotsHelper(world, x, y - 1, range, mT, false, atkOnly);
       }
       else
          return;

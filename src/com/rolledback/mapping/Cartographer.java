@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import com.rolledback.framework.GraphicsManager;
 import com.rolledback.framework.Logger;
@@ -59,8 +60,8 @@ public class Cartographer {
             return ret;
          }
          Logger.consolePrint("File checks out. Length of: " + map.length, "cartographer");
-         int width = map[2] ^ (map[3] << 8);
-         int height = map[4] ^ (map[5] << 8);
+         int width = (map[2] & 0xff) | (map[3] << 8);
+         int height = (map[4] & 0xff) | (map[5] << 8);
          Logger.consolePrint("File gives dim of: (" + width + ", " + height + ")", "cartographer");
          tiles = new Tile[height][width];
          
@@ -330,8 +331,8 @@ public class Cartographer {
       }
       if(map[0] != 0x6d)
          return new int[0];
-      int width = map[2] ^ (map[3] << 8);
-      int height = map[4] ^ (map[5] << 8);
+      int width = (map[2] & 0xff) | (map[3] << 8);
+      int height = (map[4] & 0xff) | (map[5] << 8);
       int[] ret = new int[2];
       ret[0] = width;
       ret[1] = height;

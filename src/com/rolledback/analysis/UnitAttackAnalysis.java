@@ -104,7 +104,7 @@ public class UnitAttackAnalysis {
             attackValue -= attackValue * ((double)defender.getDefense() / 100.0);
             
             double retaliationValue = 0;
-            bounds = DamageTable.getBounds(attacker.getType(), defender.getType());
+            bounds = DamageTable.getBounds(defender.getType(), attacker.getType());
             retaliationValue = bounds[0] + bounds[1];
             retaliationValue /= 2;
             retaliationValue -= retaliationValue * ((double)attacker.getDefense() / 100.0);
