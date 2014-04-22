@@ -26,7 +26,7 @@ public class Logger {
    // Simulator.java = simulator
    // temporary comments = temp
    
-   private static boolean consolePrintingOn = false;
+   private static boolean consolePrintingOn = true;
    private static List<String> validTags = asList("simulator", "game", "map", "cartographer", "analysis", "editor", "ai");
    private static int tagLength = 3;
    

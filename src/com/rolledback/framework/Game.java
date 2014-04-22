@@ -3,6 +3,7 @@ package com.rolledback.framework;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -21,7 +22,6 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeam;
-import com.rolledback.teams.ai.ComputerTeamB;
 import com.rolledback.teams.ai.ComputerTeamD;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
@@ -147,7 +147,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             state = GAME_STATE.SWITCH_TEAMS;
          }
          if(state == GAME_STATE.UPDATE || state == GAME_STATE.DISPLAY_MOVE)
-               repaint();
+            repaint();
          if(state == GAME_STATE.SWITCH_TEAMS) {
             if(!teamOne.isFirstTurn() && teamOne.getUnits().size() == 0) {
                winner = teamTwo;
@@ -158,8 +158,9 @@ public class Game extends JPanel implements MouseListener, KeyListener {
                state = GAME_STATE.END_GAME;
             }
             else {
-               if(currentTeam.isFirstTurn())
+               if(currentTeam.isFirstTurn()) {
                   currentTeam.setFirstTurn(false);
+               }
                numTurns += 1;
                switchTeams();
             }
@@ -174,12 +175,14 @@ public class Game extends JPanel implements MouseListener, KeyListener {
     */
    public void paintComponent(Graphics g) {
       logicLock.lock();
-      drawBackground(g);
-      drawTiles(g);
-      drawUnits(g);
-      drawHealthBars(g);
+      super.paintComponent(g);
+      Graphics2D g2d = (Graphics2D) g.create();
+      drawBackground(g2d);
+      drawTiles(g2d);
+      drawUnits(g2d);
+      drawHealthBars(g2d);
       if(state == GAME_STATE.DISPLAY_MOVE) {
-         drawMoveSpots(g);
+         drawMoveSpots(g2d);
       }
       g.setColor(Color.black);
       g.drawOval(selectedX * tileSize + offsetHorizontal, selectedY * tileSize + offsetVertical, tileSize - 2, tileSize - 2);
@@ -192,24 +195,59 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    
    /**
     * Draws the background underneath the actual game tiles/units. All games, even if they fill up
-    * the entire screen actually have a background.
+    * the entire screen actually have a background, though only ones which have a visiable
+    * background will have it drawn.
     * 
     * @param g Graphics object, passed in by paintComponent
     */
    public void drawBackground(Graphics g) {
       int horizOffset = (offsetHorizontal % tileSize == 0) ? 0 : tileSize / 2;
       int vertiOffset = (offsetVertical % tileSize == 0) ? 0 : tileSize / 2;
-      for(int r = 0; r < background.length; r++)
-         for(int c = 0; c < background[0].length; c++) {
-            g.setColor(new Color(185, 185, 250, 175));
+      
+      for(int y = 0; y < offsetVertical; y += tileSize) {
+         for(int x = 0; x < getWidth() + tileSize; x += tileSize) {
+            int r = y / tileSize;
+            int c = x / tileSize;
             g.setColor(new Color(120, 100, 165, 175));
             g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
             g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
          }
+      }
+      
+      for(int y = getHeight() - offsetVertical; y < getHeight() + tileSize; y += tileSize) {
+         for(int x = 0; x < getWidth() + tileSize; x += tileSize) {
+            int r = y / tileSize;
+            int c = x / tileSize;
+            g.setColor(new Color(120, 100, 165, 175));
+            g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
+            g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
+         }
+      }
+      
+      for(int y = offsetVertical; y < getHeight() - offsetVertical; y += tileSize) {
+         for(int x = 0; x < offsetHorizontal; x += tileSize) {
+            int r = y / tileSize;
+            int c = x / tileSize;
+            g.setColor(new Color(120, 100, 165, 175));
+            g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
+            g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
+         }
+      }
+      
+      for(int y = offsetVertical; y < getHeight() - offsetVertical; y += tileSize) {
+         for(int x = getWidth() - offsetHorizontal; x < getWidth() + tileSize; x += tileSize) {
+            int r = y / tileSize;
+            int c = x / tileSize;
+            g.setColor(new Color(120, 100, 165, 175));
+            g.drawImage(background[r][c], (tileSize * c) - horizOffset, (tileSize * r) - vertiOffset, tileSize, tileSize, this);
+            g.fillRect((c * tileSize) - horizOffset, (r * tileSize) - vertiOffset, tileSize, tileSize);
+         }
+      }
    }
    
    /**
-    * Creates the background and stores it in the background matrix.
+    * Creates the background and stores it in the background matrix. All games have a background,
+    * regardless of map size.
     */
    public void createBackground() {
       int w = (this.getWidth() + tileSize) / tileSize;
