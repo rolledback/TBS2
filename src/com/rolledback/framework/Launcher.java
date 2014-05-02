@@ -242,6 +242,7 @@ public class Launcher {
       
       // initialize the game and add it to the window
       Game gamePanel = new Game(x, y, tileSize, offsetHorizontal / 2, offsetVertical / 2, fileName, infoBox);
+      infoBox.setGame(gamePanel);
       gamePanel.setSize(gamePanelWidth, gamePanelHeight);
       gamePanel.createBackground();
       window.add(gamePanel, BorderLayout.CENTER);

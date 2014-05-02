@@ -100,8 +100,8 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       logicLock = new ReentrantLock();
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
-      teamOne = new ComputerTeamD("team one", 50, 100, this, 1);
-      teamTwo = new ComputerTeamD("team two", 50, 100, this, 2);
+      teamOne = new Team("Team One", 50, 100, 1);
+      teamTwo = new ComputerTeamD("Team Two", 50, 100, this, 2);
       
       currentTeam = teamOne;
       
@@ -766,6 +766,14 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    
    public void setState(GAME_STATE state) {
       this.state = state;
+   }
+
+   public Team getCurrentTeam() {
+      return currentTeam;
+   }
+
+   public GameGUI getGUI() {
+      return infoBox;
    }
    
 }

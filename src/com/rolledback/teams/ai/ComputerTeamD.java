@@ -1,5 +1,6 @@
 package com.rolledback.teams.ai;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,13 +26,17 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    
-   final int animationDelay = 1000;
+   final int animationDelay = 500;
    private HashMap<CapturableTile, HashSet<Unit>> captureSpots;
    private Coordinate avgEnemyPos;
    private CoordinateNode[] nodes = new CoordinateNode[game.getGameHeight() * game.getGameWidth()];
    private boolean capPriority;
-   private int operationSizeLimit = 1;
+   private int operationSizeLimit = 3;
    private int availOperations = 0;
+   
+   private double tauntChance = .65;
+   private String[] generalTaunts = {"Come onnnnnnnnn!", "Wololololol", "Long time, no siege.", "My granny could scrap better than that."};
+   private String[] triggeredTaunts = {"All hail, King of the losers!", "Nice city, I'll take it.", "You played two hours to die like this?"};
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
@@ -118,6 +123,12 @@ public class ComputerTeamD extends ComputerTeam {
     */
    public void executeTurn() {
       Logger.consolePrint(getName() + " starting turn.", "ai");
+      
+      Random random = new Random();
+      int rndIndex = random.nextInt(generalTaunts.length);
+      if(Math.random() > tauntChance)
+         game.getGUI().sendMessage(this, generalTaunts[rndIndex]);
+      
       calcAvgEnemyPos();
       if(captureSpots == null)
          findCaptureSpots();
@@ -157,6 +168,13 @@ public class ComputerTeamD extends ComputerTeam {
          }
          while(!currentFactory.produceUnit((UNIT_TYPE)productionList.keySet().toArray()[unitToProduce]) && attempts < 32);
       }
+      
+      if(units.size() / 2 > opponent.getUnits().size()) {
+         if(Math.random() > tauntChance)
+            game.getGUI().sendMessage(this, triggeredTaunts[0]);
+         else if(Math.random() > tauntChance)
+            game.getGUI().sendMessage(this, triggeredTaunts[2]);
+      }
       game.getLogicLock().unlock();
    }
    
@@ -169,8 +187,11 @@ public class ComputerTeamD extends ComputerTeam {
     */
    public Coordinate moveUnit(Unit u) {
       u.calcMoveSpots(false);
-      if(u.getCaptureSet().size() != 0)
+      if(u.getCaptureSet().size() != 0) {
+         if(Math.random() > tauntChance)
+            game.getGUI().sendMessage(this, triggeredTaunts[1]);
          return captureMove(u);
+      }
       else if(u.getAttackSet().size() != 0)
          return attackMove(u);
       else if(u.getMoveSet().size() != 0)
@@ -188,7 +209,7 @@ public class ComputerTeamD extends ComputerTeam {
       Logger.consolePrint("Conduting a simple move.", "ai");
       boolean savedPriority = capPriority;
       capPriority = (capPriority && (u.getClassification() == UNIT_CLASS.INFANTRY));
-      Object[] closestEnemyTuple = aStarToClosestObject(game.getWorld().getTiles(), u, opponent);
+      Object[] closestEnemyTuple = dijkstraToClosestObject(game.getWorld().getTiles(), u, opponent);
       int closestEnemyDistance = (int)closestEnemyTuple[0];
       if(closestEnemyDistance == Integer.MAX_VALUE)
          return null;
@@ -306,12 +327,16 @@ public class ComputerTeamD extends ComputerTeam {
       nodes.get(unit.getY() * game.getGameWidth() + unit.getX()).setfScore(0);
       nodes.get(unit.getY() * game.getGameWidth() + unit.getX()).setReachable(true);
       queue.offer(nodes.get(unit.getY() * game.getGameWidth() + unit.getX()));
-      set.add(queue.peek());
       world[unit.getY()][unit.getX()].setOccupied(false);
       
       while(queue.size() > 0) {
          CoordinateNode n = queue.poll();
          Tile t = world[n.getY()][n.getX()];
+         
+         if(set.contains(n))
+            continue;
+         set.add(n);
+         
          if((unit.canCapture(t) && (captureSpots.get(t).size() <= operationSizeLimit - 1 || captureSpots.get(t).contains(unit))) || (!capPriority && unit.canAttack(t))) {
             if(capPriority)
                captureSpots.get(t).add(unit);
@@ -335,20 +360,14 @@ public class ComputerTeamD extends ComputerTeam {
                   Tile tempTile = world[r][c];
                   // get the node associated with the tile
                   CoordinateNode temp = nodes.get(r * game.getGameWidth() + c);
-                  
                   // if it has not been visited, set prev, set distance, push on queue, add to set
-                  if(!set.contains(temp) && unit.canTraverse(tempTile)) {
-                     temp.setPrev(n);
-                     temp.setfScore(n.getfScore() + tempTile.getEffect().getMoveCost());
-                     queue.offer(temp);
-                     set.add(temp);
-                  }
-                  
-                  // if distance through this node is less than it's current distance update it and
-                  // its previous node
-                  if(n.getfScore() + tempTile.getEffect().getMoveCost() < temp.getfScore()) {
-                     temp.setPrev(n);
-                     temp.setfScore(n.getfScore() + tempTile.getEffect().getMoveCost());
+                  if(unit.canTraverse(tempTile)) {
+                     // if distance is less than current distance update it and its prev node
+                     if(n.getfScore() + tempTile.getEffect().getMoveCost() < temp.getfScore()) {
+                        temp.setPrev(n);
+                        temp.setfScore(n.getfScore() + tempTile.getEffect().getMoveCost());
+                        queue.offer(temp);
+                     }
                   }
                }
                catch(Exception e) {
@@ -373,22 +392,23 @@ public class ComputerTeamD extends ComputerTeam {
       Arrays.fill(nodes, null);
       // set up the priority queue and set
       Comparator<CoordinateNode> comparator = new TileCostComparator();
-      PriorityQueue<CoordinateNode> queue = new PriorityQueue<CoordinateNode>(25, comparator);
-      HashSet<CoordinateNode> queueSet = new HashSet<CoordinateNode>();
-      
-      HashSet<CoordinateNode> set = new HashSet<CoordinateNode>();
+      PriorityQueue<CoordinateNode> openSetQueue = new PriorityQueue<CoordinateNode>(25, comparator);
+      HashSet<CoordinateNode> openSet = new HashSet<CoordinateNode>();
+      HashSet<CoordinateNode> closedSet = new HashSet<CoordinateNode>();
       
       // set starting node to have distance 0 and push it on the queue and add it to the set
       nodes[unit.getY() * game.getGameWidth() + unit.getX()] = new CoordinateNode(true, null, unit.getX(), unit.getY(), unit.getCurrentTile(), Integer.MAX_VALUE, Integer.MAX_VALUE);
       nodes[unit.getY() * game.getGameWidth() + unit.getX()].setgScore(0);
       nodes[unit.getY() * game.getGameWidth() + unit.getX()].setfScore(heuristic(unit.getX(), unit.getY(), estimatedGoal.getX(), estimatedGoal.getY()));
-      queue.offer(nodes[unit.getY() * game.getGameWidth() + unit.getX()]);
-      queueSet.add(queue.peek());
+      openSetQueue.offer(nodes[unit.getY() * game.getGameWidth() + unit.getX()]);
+      openSet.add(openSetQueue.peek());
       world[unit.getY()][unit.getX()].setOccupied(false);
       
-      while(queue.size() > 0) {
-         CoordinateNode current = queue.poll();
+      while(openSetQueue.size() > 0) {
+         CoordinateNode current = openSetQueue.poll();
          Tile t = current.getTile();
+         game.highLightTile(t.getX(), t.getY(), new Color(0, 255, 0, 137));
+         delay(100);
          if((unit.canCapture(t) && (captureSpots.get(t).size() < operationSizeLimit || captureSpots.get(t).contains(unit))) || (!capPriority && unit.canAttack(t))) {
             if(capPriority) {
                if(captureSpots.get(t).add(unit) && captureSpots.get(t).size() >= operationSizeLimit)
@@ -401,8 +421,12 @@ public class ComputerTeamD extends ComputerTeam {
             world[unit.getY()][unit.getX()].setOccupied(true);
             CoordinateNode moveNode = current;
             
-            while(moveNode != null && !moveNode.isReachable())
+            while(moveNode != null && !moveNode.isReachable()) {
+               System.out.println(moveNode.getfScore() + " " + moveNode.getgScore() + "(" + moveNode.getX() + "," + moveNode.getY() + ")");
+               game.highLightTile(moveNode.getX(), moveNode.getY(), new Color(255, 0, 0, 137));
+               delay(100);
                moveNode = moveNode.getPrev();
+            }
             delay(200);
             resultsTuple[0] = moveNode.getfScore();
             resultsTuple[1] = new Coordinate(t.getX(), t.getY());
@@ -410,7 +434,8 @@ public class ComputerTeamD extends ComputerTeam {
             return resultsTuple;
          }
          else {
-            set.add(current);
+            openSet.remove(current);
+            closedSet.add(current);
             int[] yDirs = { 0, 0, 1, -1 };
             int[] xDirs = { 1, -1, 0, 0 };
             for(int i = 0; i < xDirs.length; i++) {
@@ -418,24 +443,35 @@ public class ComputerTeamD extends ComputerTeam {
                   int r = t.getY() + yDirs[i];
                   int c = t.getX() + xDirs[i];
                   CoordinateNode neighbor;
-                  if(nodes[(r * game.getGameWidth()) + c] == null)
+                  if(nodes[(r * game.getGameWidth()) + c] == null) {
+                     System.out.println("FIRST TIME TO SEE THIS CUNT " + c + " " + r);
                      neighbor = new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), current, c, r, game.getWorld().getTiles()[r][c], Integer.MAX_VALUE, Integer.MAX_VALUE);
+                     nodes[(r * game.getGameWidth()) + c] = neighbor;
+                  }
                   else
                      neighbor = nodes[r * game.getGameWidth() + c];
-                  boolean visited = queueSet.contains(neighbor);
-                  if(visited)
+                  if(closedSet.contains(neighbor))
                      continue;
                   
                   Tile neighborTile = neighbor.getTile();
                   int tentative_gScore = current.getgScore() + neighbor.getTile().getEffect().getMoveCost();
-                  if((!visited || tentative_gScore < neighbor.getgScore()) && unit.canTraverse(neighborTile)) {
+                  System.out.println(openSetQueue);
+                  System.out.println(neighbor);
+                  if((!openSet.contains(neighbor) || tentative_gScore < neighbor.getgScore()) && unit.canTraverse(neighborTile)) {
                      neighbor.setPrev(current);
                      neighbor.setgScore(tentative_gScore);
-                     neighbor.setfScore((int)(tentative_gScore + heuristic(c, r, estimatedGoal.getX(), estimatedGoal.getY())));
-                     
-                     if(!visited) {
-                        queue.offer(neighbor);
-                        queueSet.add(neighbor);
+                     neighbor.setfScore((int)(tentative_gScore + (heuristic(c, r, estimatedGoal.getX(), estimatedGoal.getY()))));
+                     System.out.println(neighbor);
+                     System.out.println("Heuristic from " + c + " " + r + " to " + estimatedGoal.getX() + " " + estimatedGoal.getY() + " is "
+                           + heuristic(c, r, estimatedGoal.getX(), estimatedGoal.getY()));
+                     if(!openSet.contains(neighbor)) {
+                        openSetQueue.remove(neighbor);
+                        openSetQueue.offer(neighbor);
+                        openSet.add(neighbor);
+                     }
+                     else {
+                        System.out.println("IT SHOULD HAVE MOVED MOTEHR FUCKERS.");
+                        System.out.println(openSetQueue);
                      }
                   }
                }
@@ -457,7 +493,7 @@ public class ComputerTeamD extends ComputerTeam {
       int distance = Integer.MAX_VALUE;
       
       for(Unit e: opponent.getUnits()) {
-         int d = distanceFormula(unit.getX(), unit.getY(), e.getX(), e.getY());
+         int d = heuristic(unit.getX(), unit.getY(), e.getX(), e.getY());
          if(d < distance) {
             distance = d;
             closest = new Coordinate(e.getX(), e.getY());
@@ -472,7 +508,8 @@ public class ComputerTeamD extends ComputerTeam {
                closest = new Coordinate(entry.getKey().getX(), entry.getKey().getY());
                break;
             }
-            int d = distanceFormula(unit.getX(), unit.getY(), entry.getKey().getX(), entry.getKey().getY());
+            int d = heuristic(unit.getX(), unit.getY(), entry.getKey().getX(), entry.getKey().getY());
+            
             if(d < distance) {
                distance = d;
                closest = new Coordinate(entry.getKey().getX(), entry.getKey().getY());
@@ -488,7 +525,7 @@ public class ComputerTeamD extends ComputerTeam {
       int dy = y1 - y2;
       dx = ((dx >> 31) ^ dx) - (dx >> 31);
       dy = ((dy >> 31) ^ dy) - (dy >> 31);
-      return(dx + dy);
+      return Math.abs(x1 - x2) + Math.abs(y1 - y2);
    }
    
    public Object[] bfsToClosestObject(Tile[][] world, Unit unit, Team targetOwner) {
@@ -647,7 +684,7 @@ class CoordinateNode {
    }
    
    public String toString() {
-      return "" + fScore;
+      return x + " " + y + " " + "(" + fScore + ")";
    }
 }
 

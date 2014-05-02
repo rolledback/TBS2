@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -12,11 +14,16 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.DefaultCaret;
 
+import com.rolledback.framework.Game.GAME_STATE;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
@@ -29,12 +36,19 @@ import com.rolledback.units.Unit;
  * @author Matthew Rayermann (rolledback, www.github.com/rolledback, www.cs.utexas.edu/~mrayer)
  * @version 1.0
  */
-public class GameGUI extends JPanel {
+public class GameGUI extends JPanel implements ActionListener {
    
    private static final long serialVersionUID = 1L;
    
+   private Game game;
+   
    private JPanel guiPanel;
    private BoxLayout guiLayout;
+   
+   private JPanel tauntPanel;
+   private BoxLayout tauntLayout;
+   public JTextArea tauntBox;
+   public JTextField tauntField;
    
    private UnitPanel canvasPanel;
    private Image uImage;
@@ -95,6 +109,7 @@ public class GameGUI extends JPanel {
       guiLayout = new BoxLayout(guiPanel, BoxLayout.X_AXIS);
       guiPanel.setLayout(guiLayout);
       
+      setupTaunt();
       setupCanvas();
       setupUnit();
       setupTerrain();
@@ -102,6 +117,8 @@ public class GameGUI extends JPanel {
       setupTeamTwo();
       setupButtonPanel();
       
+      guiPanel.add(tauntPanel);
+      guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(canvasPanel);
       guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(unitPanel);
@@ -140,6 +157,30 @@ public class GameGUI extends JPanel {
       teamTwoPanel.setPreferredSize(new Dimension(teamTwoPanel.getWidth(), teamTwoPanel.getHeight()));
       buttonPanel.setPreferredSize(new Dimension(buttonPanel.getWidth(), buttonPanel.getHeight()));
       guiPanel.setPreferredSize(new Dimension(guiPanel.getWidth(), guiPanel.getHeight()));
+   }
+   
+   /**
+    * Sets up the component containing the taunt text box which allows teams to "taunt" each other.
+    */
+   public void setupTaunt() {
+      tauntPanel = new JPanel();
+      tauntLayout = new BoxLayout(tauntPanel, BoxLayout.Y_AXIS);
+      tauntPanel.setLayout(tauntLayout);
+      
+      tauntBox = new JTextArea(5, 26);
+      tauntBox.setEditable(false);
+      DefaultCaret caret = (DefaultCaret)tauntBox.getCaret();
+      caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+      JScrollPane scrollPane = new JScrollPane(tauntBox);
+      
+      tauntField = new JTextField(26);
+      tauntField.addActionListener(this);
+      tauntField.setMaximumSize(tauntField.getPreferredSize());
+      
+      tauntPanel.add(scrollPane);
+      tauntPanel.add(tauntField);
+      tauntPanel.setBorder(new TitledBorder(new LineBorder(Color.BLACK, 1), "Chat Box"));
+      tauntPanel.setBackground(new Color(190, 190, 190));
    }
    
    /**
@@ -277,6 +318,12 @@ public class GameGUI extends JPanel {
       buttonPanel.setLayout(buttonLayout);
       
       endTurnButton = new JButton("End Turn");
+      endTurnButton.addActionListener(new ActionListener() {
+         public void actionPerformed(ActionEvent arg0) {
+            if(game.getCurrentTeam().getClass().equals(Team.class))
+               game.setState(GAME_STATE.SWITCH_TEAMS);
+         }
+      });
       buttonPanel.add(endTurnButton);
       buttonPanel.setBackground(new Color(190, 190, 190));
    }
@@ -356,6 +403,20 @@ public class GameGUI extends JPanel {
       
       canvasPanel.setTerrainImage(tImage);
       canvasPanel.repaint();
+   }
+   
+   public void sendMessage(Team team, String msg) {
+      tauntBox.append("[" + team.getName() + "] " + msg + "\n");
+   }
+   
+   public void setGame(Game gamePanel) {
+      game = gamePanel;
+   }
+   
+   @Override
+   public void actionPerformed(ActionEvent e) {
+      sendMessage(game.getCurrentTeam(), tauntField.getText());
+      tauntField.setText("");
    }
 }
 
