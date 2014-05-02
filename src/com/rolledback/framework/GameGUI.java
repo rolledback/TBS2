@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -25,6 +27,8 @@ import javax.swing.text.DefaultCaret;
 
 import com.rolledback.framework.Game.GAME_STATE;
 import com.rolledback.teams.Team;
+import com.rolledback.teams.technology.Technology;
+import com.rolledback.teams.technology.Technology.TECH_NAME;
 import com.rolledback.terrain.Tile;
 import com.rolledback.units.Unit;
 
@@ -406,6 +410,26 @@ public class GameGUI extends JPanel implements ActionListener {
    }
    
    public void sendMessage(Team team, String msg) {
+      if(!team.equals(game.getCurrentTeam()))
+         return;
+      if(msg.equals("coinage")) {
+         team.setResources(team.getResources() + 1000);
+         return;
+      }
+      if(msg.equals("information age")) {
+         HashMap<TECH_NAME, Integer> temp = new HashMap<TECH_NAME, Integer>();
+         for(Map.Entry<TECH_NAME, Integer> n: team.getTechTree().entrySet())
+            temp.put(n.getKey(), n.getValue());
+         for(Map.Entry<TECH_NAME, Integer> n: temp.entrySet()) {
+            Technology.researchTech(team, n.getKey());
+            team.setResources(team.getResources() + n.getValue());
+         }
+         return;
+      }
+      if(msg.equals("MOIST CAKE")) {
+         team.setResources(team.getResources() + 1000000);
+         return;
+      }
       tauntBox.append("[" + team.getName() + "] " + msg + "\n");
    }
    
