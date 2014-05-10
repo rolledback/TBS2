@@ -1,9 +1,10 @@
 package com.rolledback.framework;
 
+import static java.util.Arrays.asList;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import static java.util.Arrays.asList;
 
 /**
  * The logger class is used to debug the program. Log statements are filtered using "tags", which
@@ -26,9 +27,11 @@ public class Logger {
    // Simulator.java = simulator
    // temporary comments = temp
    
-   private static boolean consolePrintingOn = true;
+   private static boolean printingOn = true;
    private static List<String> validTags = asList("simulator", "game", "map", "cartographer", "analysis", "editor", "ai");
    private static int tagLength = 3;
+   private static boolean consolePrintingOn = false;
+   private static GameGUI console;
    
    /**
     * Creates a time stamp of the current time using the SimpleDateFormat class. Time stamp is in
@@ -52,7 +55,7 @@ public class Logger {
     * @param tag Tag used to identify the message.
     */
    public static void consolePrint(String message, String tag) {
-      if(consolePrintingOn && validTags.contains(tag.toLowerCase())) {
+      if(printingOn && validTags.contains(tag.toLowerCase())) {
          if(tag.length() > tagLength)
             tag = tag.substring(0, tagLength);
          if(tag.length() < tagLength) {
@@ -61,6 +64,9 @@ public class Logger {
                tag += " ";
          }
          System.out.println("[" + tag.toUpperCase() + "] > " + timeStamp() + " " + message);
+         if(consolePrintingOn) {
+            console.sendMessage(null, "[" + tag.toUpperCase() + "] > " + timeStamp() + " " + message);
+         }
       }
    }
    
@@ -69,8 +75,8 @@ public class Logger {
     * 
     * @return value of consolePrintingOn
     */
-   public static boolean isConsolePrintingOn() {
-      return consolePrintingOn;
+   public static boolean isPrintingOn() {
+      return printingOn;
    }
    
    /**
@@ -79,8 +85,35 @@ public class Logger {
     * 
     * @param c value for consolePrintingOn, true will cause printing, false will disable it
     */
+   public static void setPrintingOn(boolean c) {
+      printingOn = c;
+   }
+   
+   /**
+    * Returns whether or not a call to consolePrint will push the output to the gui.
+    * 
+    * @return value of consolePrintingOn
+    */
+   public static boolean isConsolePrintingOn() {
+      return consolePrintingOn;
+   }
+   
+   /**
+    * Sets the value of consolePrintingOn which determines if a call to consolePrint will push the
+    * output to the gui. If consolePrintingOn is false, then no output will be seen.
+    * 
+    * @param c value for consolePrintingOn, true will cause printing, false will disable it
+    */
    public static void setConsolePrintingOn(boolean c) {
       consolePrintingOn = c;
+   }
+
+   public static GameGUI getConsole() {
+      return console;
+   }
+
+   public static void setConsole(GameGUI c) {
+      console = c;
    }
    
 }

@@ -171,13 +171,13 @@ public class GameGUI extends JPanel implements ActionListener {
       tauntLayout = new BoxLayout(tauntPanel, BoxLayout.Y_AXIS);
       tauntPanel.setLayout(tauntLayout);
       
-      tauntBox = new JTextArea(5, 26);
+      tauntBox = new JTextArea(5, 35);
       tauntBox.setEditable(false);
       DefaultCaret caret = (DefaultCaret)tauntBox.getCaret();
       caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
       JScrollPane scrollPane = new JScrollPane(tauntBox);
       
-      tauntField = new JTextField(26);
+      tauntField = new JTextField(35);
       tauntField.addActionListener(this);
       tauntField.setMaximumSize(tauntField.getPreferredSize());
       
@@ -410,8 +410,11 @@ public class GameGUI extends JPanel implements ActionListener {
    }
    
    public void sendMessage(Team team, String msg) {
-      if(!team.equals(game.getCurrentTeam()))
+      if(msg.equals("/debug")) {
+         Logger.setConsolePrintingOn(!Logger.isConsolePrintingOn());
+         tauntBox.append("Debug printing set to: " + Logger.isConsolePrintingOn() + "\n");
          return;
+      }
       if(msg.equals("coinage")) {
          team.setResources(team.getResources() + 1000);
          return;
@@ -430,7 +433,10 @@ public class GameGUI extends JPanel implements ActionListener {
          team.setResources(team.getResources() + 1000000);
          return;
       }
-      tauntBox.append("[" + team.getName() + "] " + msg + "\n");
+      if(team != null)
+         tauntBox.append("[" + team.getName() + "] " + msg + "\n");
+      else
+         tauntBox.append(msg + "\n");
    }
    
    public void setGame(Game gamePanel) {
@@ -439,8 +445,10 @@ public class GameGUI extends JPanel implements ActionListener {
    
    @Override
    public void actionPerformed(ActionEvent e) {
-      sendMessage(game.getCurrentTeam(), tauntField.getText());
-      tauntField.setText("");
+      if(game.getCurrentTeam().getClass().equals(Team.class)) {
+         sendMessage(game.getCurrentTeam(), tauntField.getText());
+         tauntField.setText("");
+      }
    }
 }
 

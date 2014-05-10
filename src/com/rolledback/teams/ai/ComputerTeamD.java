@@ -26,7 +26,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    
-   final int animationDelay = 500;
+   final int animationDelay = 100;
    private HashMap<CapturableTile, HashSet<Unit>> captureSpots;
    private Coordinate avgEnemyPos;
    private CoordinateNode[] nodes = new CoordinateNode[game.getGameHeight() * game.getGameWidth()];
@@ -35,8 +35,8 @@ public class ComputerTeamD extends ComputerTeam {
    private int availOperations = 0;
    
    private double tauntChance = .65;
-   private String[] generalTaunts = {"Come onnnnnnnnn!", "Wololololol", "Long time, no siege.", "My granny could scrap better than that."};
-   private String[] triggeredTaunts = {"All hail, King of the losers!", "Nice city, I'll take it.", "You played two hours to die like this?"};
+   private String[] generalTaunts = { "Come onnnnnnnnn!", "Wololololol", "Long time, no siege.", "My granny could scrap better than that.", "Dont point that thing at me." };
+   private String[] triggeredTaunts = { "All hail, King of the losers!", "Nice city, I'll take it.", "You played two hours to die like this?", "Enemy sighted!", "Raiding party!" };
    
    public ComputerTeamD(String name, int size, int r, Game g, int n) {
       super(name, size, r, g, n);
@@ -190,12 +190,17 @@ public class ComputerTeamD extends ComputerTeam {
       if(u.getCaptureSet().size() != 0) {
          if(Math.random() > tauntChance)
             game.getGUI().sendMessage(this, triggeredTaunts[1]);
+         else if(Math.random() > tauntChance)
+            game.getGUI().sendMessage(this, triggeredTaunts[4]);
          return captureMove(u);
       }
       else if(u.getAttackSet().size() != 0)
          return attackMove(u);
-      else if(u.getMoveSet().size() != 0)
+      else if(u.getMoveSet().size() != 0) {
+         if(Math.random() > tauntChance)
+            game.getGUI().sendMessage(this, triggeredTaunts[3]);
          return simpleMove(u);
+      }
       return null;
    }
    

@@ -211,6 +211,7 @@ public class Launcher {
       
       // create and add the GUI to the game window
       GameGUI infoBox = new GameGUI();
+      Logger.setConsole(infoBox);
       window.add(infoBox, BorderLayout.SOUTH);
       window.pack();
       
