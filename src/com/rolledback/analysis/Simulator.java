@@ -293,8 +293,8 @@ public class Simulator {
          Logger.consolePrint("Final gui dimensions: " + infoBox.getSize(), "simulator");
          
          if(saveMap) {
-            Logger.consolePrint("Saving this iteration to simulator.map.", "simulator");
-            Cartographer.createMapFile("simulator.map", gamePanel.getWorld().getTiles(), tileSize);
+            Logger.consolePrint("Saving this iteration to simulator" + Integer.toString(tileSize) + ".map.", "simulator");
+            Cartographer.createMapFile("simulator" + Integer.toString(tileSize) + ".map", gamePanel.getWorld().getTiles(), tileSize);
             Logger.consolePrint("Save complete Moving on.", "simulator");
          }
          
@@ -314,10 +314,11 @@ public class Simulator {
          
          if(printDump)
             try {
-               PrintStream out = new PrintStream(new FileOutputStream("dump.txt", true));
+               PrintStream out = new PrintStream(new FileOutputStream("dump" + Integer.toString(tileSize) + ".txt", true));
                for(Coordinate c: gamePanel.getClickHistory())
                   out.println(c.getX() + " " + c.getY());
                out.close();
+               Logger.consolePrint("Doen saving click info to dump" + Integer.toString(tileSize) + ".txt.", "simulator");
             }
             catch(FileNotFoundException e) {
                // TODO Auto-generated catch block

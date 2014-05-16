@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeam;
-import com.rolledback.teams.ai.ComputerTeamD;
+import com.rolledback.teams.ai.ComputerTeamE;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
@@ -101,7 +101,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       teamOne = new Team("Team One", 50, 100, 1);
-      teamTwo = new ComputerTeamD("Team Two", 50, 100, this, 2);
+      teamTwo = new ComputerTeamE("Team Two", 50, 100, this, 2);
       
       currentTeam = teamOne;
       
@@ -176,7 +176,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    public void paintComponent(Graphics g) {
       logicLock.lock();
       super.paintComponent(g);
-      Graphics2D g2d = (Graphics2D) g.create();
+      Graphics2D g2d = (Graphics2D)g.create();
       drawBackground(g2d);
       drawTiles(g2d);
       drawUnits(g2d);
@@ -428,6 +428,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       selectedX = xTile;
       selectedY = yTile;
       selectedTile = selectTile(x, y);
+      Logger.consolePrint("Tile clicked: " + selectedTile, "game");
       clickHistory.add(new Coordinate(x, y));
       
       if(unitSelected) {
@@ -767,11 +768,11 @@ public class Game extends JPanel implements MouseListener, KeyListener {
    public void setState(GAME_STATE state) {
       this.state = state;
    }
-
+   
    public Team getCurrentTeam() {
       return currentTeam;
    }
-
+   
    public GameGUI getGUI() {
       return infoBox;
    }

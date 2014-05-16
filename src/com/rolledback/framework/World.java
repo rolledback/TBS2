@@ -261,10 +261,7 @@ public class World {
       }
       for(Coordinate c: notVisited)
          if(tiles[c.getY()][c.getX()].getType() != TILE_TYPE.RIVER && tiles[c.getY()][c.getX()].getType() != TILE_TYPE.MOUNTAIN) {
-            if(factoriesFound != teamOne.getFactories().size() + teamTwo.getFactories().size())
-               return false;
-            else
-               return true;
+            return false;
          }
       
       return true;
@@ -744,8 +741,7 @@ public class World {
    public void destroyUnit(Unit u) {
       Team owner = u.getOwner();
       owner.removeUnit(u);
-      u.getCurrentTile().setOccupied(false);
-      u.getCurrentTile().setOccupiedBy(null);
+      u.getCurrentTile().removeUnit();
    }
    
    /**

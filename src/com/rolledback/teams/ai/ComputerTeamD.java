@@ -26,7 +26,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamD extends ComputerTeam {
    
-   final int animationDelay = 100;
+   final int animationDelay = 0;
    private HashMap<CapturableTile, HashSet<Unit>> captureSpots;
    private Coordinate avgEnemyPos;
    private CoordinateNode[] nodes = new CoordinateNode[game.getGameHeight() * game.getGameWidth()];
@@ -214,7 +214,7 @@ public class ComputerTeamD extends ComputerTeam {
       Logger.consolePrint("Conduting a simple move.", "ai");
       boolean savedPriority = capPriority;
       capPriority = (capPriority && (u.getClassification() == UNIT_CLASS.INFANTRY));
-      Object[] closestEnemyTuple = dijkstraToClosestObject(game.getWorld().getTiles(), u, opponent);
+      Object[] closestEnemyTuple = aStarToClosestObject(game.getWorld().getTiles(), u, opponent);
       int closestEnemyDistance = (int)closestEnemyTuple[0];
       if(closestEnemyDistance == Integer.MAX_VALUE)
          return null;
@@ -268,7 +268,7 @@ public class ComputerTeamD extends ComputerTeam {
          if(factories.size() + cities.size() == captureSpots.size()) {
             availOperations = 0;
             operationSizeLimit = 0;
-            capPriority = true;
+            capPriority = false;
          }
          return minEntry.getKey();
       }
@@ -324,7 +324,7 @@ public class ComputerTeamD extends ComputerTeam {
          for(int c = 0; c < game.getGameWidth(); c++)
             nodes.add(new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), null, c, r, game.getWorld().getTiles()[r][c], Integer.MAX_VALUE));
       // set up the priority queue and set
-      Comparator<CoordinateNode> comparator = new TileCostComparator();
+      Comparator<CoordinateNode> comparator = new CoordinateNodeComparator();
       PriorityQueue<CoordinateNode> queue = new PriorityQueue<CoordinateNode>(25, comparator);
       HashSet<CoordinateNode> set = new HashSet<CoordinateNode>();
       
@@ -396,7 +396,7 @@ public class ComputerTeamD extends ComputerTeam {
       // initialize all nodes in the graph to have distance infinity
       Arrays.fill(nodes, null);
       // set up the priority queue and set
-      Comparator<CoordinateNode> comparator = new TileCostComparator();
+      Comparator<CoordinateNode> comparator = new CoordinateNodeComparator();
       PriorityQueue<CoordinateNode> openSetQueue = new PriorityQueue<CoordinateNode>(25, comparator);
       HashSet<CoordinateNode> openSet = new HashSet<CoordinateNode>();
       HashSet<CoordinateNode> closedSet = new HashSet<CoordinateNode>();
@@ -412,8 +412,6 @@ public class ComputerTeamD extends ComputerTeam {
       while(openSetQueue.size() > 0) {
          CoordinateNode current = openSetQueue.poll();
          Tile t = current.getTile();
-         game.highLightTile(t.getX(), t.getY(), new Color(0, 255, 0, 137));
-         delay(100);
          if((unit.canCapture(t) && (captureSpots.get(t).size() < operationSizeLimit || captureSpots.get(t).contains(unit))) || (!capPriority && unit.canAttack(t))) {
             if(capPriority) {
                if(captureSpots.get(t).add(unit) && captureSpots.get(t).size() >= operationSizeLimit)
@@ -426,13 +424,8 @@ public class ComputerTeamD extends ComputerTeam {
             world[unit.getY()][unit.getX()].setOccupied(true);
             CoordinateNode moveNode = current;
             
-            while(moveNode != null && !moveNode.isReachable()) {
-               System.out.println(moveNode.getfScore() + " " + moveNode.getgScore() + "(" + moveNode.getX() + "," + moveNode.getY() + ")");
-               game.highLightTile(moveNode.getX(), moveNode.getY(), new Color(255, 0, 0, 137));
-               delay(100);
+            while(moveNode != null && !moveNode.isReachable())
                moveNode = moveNode.getPrev();
-            }
-            delay(200);
             resultsTuple[0] = moveNode.getfScore();
             resultsTuple[1] = new Coordinate(t.getX(), t.getY());
             resultsTuple[2] = moveNode;
@@ -449,7 +442,6 @@ public class ComputerTeamD extends ComputerTeam {
                   int c = t.getX() + xDirs[i];
                   CoordinateNode neighbor;
                   if(nodes[(r * game.getGameWidth()) + c] == null) {
-                     System.out.println("FIRST TIME TO SEE THIS CUNT " + c + " " + r);
                      neighbor = new CoordinateNode(unit.getMoveSet().contains(new Coordinate(c, r)), current, c, r, game.getWorld().getTiles()[r][c], Integer.MAX_VALUE, Integer.MAX_VALUE);
                      nodes[(r * game.getGameWidth()) + c] = neighbor;
                   }
@@ -460,23 +452,14 @@ public class ComputerTeamD extends ComputerTeam {
                   
                   Tile neighborTile = neighbor.getTile();
                   int tentative_gScore = current.getgScore() + neighbor.getTile().getEffect().getMoveCost();
-                  System.out.println(openSetQueue);
-                  System.out.println(neighbor);
                   if((!openSet.contains(neighbor) || tentative_gScore < neighbor.getgScore()) && unit.canTraverse(neighborTile)) {
                      neighbor.setPrev(current);
                      neighbor.setgScore(tentative_gScore);
                      neighbor.setfScore((int)(tentative_gScore + (heuristic(c, r, estimatedGoal.getX(), estimatedGoal.getY()))));
-                     System.out.println(neighbor);
-                     System.out.println("Heuristic from " + c + " " + r + " to " + estimatedGoal.getX() + " " + estimatedGoal.getY() + " is "
-                           + heuristic(c, r, estimatedGoal.getX(), estimatedGoal.getY()));
                      if(!openSet.contains(neighbor)) {
                         openSetQueue.remove(neighbor);
                         openSetQueue.offer(neighbor);
                         openSet.add(neighbor);
-                     }
-                     else {
-                        System.out.println("IT SHOULD HAVE MOVED MOTEHR FUCKERS.");
-                        System.out.println(openSetQueue);
                      }
                   }
                }
@@ -592,112 +575,4 @@ public class ComputerTeamD extends ComputerTeam {
       resultsTuple[2] = null;
       return resultsTuple;
    }
-}
-
-class CoordinateNode {
-   
-   private boolean reachable;
-   private CoordinateNode prev;
-   private int x;
-   private int y;
-   private Tile tile;
-   private int fScore;
-   private int gScore;
-   
-   public CoordinateNode(boolean r, CoordinateNode p, int x, int y, Tile t, int f) {
-      reachable = r;
-      prev = p;
-      this.x = x;
-      this.y = y;
-      tile = t;
-      fScore = f;
-   }
-   
-   public CoordinateNode(boolean r, CoordinateNode p, int x, int y, Tile t, int d, int g) {
-      reachable = r;
-      prev = p;
-      this.x = x;
-      this.y = y;
-      tile = t;
-      fScore = d;
-      gScore = g;
-   }
-   
-   public boolean equals(Object compare) {
-      if(compare == null)
-         return false;
-      if(compare.getClass() != this.getClass())
-         return false;
-      CoordinateNode t = (CoordinateNode)compare;
-      return t.x == x && t.y == y;
-   }
-   
-   public int hashCode() {
-      return (this.getX() * 31) + this.getY();
-   }
-   
-   public boolean isReachable() {
-      return reachable;
-   }
-   
-   public void setReachable(boolean reachable) {
-      this.reachable = reachable;
-   }
-   
-   public CoordinateNode getPrev() {
-      return prev;
-   }
-   
-   public void setPrev(CoordinateNode prev) {
-      this.prev = prev;
-   }
-   
-   public int getX() {
-      return x;
-   }
-   
-   public void setX(int x) {
-      this.x = x;
-   }
-   
-   public int getY() {
-      return y;
-   }
-   
-   public void setY(int y) {
-      this.y = y;
-   }
-   
-   public Tile getTile() {
-      return tile;
-   }
-   
-   public int getfScore() {
-      return fScore;
-   }
-   
-   public void setfScore(int fScore) {
-      this.fScore = fScore;
-   }
-   
-   public int getgScore() {
-      return gScore;
-   }
-   
-   public void setgScore(int gScore) {
-      this.gScore = gScore;
-   }
-   
-   public String toString() {
-      return x + " " + y + " " + "(" + fScore + ")";
-   }
-}
-
-class TileCostComparator implements Comparator<CoordinateNode> {
-   
-   @Override
-   public int compare(CoordinateNode arg0, CoordinateNode arg1) {
-      return arg0.getfScore() - arg1.getfScore();
-   }
-   
 }

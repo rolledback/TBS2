@@ -56,6 +56,16 @@ public class Tile {
       texture = null;
    }
    
+   public void removeUnit() {
+      occupied = false;
+      occupiedBy = null;
+   }
+   
+   public void addUnit(Unit u) {
+      occupied = true;
+      occupiedBy = u;
+   }
+   
    public void setOccupiedBy(Unit u) {
       occupiedBy = u;
    }

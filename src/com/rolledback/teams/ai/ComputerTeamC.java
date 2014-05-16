@@ -207,7 +207,6 @@ public class ComputerTeamC extends ComputerTeam {
       queue.offer(world[targetY][targetX]);
       queue.offer(null);
       queue.offer(world[targetY][targetX]);
-      world[unit.getY()][unit.getX()].setOccupied(false);
       int distance = 0;
       while(queue.size() > 1) {
          Tile t = queue.poll();
@@ -216,7 +215,6 @@ public class ComputerTeamC extends ComputerTeam {
             queue.offer(null);
          }
          else if(t.equals(world[row][col])) {
-            world[unit.getY()][unit.getX()].setOccupied(true);
             return distance;
          }
          else {
@@ -243,7 +241,6 @@ public class ComputerTeamC extends ComputerTeam {
                }
          }
       }
-      world[unit.getY()][unit.getX()].setOccupied(true);
       return distance;
    }
 }

@@ -23,7 +23,9 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.Document;
 
 import com.rolledback.framework.Game.GAME_STATE;
 import com.rolledback.teams.Team;
@@ -433,10 +435,21 @@ public class GameGUI extends JPanel implements ActionListener {
          team.setResources(team.getResources() + 1000000);
          return;
       }
-      if(team != null)
-         tauntBox.append("[" + team.getName() + "] " + msg + "\n");
-      else
+      if(team != null) {
+         msg = "[" + team.getName() + "] " + msg;
+         Document doc = tauntBox.getDocument();
+         int overLength = doc.getLength() + msg.length() - 1000;
+
+         if (overLength > 0)
+            try {
+               doc.remove(0, overLength);
+            }
+            catch(BadLocationException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+            }
          tauntBox.append(msg + "\n");
+      }
    }
    
    public void setGame(Game gamePanel) {

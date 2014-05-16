@@ -22,11 +22,17 @@ import com.rolledback.terrain.Tile.TILE_TYPE;
 public class Unit {
    
    public enum UNIT_CLASS {
-      ALL, VEHICLE, INFANTRY
+      ALL,
+      VEHICLE,
+      INFANTRY
    }
    
    public enum UNIT_TYPE {
-      ALL("All"), INFANTRY("Infantry"), RPG("RPG Team"), TANK("Tank"), TANK_DEST("Tank Destroyer");
+      ALL("All"),
+      INFANTRY("Infantry"),
+      RPG("RPG Team"),
+      TANK("Tank"),
+      TANK_DEST("Tank Destroyer");
       
       private String name;
       
@@ -55,7 +61,8 @@ public class Unit {
    }
    
    public enum DIRECTION {
-      LEFT, RIGHT
+      LEFT,
+      RIGHT
    }
    
    private HashSet<Coordinate> moveSet;
@@ -155,7 +162,7 @@ public class Unit {
       if(x < 0 || x >= width || y < 0 || y >= height)
          return;
       if(range <= 0) {
-         if(tiles[y][x].isOccupied() && !owner.equals(tiles[y][x].getOccupiedBy().getOwner()) && !movedThrough)
+         if(canAttack(tiles[y][x]) && !movedThrough)
             attackSet.add(thisCoord);
          return;
       }
@@ -241,13 +248,11 @@ public class Unit {
          setDir(DIRECTION.RIGHT);
       if(x > tile.getX())
          setDir(DIRECTION.LEFT);
-      currentTile.setOccupied(false);
-      currentTile.setOccupiedBy(null);
+      currentTile.removeUnit();
       this.x = tile.getX();
       this.y = tile.getY();
       currentTile = tile;
-      tile.setOccupied(true);
-      tile.setOccupiedBy(this);
+      tile.addUnit(this);
    }
    
    /**

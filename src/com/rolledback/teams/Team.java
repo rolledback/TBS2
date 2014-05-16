@@ -98,18 +98,19 @@ public class Team {
    }
    
    public void createUnit(Tile t, UNIT_TYPE uType, Image i) {
+      Unit newUnit;
       if(uType == UNIT_TYPE.TANK)
-         units.add(new Tank(t.getX(), t.getY(), t, this, i));
+         newUnit = new Tank(t.getX(), t.getY(), t, this, i);
       else if(uType == UNIT_TYPE.TANK_DEST)
-         units.add(new TankDestroyer(t.getX(), t.getY(), t, this, i));
+         newUnit = new TankDestroyer(t.getX(), t.getY(), t, this, i);
       else if(uType == UNIT_TYPE.INFANTRY)
-         units.add(new Infantry(t.getX(), t.getY(), t, this, i));
+         newUnit = new Infantry(t.getX(), t.getY(), t, this, i);
       else if(uType == UNIT_TYPE.RPG)
-         units.add(new RPGTeam(t.getX(), t.getY(), t, this, i));
+         newUnit = new RPGTeam(t.getX(), t.getY(), t, this, i);
       else
          return;
-      t.setOccupied(true);
-      t.setOccupiedBy(units.get(units.size() - 1));
+      units.add(newUnit);
+      t.addUnit(newUnit);
    }
    
    public LinkedHashMap<TECH_NAME, Integer> getTechTree() {

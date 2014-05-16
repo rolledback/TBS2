@@ -67,7 +67,12 @@ public abstract class Technology {
       }
    }
    
-   public static void researchTech(Team researcher, TECH_NAME name) {
+   public static boolean researchTech(Team researcher, TECH_NAME name) {
+      if(!researcher.getTechTree().keySet().contains(name))
+         return false;
+      if(researcher.getTechTree().get(name) > researcher.getResources())
+         return false;
+      
       if(name == TECH_NAME.MILI) {
          researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
@@ -85,7 +90,7 @@ public abstract class Technology {
          researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(Unit u: (((Team)effectObjectOne).getOpponent()).getUnits())
-                  u.takeDamage((int)(u.getHealth() * .25));
+                  u.takeDamage((int)(u.getHealth() * .5));
             }
          }));
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
@@ -121,7 +126,7 @@ public abstract class Technology {
          researcher.setResources(researcher.getResources() - researcher.getTechTree().get(name));
          researcher.getTechTree().remove(name);
       }
-      
+      return true;
    }
    
    public int getAttackValue() {
