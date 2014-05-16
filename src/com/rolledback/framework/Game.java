@@ -23,7 +23,7 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeam;
-import com.rolledback.teams.ai.ComputerTeamD;
+import com.rolledback.teams.ai.ComputerTeamE;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
@@ -103,7 +103,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       teamOne = new Team("Team One", 50, 100, 1);
-      teamTwo = new ComputerTeamD("Team Two", 50, 100, this, 2);
+      teamTwo = new ComputerTeamE("Team Two", 50, 100, this, 2);
       
       currentTeam = teamOne;
       
@@ -126,8 +126,9 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       selectedY = 0;
       
       infoBox = iB;
+      infoBox.updateTurns(1);
       
-      setNumTurns(0);
+      numTurns = 1;
       winner = null;
       
       setDoubleBuffered(true);
@@ -163,7 +164,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
                if(currentTeam.isFirstTurn()) {
                   currentTeam.setFirstTurn(false);
                }
-               numTurns += 1;
                switchTeams();
             }
          }
@@ -273,6 +273,12 @@ public class Game extends JPanel implements MouseListener, KeyListener {
     */
    public void switchTeams() {
       Logger.consolePrint("Switching teams.", "game");
+      
+      if(currentTeam.equals(teamTwo)) {
+         numTurns++;
+         infoBox.updateTurns(numTurns);
+      }
+      
       infoBox.updateInfo(teamOne, teamTwo);
       unitSelected = false;
       selectedUnit = null;
@@ -294,7 +300,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
          currentTeam = teamOne;
       
       state = GAME_STATE.UPDATE;
-      setNumTurns(getNumTurns() + 1);
    }
    
    /**

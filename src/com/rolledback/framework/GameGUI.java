@@ -91,6 +91,7 @@ public class GameGUI extends JPanel implements ActionListener {
    private JPanel buttonPanel;
    private BoxLayout buttonLayout;
    private JButton endTurnButton;
+   private JLabel numTurns;
    
    /**
     * Used to test the GUI. Will just create a place a GUI in it's own window with all starting
@@ -331,6 +332,10 @@ public class GameGUI extends JPanel implements ActionListener {
          }
       });
       buttonPanel.add(endTurnButton);
+      
+      numTurns = new JLabel("Turn: 99999");
+      buttonPanel.add(numTurns);
+      
       buttonPanel.setBackground(new Color(190, 190, 190));
    }
    
@@ -409,6 +414,10 @@ public class GameGUI extends JPanel implements ActionListener {
       
       canvasPanel.setTerrainImage(tImage);
       canvasPanel.repaint();
+   }
+   
+   public void updateTurns(int n) {
+      numTurns.setText("Turn: " + n);
    }
    
    public void sendMessage(Team team, String msg) {
