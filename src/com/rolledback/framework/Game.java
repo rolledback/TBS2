@@ -15,6 +15,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JPanel;
@@ -22,7 +23,7 @@ import javax.swing.SwingUtilities;
 
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeam;
-import com.rolledback.teams.ai.ComputerTeamE;
+import com.rolledback.teams.ai.ComputerTeamD;
 import com.rolledback.teams.technology.Technology;
 import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
@@ -31,6 +32,7 @@ import com.rolledback.terrain.Tile;
 import com.rolledback.terrain.Tile.TILE_TYPE;
 import com.rolledback.units.Unit;
 import com.rolledback.units.Unit.DIRECTION;
+import com.rolledback.units.Unit.UNIT_TYPE;
 
 /**
  * The Game class contains all logic for running and displaying the game. An extension of JPanel,
@@ -101,7 +103,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       teamOne = new Team("Team One", 50, 100, 1);
-      teamTwo = new ComputerTeamE("Team Two", 50, 100, this, 2);
+      teamTwo = new ComputerTeamD("Team Two", 50, 100, this, 2);
       
       currentTeam = teamOne;
       
@@ -166,6 +168,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
             }
          }
       }
+      endGameStats();
    }
    
    /**
@@ -588,6 +591,28 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       Graphics g = this.getGraphics();
       g.setColor(c);
       g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+   }
+   
+   public void endGameStats() {
+      Logger.consolePrint("Team One Stats", "game");
+      Logger.consolePrint("Kill Count: " + teamOne.getKillCount(), "game");
+      Logger.consolePrint("Death Count: " + teamOne.getDeathCount(), "game");
+      Logger.consolePrint("Research Count: " + teamOne.getResearchCount(), "game");
+      Logger.consolePrint("Resources gathered: " + teamOne.getResourcesGathered(), "game");
+      Logger.consolePrint("Unit Production Counts", "game");
+      for(Map.Entry<UNIT_TYPE, Integer> entry: teamOne.getProductionHistory().entrySet()) {
+         Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
+      }
+      
+      Logger.consolePrint("Team Two Stats", "game");
+      Logger.consolePrint("Kill Count: " + teamTwo.getKillCount(), "game");
+      Logger.consolePrint("Death Count: " + teamTwo.getDeathCount(), "game");
+      Logger.consolePrint("Research Count: " + teamTwo.getResearchCount(), "game");
+      Logger.consolePrint("Resources gathered: " + teamTwo.getResourcesGathered(), "game");
+      Logger.consolePrint("Unit Production Counts", "game");
+      for(Map.Entry<UNIT_TYPE, Integer> entry: teamTwo.getProductionHistory().entrySet()) {
+         Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
+      }
    }
    
    /**

@@ -32,12 +32,13 @@ public class ComputerAnalysis {
     */
    public static void main(String args[]) {
       Logger.consolePrint("Analyzing click data.", "analysis");
-      File coordinateDump = new File("dump.txt");
+
       coordHash = new LinkedHashMap<Coordinate, Double>();
       int maxValue = 0;
       int width = 176;
       int height = 96;
       int size = 8;
+      File coordinateDump = new File("dump" + size + ".txt");
       
       for(int x = 0; x < width; x++)
          for(int y = 0; y < height; y++)

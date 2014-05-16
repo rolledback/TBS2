@@ -9,6 +9,7 @@ import java.util.Random;
 import com.rolledback.mapping.Cartographer;
 import com.rolledback.teams.Team;
 import com.rolledback.terrain.Bridge;
+import com.rolledback.terrain.CapturableTile;
 import com.rolledback.terrain.City;
 import com.rolledback.terrain.Factory;
 import com.rolledback.terrain.Forest;
@@ -191,7 +192,9 @@ public class World {
             return false;
          if(!placeFactories(teamTwo, width - (width / 5), width))
             return false;
-         if(!placeCities((int)(Math.sqrt(height * height + width * width) / 5), (int)(width / 5), (int)(width - (width / 5))))
+         if(!placeFactories(null, (width / 5), width - (width / 5)))
+            return false;
+         if(!placeCities((int)(Math.sqrt(height * height + width * width) / 5), 0, width))
             return false;
       }
       
@@ -219,7 +222,6 @@ public class World {
     * @return false if the map is not valid as defined by the method description.
     */
    public boolean validMap() {
-      int factoriesFound = 0;
       HashSet<Coordinate> notVisited = new HashSet<Coordinate>();
       for(int r = 0; r < height; r++)
          for(int c = 0; c < width; c++)
@@ -247,8 +249,6 @@ public class World {
                      if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].isVehiclePassable()) {
                         // the previous if statement should be both veh and inf, but AI updates are
                         // needed before this can happen
-                        if(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]].getType() == TILE_TYPE.FACTORY)
-                           factoriesFound++;
                         set.add(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
                         notVisited.remove(new Coordinate(t.getX() + xDirs[i], t.getY() + yDirs[i]));
                         queue.offer(tiles[t.getY() + yDirs[i]][t.getX() + xDirs[i]]);
@@ -636,7 +636,7 @@ public class World {
          int nc = 0;
          int attempts = width * height;
          while(nc < 2) {
-            while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+            while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE || tiles[row][col] instanceof CapturableTile) {
                col = rand.nextInt(max - min) + min;
                row = rand.nextInt(height - 1) + 1;
                attempts--;
@@ -658,15 +658,22 @@ public class World {
     * @return whether or not the function was able to place all of the factories
     */
    public boolean placeFactories(Team team, int min, int max) {
-      Logger.consolePrint("placing factories for " + team.getName(), "map");
-      for(int col = min; col < max; col += 2) {
+      if(team != null)
+         Logger.consolePrint("Placing factories for " + team.getName(), "map");
+      else
+         Logger.consolePrint("Placing uncaptured factories.", "map");
+      for(int col = min; col < max; col += (team == null) ? (int)(Math.random() * (4 - 2) + 2) : 2) {
          int row = (int)(Math.random() * height);
          int attempts = width * height;
-         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE) {
+         while(tiles[row][col].getType() == TILE_TYPE.RIVER || tiles[row][col].getType() == TILE_TYPE.BRIDGE || tiles[row][col] instanceof CapturableTile) {
             row = (int)(Math.random() * height);
             attempts--;
             if(attempts == 0)
                return false;
+         }
+         if(team == null) {
+            tiles[row][col] = new Factory(this, col, row, null, GraphicsManager.getTileTextures().get("factoryGrey.png"));
+            continue;
          }
          if(team.equals(teamOne))
             tiles[row][col] = new Factory(this, col, row, team, GraphicsManager.getTileTextures().get("factoryRed.png"));
@@ -720,7 +727,7 @@ public class World {
          }
          else {
             UNIT_TYPE rand = randUnitType();
-            Image texture = GraphicsManager.typetoImage(rand, team.getTeamNumber());
+            Image texture = GraphicsManager.typetoImage(rand, team.getColorNumber());
             team.createUnit(tiles[row][col], rand, texture);
          }
          if(team.equals(teamTwo))

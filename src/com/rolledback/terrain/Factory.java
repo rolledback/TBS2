@@ -70,7 +70,7 @@ public class Factory extends CapturableTile {
       if(this.isOccupied())
          return false;
       owner.setResources(owner.getResources() - productionList.get(type));
-      Image texture = GraphicsManager.typetoImage(type, owner.getTeamNumber());
+      Image texture = GraphicsManager.typetoImage(type, owner.getColorNumber());
       owner.createUnit(this, type, texture);
       owner.getUnits().get(owner.getUnits().size() - 1).setAttacked(true);
       owner.getUnits().get(owner.getUnits().size() - 1).setMoved(true);
@@ -87,7 +87,7 @@ public class Factory extends CapturableTile {
          owner.getFactories().remove(this);
       owner = unit.getOwner();
       unit.getOwner().getFactories().add(this);
-      if(owner.equals(getWorld().getTeamOne()))
+      if(owner.equals(world.getTeamOne()))
          texture = GraphicsManager.getTileTextures().get("factoryRed.png");
       else
          texture = GraphicsManager.getTileTextures().get("factoryBlue.png");

@@ -72,13 +72,13 @@ public abstract class Technology {
          return false;
       if(researcher.getTechTree().get(name) > researcher.getResources())
          return false;
-      
+      researcher.incrementResearchCount();
       if(name == TECH_NAME.MILI) {
          researcher.getResearchedTechs().add(new RunnableTechnology(researcher, new TechnologyEffect(researcher, null) {
             public void run() {
                for(City c: ((Team)effectObjectOne).getCities())
                   if(!c.isOccupied()) {
-                     Image texture = GraphicsManager.typetoImage(UNIT_TYPE.INFANTRY, ((Team)effectObjectOne).getTeamNumber());
+                     Image texture = GraphicsManager.typetoImage(UNIT_TYPE.INFANTRY, ((Team)effectObjectOne).getColorNumber());
                      ((Team)effectObjectOne).createUnit(c, UNIT_TYPE.INFANTRY, texture);
                   }
             }

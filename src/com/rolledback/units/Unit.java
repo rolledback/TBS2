@@ -276,6 +276,8 @@ public class Unit {
       int attackNum = random.nextInt(adHocMaxAttack - adHocMinAttack) + adHocMinAttack;
       attackNum *= (double)health / (double)maxHealth;
       target.takeDamage(attackNum);
+      if(!target.isAlive())
+         owner.incrementKillCount();
    }
    
    /**
@@ -299,6 +301,8 @@ public class Unit {
       int percMinus = random.nextInt(adHocDefense - (adHocDefense / 2)) + (adHocDefense / 2);
       health -= amount - (int)((double)amount * ((double)percMinus / 100.0));
       alive = health > 0;
+      if(!alive)
+         owner.incrementDeathCount();
    }
    
    public String toString() {
