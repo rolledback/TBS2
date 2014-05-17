@@ -18,6 +18,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,7 +32,7 @@ import com.rolledback.mapping.Cartographer;
 import com.rolledback.teams.Team;
 import com.rolledback.teams.ai.ComputerTeamE;
 
-public class GameLauncher extends JFrame implements ItemListener, ActionListener {
+public class GameLauncher extends JDialog implements ItemListener, ActionListener {
    
    private static final long serialVersionUID = 1L;
    
@@ -119,11 +120,10 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
    
    public static void main(String args[]) {
       GameLauncher launcher = new GameLauncher();
-      
-      while(!launcher.isChoiceMade()) {
-      }
-      
       launcher.dispose();
+      
+      if(!launcher.isChoiceMade())
+         System.exit(1);
       
       int x = launcher.getCustomX();
       int y = launcher.getCustomY();
@@ -194,8 +194,10 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
       // Move the window
       setLocation(x, y);
       
+      
+      this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      this.setModal(true);
       this.setVisible(true);
-      this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
    
    public void fieldsToDefault() {
@@ -211,7 +213,8 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
       String[] files = directory.list();
       if(files == null)
          files = new File(System.getProperty("user.dir") + "maps\\").list();
-      
+      if(files == null)
+         return;
       ArrayList<String> customMapNames = new ArrayList<String>();
       for(int f = 0; f < files.length; f++) {
          if(files[f].endsWith(".map")) {
@@ -369,7 +372,7 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
          teamOne = new ComputerTeamE(teamOneName.getText(), 50, Integer.parseInt(teamOneResources.getText()), null, 1);
       
       if(teamTwoType.getSelectedItem().equals("Human"))
-         teamTwo = new Team(teamTwoName.getText(), 50, Integer.parseInt(teamTwoResources.getText()), 1);
+         teamTwo = new Team(teamTwoName.getText(), 50, Integer.parseInt(teamTwoResources.getText()), 2);
       else
          teamTwo = new ComputerTeamE(teamTwoName.getText(), 50, Integer.parseInt(teamTwoResources.getText()), null, 2);
       
@@ -426,6 +429,7 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
          dimensions = Cartographer.getDimensions(fileToLoad);
       }
       choiceMade = true;
+      this.setVisible(false);
    }
    
    public static void initGame(Team one, Team two, int x, int y, String fileName) {
@@ -522,7 +526,7 @@ public class GameLauncher extends JFrame implements ItemListener, ActionListener
       // setup complete, run the game
       Logger.consolePrint("Running game.", "launcher");
       gamePanel.run();
-      JOptionPane.showMessageDialog(new JFrame(), "Winner: " + gamePanel.getWinner().getName(), "WIN", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(new JFrame(), "Winner: " + gamePanel.getWinner().getName() + "\n" + gamePanel.endGameStats(), "WIN", JOptionPane.INFORMATION_MESSAGE);
       System.exit(1);
    }
    

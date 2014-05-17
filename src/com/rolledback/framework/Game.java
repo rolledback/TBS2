@@ -211,6 +211,9 @@ public class Game extends JPanel implements MouseListener, KeyListener {
          if(state == GAME_STATE.UPDATE || state == GAME_STATE.DISPLAY_MOVE)
             repaint();
          if(state == GAME_STATE.SWITCH_TEAMS) {
+            if(currentTeam.isFirstTurn()) {
+               currentTeam.setFirstTurn(false);
+            }
             if(!teamOne.isFirstTurn() && teamOne.getUnits().size() == 0) {
                winner = teamTwo;
                state = GAME_STATE.END_GAME;
@@ -220,9 +223,6 @@ public class Game extends JPanel implements MouseListener, KeyListener {
                state = GAME_STATE.END_GAME;
             }
             else {
-               if(currentTeam.isFirstTurn()) {
-                  currentTeam.setFirstTurn(false);
-               }
                switchTeams();
             }
          }
@@ -357,7 +357,7 @@ public class Game extends JPanel implements MouseListener, KeyListener {
          currentTeam = teamTwo;
       else
          currentTeam = teamOne;
-      
+      infoBox.updateInfo(teamOne, teamTwo);
       state = GAME_STATE.UPDATE;
    }
    
@@ -657,26 +657,28 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
    }
    
-   public void endGameStats() {
-      Logger.consolePrint("Team One Stats", "game");
-      Logger.consolePrint("Kill Count: " + teamOne.getKillCount(), "game");
-      Logger.consolePrint("Death Count: " + teamOne.getDeathCount(), "game");
-      Logger.consolePrint("Research Count: " + teamOne.getResearchCount(), "game");
-      Logger.consolePrint("Resources gathered: " + teamOne.getResourcesGathered(), "game");
-      Logger.consolePrint("Unit Production Counts", "game");
+   public String endGameStats() {
+      String ret = "\n";
+      ret += Logger.consolePrint("Team One Stats:", "game");
+      ret += Logger.consolePrint("Kill Count: " + teamOne.getKillCount(), "game");
+      ret += Logger.consolePrint("Death Count: " + teamOne.getDeathCount(), "game");
+      ret += Logger.consolePrint("Research Count: " + teamOne.getResearchCount(), "game");
+      ret += Logger.consolePrint("Resources gathered: " + teamOne.getResourcesGathered(), "game");
+      ret += Logger.consolePrint("Units Produced:", "game");
       for(Map.Entry<UNIT_TYPE, Integer> entry: teamOne.getProductionHistory().entrySet()) {
-         Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
+         ret += Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
       }
-      
-      Logger.consolePrint("Team Two Stats", "game");
-      Logger.consolePrint("Kill Count: " + teamTwo.getKillCount(), "game");
-      Logger.consolePrint("Death Count: " + teamTwo.getDeathCount(), "game");
-      Logger.consolePrint("Research Count: " + teamTwo.getResearchCount(), "game");
-      Logger.consolePrint("Resources gathered: " + teamTwo.getResourcesGathered(), "game");
-      Logger.consolePrint("Unit Production Counts", "game");
+      ret += "\n";
+      ret += Logger.consolePrint("Team Two Stats:", "game");
+      ret += Logger.consolePrint("Kill Count: " + teamTwo.getKillCount(), "game");
+      ret += Logger.consolePrint("Death Count: " + teamTwo.getDeathCount(), "game");
+      ret += Logger.consolePrint("Research Count: " + teamTwo.getResearchCount(), "game");
+      ret += Logger.consolePrint("Resources gathered: " + teamTwo.getResourcesGathered(), "game");
+      ret += Logger.consolePrint("Units Produced:", "game");
       for(Map.Entry<UNIT_TYPE, Integer> entry: teamTwo.getProductionHistory().entrySet()) {
-         Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
+         ret += Logger.consolePrint(entry.getKey().toString() + ": " + entry.getValue(), "game");
       }
+      return ret;
    }
    
    /**

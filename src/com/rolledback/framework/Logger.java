@@ -54,7 +54,7 @@ public class Logger {
     * @param message Message to be printed to the console.
     * @param tag Tag used to identify the message.
     */
-   public static void consolePrint(String message, String tag) {
+   public static String consolePrint(String message, String tag) {
       if(printingOn && validTags.contains(tag.toLowerCase())) {
          if(tag.length() > tagLength)
             tag = tag.substring(0, tagLength);
@@ -68,6 +68,7 @@ public class Logger {
             console.sendMessage(null, "[" + tag.toUpperCase() + "] > " + timeStamp() + " " + message);
          }
       }
+      return message + "\n";
    }
    
    /**

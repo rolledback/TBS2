@@ -32,7 +32,7 @@ import com.rolledback.units.Unit.UNIT_TYPE;
 
 public class ComputerTeamE extends ComputerTeam {
    
-   final int animationDelay = 0;
+   private int animationDelay = 0;
    private HashMap<CapturableTile, HashSet<Unit>> captureSpots;
    private Coordinate avgEnemyPos;
    private ArrayList<aStarCallable> calls;
@@ -572,6 +572,14 @@ public class ComputerTeamE extends ComputerTeam {
          Logger.consolePrint("[" + id + "] Returning, target not found.", "ai");
          return new AbstractMap.SimpleEntry<CoordinateNode[], Integer>(null, Integer.MAX_VALUE);
       }
+   }
+
+   public int getAnimationDelay() {
+      return animationDelay;
+   }
+
+   public void setAnimationDelay(int animationDelay) {
+      this.animationDelay = animationDelay;
    }
    
 }

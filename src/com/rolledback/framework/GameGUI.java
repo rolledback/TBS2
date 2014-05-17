@@ -124,8 +124,8 @@ public class GameGUI extends JPanel implements ActionListener {
       setupTeamTwo();
       setupButtonPanel();
       
-      guiPanel.add(tauntPanel);
-      guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
+//      guiPanel.add(tauntPanel);
+//      guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(canvasPanel);
       guiPanel.add(Box.createRigidArea(new Dimension(15, 0)));
       guiPanel.add(unitPanel);
@@ -446,19 +446,19 @@ public class GameGUI extends JPanel implements ActionListener {
       }
       if(team != null) {
          msg = "[" + team.getName() + "] " + msg;
-         Document doc = tauntBox.getDocument();
-         int overLength = doc.getLength() + msg.length() - 1000;
-
-         if (overLength > 0)
-            try {
-               doc.remove(0, overLength);
-            }
-            catch(BadLocationException e) {
-               // TODO Auto-generated catch block
-               e.printStackTrace();
-            }
-         tauntBox.append(msg + "\n");
       }
+      Document doc = tauntBox.getDocument();
+      int overLength = doc.getLength() + msg.length() - 1000;
+      
+      if(overLength > 0)
+         try {
+            doc.remove(0, overLength);
+         }
+         catch(BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      tauntBox.append(msg + "\n");
    }
    
    public void setGame(Game gamePanel) {
