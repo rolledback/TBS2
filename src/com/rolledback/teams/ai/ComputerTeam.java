@@ -24,4 +24,8 @@ public abstract class ComputerTeam extends Team {
       while(endDelay - startDelay < n)
          endDelay = System.currentTimeMillis();
    }
+
+   public void setGame(Game game) {
+      this.game = game;      
+   }
 }

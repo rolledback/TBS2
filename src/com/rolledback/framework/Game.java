@@ -100,10 +100,69 @@ public class Game extends JPanel implements MouseListener, KeyListener {
       gameHeight = y;
       
       logicLock = new ReentrantLock();
-      // teamSize = (gameWidth / 5) * (gameHeight / UNIT_DENSITY);
       
       teamOne = new Team("Team One", 50, 100, 1);
       teamTwo = new ComputerTeamE("Team Two", 50, 100, this, 2);
+      
+      currentTeam = teamOne;
+      
+      teamOne.setOpponent(teamTwo);
+      teamTwo.setOpponent(teamOne);
+      
+      world = new World(gameWidth, gameHeight, teamOne, teamTwo, fileToLoad);
+      tileSize = ts;
+      offsetHorizontal = oH;
+      offsetVertical = oV;
+      state = GAME_STATE.UPDATE;
+      
+      grid = new Rectangle[y][x];
+      for(int row = 0; row < gameHeight; row++)
+         for(int col = 0; col < gameWidth; col++)
+            grid[row][col] = new Rectangle((col * tileSize) + offsetHorizontal, (row * tileSize) + offsetVertical, tileSize, tileSize);
+      this.setBackground(Color.black);
+      
+      selectedX = 0;
+      selectedY = 0;
+      
+      infoBox = iB;
+      infoBox.updateTurns(1);
+      
+      numTurns = 1;
+      winner = null;
+      
+      setDoubleBuffered(true);
+      setIgnoreRepaint(true);
+      
+      addMouseListener(this);
+      addKeyListener(this);
+   }
+   
+   /**
+    * Secondary constructor.
+    * 
+    * @param x number of tiles in the width (x) direction.
+    * @param y number of tiles in the height (y) direction.
+    * @param ts size of the tiles, in pixels.
+    * @param oH horizontal offset, used when game doesn't fill entire screen horizontally.
+    * @param oV vertical offset, used when game doesn't fill entire screen vertically.
+    * @param fileToLoad if the user chose to load a map, this will be the file's name, empty string
+    *           if not loading a file.
+    * @param iB pointer to the GameGUI object used by the window in Launcher.java.
+    * @param one team one.
+    * @param two team two.
+    */
+   public Game(int x, int y, int ts, int oH, int oV, String fileToLoad, GameGUI iB, Team one, Team two) {
+      gameWidth = x;
+      gameHeight = y;
+      
+      logicLock = new ReentrantLock();
+      
+      teamOne = one;
+      if(teamOne instanceof ComputerTeam)
+         ((ComputerTeam)one).setGame(this);
+      teamTwo = two;
+      if(teamTwo instanceof ComputerTeam)
+         ((ComputerTeam)two).setGame(this);
       
       currentTeam = teamOne;
       
