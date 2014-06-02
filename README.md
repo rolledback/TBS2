@@ -4,7 +4,7 @@ TBS2 is an Advance Wars inspired game. Game play consists of two players battlin
 
 Basic Game Info:
 ================
-- Use Launcher.java to launch the game
+- Use Launcher.java for a simple game launcher, or use GameLauncher.java for a full featured launcher.
 - Game has been most heavily tested on a 1080p display, but it should scale to fit most displays, custom maps may not transfer well between different resolutions at this time
 - Launcher.java is used to launch a game and then play it. Nothing extra. If you wish to run the game over and over again (say for having AIs battle it out again and again), then run Simulator.java, and use the for loop to control how many times the game will play out. In Simulator.java, you can also make the window not visible to increase game speed. Although, you should consider using Logger statements to see who is winning/what is going on.
 - Use right click to end your turn
