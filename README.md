@@ -2,6 +2,8 @@ TBS2
 ====
 TBS2 is an Advance Wars inspired game. Game play consists of two players battling each other on a 2D top down grid. Players can capture cities and factories, which both provide resources that are used to create units. This game is currently still in development (more info about current state can be found at http://www.cs.utexas.edu/~mrayer/projects.html). You can find a collection of JavaDocs for the project at: https://www.cs.utexas.edu/~mrayer/doc (these are a work in progress). Below is further information about the game/etc. If you have any further questions that are not answered in this README, feel free to contact me. 
 
+NOTE: the game does not currenty work on UNIX based OSs. There is a bug with the getting of the graphic resources. This is to be resolved soon(TM).
+
 Basic Game Info:
 ================
 - Use Launcher.java for a simple game launcher, or use GameLauncher.java for a full featured launcher.
